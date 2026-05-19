@@ -1,0 +1,26 @@
+# Backend
+backend/.venv/
+backend/venv/
+backend/data/
+backend/.env
+backend/app/__pycache__/
+backend/scripts/__pycache__/
+backend/app/routes/__pycache__/
+__pycache__/
+**/__pycache__/
+*.pyc
+.eggs/
+*.egg-info/
+
+# Frontend (déjà dans frontend/.gitignore)
+# frontend/node_modules/
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+**/*.xlsx
+
+*.bin
+*.pkl
