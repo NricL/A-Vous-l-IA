@@ -1,0 +1,100 @@
+// Application Insights KQL Queries for Avoulia V2
+
+// Q1: Chat → Parcours Funnel (completion %)
+customEvents
+| where name in ('chat_session_start', 'rag_result_returned', 'parcours_url_proposed', 'parcours_page_opened', 'parcours_step_1_completed', 'parcours_step_6_completed')
+| extend sessionId = tostring(customDimensions.sessionId)
+| summarize
+    chat_starts = dcount(sessionId, 4) where name == 'chat_session_start',
+    rag_hits = dcount(sessionId, 4) where name == 'rag_result_returned',
+    urls_proposed = dcount(sessionId, 4) where name == 'parcours_url_proposed',
+    pages_opened = dcount(sessionId, 4) where name == 'parcours_page_opened',
+    step1_completed = dcount(sessionId, 4) where name == 'parcours_step_1_completed',
+    step6_completed = dcount(sessionId, 4) where name == 'parcours_step_6_completed'
+| extend
+    funnel_step1 = round(100.0 * rag_hits / chat_starts, 2),
+    funnel_step2 = round(100.0 * urls_proposed / rag_hits, 2),
+    funnel_step3 = round(100.0 * pages_opened / urls_proposed, 2),
+    funnel_step4 = round(100.0 * step1_completed / pages_opened, 2),
+    funnel_step6 = round(100.0 * step6_completed / step1_completed, 2)
+| project funnel_step1, funnel_step2, funnel_step3, funnel_step4, funnel_step6
+
+// Q2: Top 10 Cases (most visited parcours)
+customEvents
+| where name == 'parcours_page_opened'
+| summarize visit_count = dcount(customDimensions.caseHash) by caseHash = tostring(customDimensions.caseHash)
+| top 10 by visit_count desc
+| project caseHash, visit_count
+
+// Q3: Quickwin Copy Rate
+customEvents
+| where name == 'quickwin_copy'
+| summarize copy_count = count() by sessionId = tostring(customDimensions.sessionId)
+| summarize
+    total_copy_events = sum(copy_count),
+    sessions_with_copy = dcount(sessionId),
+    avg_copies_per_session = round(avg(copy_count), 2)
+
+// Q4: Retention (J+1, J+3, J+7)
+let day0 = customEvents
+| where name == 'chat_session_start'
+| extend date0 = startofday(timestamp)
+| summarize by sessionId = tostring(customDimensions.sessionId), date0;
+let day1 = customEvents
+| where name == 'chat_session_start'
+| extend date_activity = startofday(timestamp)
+| where date_activity > ago(8d)
+| summarize day1_seen = max(timestamp) by sessionId = tostring(customDimensions.sessionId);
+day0
+| join kind=leftouter day1 on sessionId
+| extend retained_j1 = isnotnull(day1_seen)
+| summarize
+    initial_users = dcount(sessionId),
+    retained_j1 = sumif(1, retained_j1),
+    retention_j1_pct = round(100.0 * sumif(1, retained_j1) / dcount(sessionId), 2)
+
+// Q5: Mode d'exécution split (outil vs no_code) — requires mapping
+customEvents
+| where name == 'parcours_page_opened'
+| extend caseHash = tostring(customDimensions.caseHash)
+| summarize opens_by_case = count() by caseHash
+| project caseHash, opens_by_case
+
+// Q6: Timeline (events per hour, last 24h)
+customEvents
+| where timestamp > ago(24h)
+| extend hour = bin(timestamp, 1h)
+| summarize event_count = count() by hour, name
+| order by hour desc
+
+// Q7: Bounce Rate (chat_start → no RAG result)
+let chat_starts = customEvents
+| where name == 'chat_session_start'
+| extend sessionId = tostring(customDimensions.sessionId)
+| summarize by sessionId;
+let rag_hits = customEvents
+| where name == 'rag_result_returned'
+| extend sessionId = tostring(customDimensions.sessionId)
+| summarize by sessionId;
+chat_starts
+| join kind=leftanti rag_hits on sessionId
+| extend bounced = 1
+| summarize
+    total_sessions = dcount(sessionId),
+    bounced_sessions = count(),
+    bounce_rate_pct = round(100.0 * count() / dcount(sessionId), 2)
+
+// Q8: Average Steps Completed per Session
+customEvents
+| where name startswith 'parcours_step_' and name endswith '_completed'
+| extend
+    sessionId = tostring(customDimensions.sessionId),
+    stepNum = toint(extract(@'step_(\d+)_completed', 1, name))
+| summarize
+    steps_completed = max(stepNum),
+    session_events = count()
+    by sessionId
+| summarize
+    avg_steps = round(avg(steps_completed), 2),
+    max_steps = max(steps_completed),
+    median_steps = percentile(steps_completed, 0.5)

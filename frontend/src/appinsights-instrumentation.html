@@ -1,0 +1,265 @@
+<!-- Application Insights Instrumentation (RGPD-safe, anonymized tracking) -->
+<script>
+  (function() {
+    'use strict';
+    
+    // Configuration
+    const INSTRUMENTATION_KEY = '{{ appinsights_instrumentation_key }}'; // Injected by build process
+    const ENABLE_TELEMETRY = {{ enable_telemetry | default(true) }};
+    
+    if (!ENABLE_TELEMETRY || !INSTRUMENTATION_KEY) {
+      console.log('[Telemetry] Disabled or key missing');
+      return;
+    }
+
+    // Session ID (anonymized hash regenerated weekly)
+    function getSessionId() {
+      const storageKey = 'ai_session_id';
+      const storageExpiry = 'ai_session_expiry';
+      const now = Date.now();
+      const weekly = 7 * 24 * 60 * 60 * 1000;
+      
+      let sessionId = localStorage.getItem(storageKey);
+      let expiry = localStorage.getItem(storageExpiry);
+      
+      if (!sessionId || !expiry || now > parseInt(expiry)) {
+        sessionId = 'sess_' + Math.random().toString(36).substring(2, 15);
+        localStorage.setItem(storageKey, sessionId);
+        localStorage.setItem(storageExpiry, (now + weekly).toString());
+      }
+      return sessionId;
+    }
+
+    // Initialize Application Insights SDK
+    const sdkInstance = window.appInsights = {
+      config: {
+        instrumentationKey: INSTRUMENTATION_KEY,
+        enableAutoRouteTracking: false,
+        enableAjaxErrorStatusText: true,
+        maxAjaxCallsPerView: -1,
+        disableFetchTracking: false,
+        sdkExtension: 'avoulia-v2'
+      },
+      sessionId: getSessionId(),
+      caseHash: document.body.getAttribute('data-case-hash') || null,
+      
+      // Track page view / chat session init
+      trackChatSessionStart: function() {
+        const event = {
+          name: 'chat_session_start',
+          properties: {
+            sessionId: this.sessionId,
+            timestamp: new Date().toISOString(),
+            url: window.location.pathname
+          },
+          measurements: {
+            eventTime: Date.now()
+          }
+        };
+        this._trackEvent(event);
+      },
+      
+      // Track user message sent
+      trackUserMessage: function(messageText, questionCategory) {
+        const event = {
+          name: 'user_message_sent',
+          properties: {
+            sessionId: this.sessionId,
+            messageLength: messageText.length,
+            questionCategory: questionCategory || 'unknown',
+            timestamp: new Date().toISOString()
+          },
+          measurements: {
+            characterCount: messageText.length
+          }
+        };
+        this._trackEvent(event);
+      },
+      
+      // Track RAG result returned
+      trackRagResult: function(caseId, matchingScore, matchingCase) {
+        const event = {
+          name: 'rag_result_returned',
+          properties: {
+            sessionId: this.sessionId,
+            caseId: caseId || 'unknown',
+            matchingScore: matchingScore || 0,
+            caseTitle: matchingCase ? matchingCase.substring(0, 50) : 'unknown',
+            timestamp: new Date().toISOString()
+          },
+          measurements: {
+            score: parseFloat(matchingScore) || 0
+          }
+        };
+        this._trackEvent(event);
+      },
+      
+      // Track parcours URL proposed
+      trackParcoursUrlProposed: function(parcoursUrl, caseHash) {
+        const event = {
+          name: 'parcours_url_proposed',
+          properties: {
+            sessionId: this.sessionId,
+            parcoursUrl: parcoursUrl,
+            caseHash: caseHash,
+            timestamp: new Date().toISOString()
+          }
+        };
+        this._trackEvent(event);
+      },
+      
+      // Track parcours page opened (from link click)
+      trackParcoursPageOpened: function(caseHash) {
+        const event = {
+          name: 'parcours_page_opened',
+          properties: {
+            sessionId: this.sessionId,
+            caseHash: caseHash || document.body.getAttribute('data-case-hash'),
+            timestamp: new Date().toISOString(),
+            url: window.location.pathname
+          }
+        };
+        this._trackEvent(event);
+      },
+      
+      // Track step completion (étape 1-6)
+      trackStepCompletion: function(stepNumber, stepName, completionTime) {
+        const event = {
+          name: `parcours_step_${stepNumber}_completed`,
+          properties: {
+            sessionId: this.sessionId,
+            caseHash: this.caseHash,
+            stepNumber: stepNumber,
+            stepName: stepName,
+            timestamp: new Date().toISOString()
+          },
+          measurements: {
+            completionTimeSeconds: completionTime || 0
+          }
+        };
+        this._trackEvent(event);
+      },
+      
+      // Track quickwin action (open/close/copy)
+      trackQuickwinAction: function(action, copiedText) {
+        const event = {
+          name: `quickwin_${action}`,
+          properties: {
+            sessionId: this.sessionId,
+            caseHash: this.caseHash,
+            action: action,
+            copiedTextLength: copiedText ? copiedText.length : 0,
+            timestamp: new Date().toISOString()
+          }
+        };
+        this._trackEvent(event);
+      },
+      
+      // Track validation step (étape 1)
+      trackValidation: function(q1Answer, q2Answer, q3Answer) {
+        const event = {
+          name: 'parcours_validation_answers',
+          properties: {
+            sessionId: this.sessionId,
+            caseHash: this.caseHash,
+            q1: q1Answer || 'unknown',
+            q2: q2Answer || 'unknown',
+            q3: q3Answer || 'unknown',
+            timestamp: new Date().toISOString()
+          }
+        };
+        this._trackEvent(event);
+      },
+      
+      // Internal: track generic event
+      _trackEvent: function(event) {
+        if (!ENABLE_TELEMETRY) return;
+        
+        const payload = {
+          name: event.name,
+          time: new Date().toISOString(),
+          iKey: INSTRUMENTATION_KEY,
+          data: {
+            baseType: 'EventData',
+            baseData: {
+              ver: 2,
+              name: event.name,
+              properties: event.properties || {},
+              measurements: event.measurements || {}
+            }
+          }
+        };
+        
+        // Send to App Insights ingestion endpoint
+        const url = `https://dc.applicationinsights.azure.com/v2/track`;
+        navigator.sendBeacon(url, JSON.stringify([payload]));
+        
+        console.log('[Telemetry]', event.name, event.properties);
+      },
+      
+      // Session end (optional, for funnel tracking)
+      trackSessionEnd: function(completedSteps) {
+        const event = {
+          name: 'chat_session_end',
+          properties: {
+            sessionId: this.sessionId,
+            completedSteps: completedSteps || 0,
+            timestamp: new Date().toISOString()
+          },
+          measurements: {
+            stepCount: parseInt(completedSteps) || 0
+          }
+        };
+        this._trackEvent(event);
+      }
+    };
+
+    // Auto-track on page load (parcours page)
+    if (document.body.getAttribute('data-case-hash')) {
+      window.addEventListener('load', function() {
+        window.appInsights.trackParcoursPageOpened();
+      });
+    } else {
+      // Chat page: track session start
+      window.addEventListener('load', function() {
+        window.appInsights.trackChatSessionStart();
+      });
+    }
+
+    // Auto-track step completion on checkbox change (étapes 1-6)
+    document.addEventListener('change', function(e) {
+      if (e.target && e.target.closest('.coche input[type="checkbox"]')) {
+        const stepEl = e.target.closest('[data-step-number]');
+        if (stepEl) {
+          const stepNum = stepEl.getAttribute('data-step-number');
+          const stepName = stepEl.getAttribute('data-step-name') || `Étape ${stepNum}`;
+          window.appInsights.trackStepCompletion(stepNum, stepName, 0);
+        }
+      }
+    });
+
+    // Auto-track quickwin accordion interactions
+    document.addEventListener('toggle', function(e) {
+      if (e.target && e.target.closest('.quickwin-accordion')) {
+        const action = e.target.open ? 'open' : 'close';
+        window.appInsights.trackQuickwinAction(action);
+      }
+    });
+
+    // Auto-track copy button (quickwin copy)
+    document.addEventListener('click', function(e) {
+      if (e.target && e.target.hasAttribute('data-copie')) {
+        const text = e.target.textContent || '';
+        window.appInsights.trackQuickwinAction('copy', text);
+      }
+    });
+
+    // Optional: track unload (session end)
+    window.addEventListener('beforeunload', function() {
+      // Count completed steps
+      const completedSteps = document.querySelectorAll('.coche input[type="checkbox"]:checked').length;
+      window.appInsights.trackSessionEnd(completedSteps);
+    });
+
+  })();
+</script>

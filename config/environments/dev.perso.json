@@ -1,0 +1,27 @@
+{
+  "resourceGroup": "rg-avoulia-fr-dev",
+  "region": "francecentral",
+  "environment": "dev",
+  "appInsights": {
+    "name": "ai-avoulia-dev",
+    "sku": "standard",
+    "retentionDays": 30
+  },
+  "logAnalytics": {
+    "name": "law-avoulia-dev",
+    "sku": "PerGB2018",
+    "retentionDays": 30
+  },
+  "storageAccount": {
+    "name": "stavouliafr4dev",
+    "sku": "Standard_LRS",
+    "kind": "StorageV2",
+    "accessTier": "Hot"
+  },
+  "tags": {
+    "environment": "dev",
+    "project": "avoulia-v2",
+    "owner": "eneric",
+    "cost-center": "labo"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "resourceGroup": "rg-avoulia-fr-prod",
+  "region": "westeurope",
+  "environment": "prod",
+  "appInsights": {
+    "name": "ai-avoulia-prod",
+    "sku": "standard",
+    "retentionDays": 90
+  },
+  "logAnalytics": {
+    "name": "law-avoulia-prod",
+    "sku": "PerGB2018",
+    "retentionDays": 90
+  },
+  "storageAccount": {
+    "name": "stavouliafr4prod",
+    "sku": "Standard_GRS",
+    "kind": "StorageV2",
+    "accessTier": "Hot"
+  },
+  "keyVault": {
+    "name": "kv-avoulia-prod",
+    "enableSoftDelete": true,
+    "purgeProtectionEnabled": true
+  },
+  "tags": {
+    "environment": "prod",
+    "project": "avoulia-v2",
+    "owner": "eneric",
+    "cost-center": "A-Vous-l-IA"
+  }
+}
