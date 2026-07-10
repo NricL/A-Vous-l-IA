@@ -1,4 +1,6 @@
 import json
+import os
+import hashlib
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
@@ -7,6 +9,7 @@ from app.config import get_settings
 from app.models import ChatRequest, ChatResponse, SuggestedCase
 from app.rag import chat_simple, chat_simple_stream, stream_prompt
 from app.haystack_rag import query_rag_haystack, get_rag_prompt_and_sources, WELCOME_MESSAGE
+from app.parcours_util import build_parcours_info
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -62,10 +65,16 @@ def _build_suggested_cases(
     rows: list[SuggestedCase] = []
     for i in range(n):
         ex = case_extras[i] if case_extras and i < len(case_extras) else {}
+        
+        # Generate parcours URL for each case
+        parcours_info = build_parcours_info(ids[i])
+        
         rows.append(
             SuggestedCase(
                 id=ids[i],
                 content=full_contents[i],
+                case_hash=parcours_info.get("case_hash"),
+                parcours_url=parcours_info.get("parcours_url"),
                 effort=ex.get("effort"),
                 prerequis_donnees=ex.get("prerequis_donnees"),
                 guardrails=ex.get("guardrails"),
