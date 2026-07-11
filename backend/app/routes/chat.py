@@ -1,8 +1,6 @@
 import json
-import os
-import hashlib
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
 from app.config import get_settings
@@ -10,6 +8,7 @@ from app.models import ChatRequest, ChatResponse, SuggestedCase
 from app.rag import chat_simple, chat_simple_stream, stream_prompt
 from app.haystack_rag import query_rag_haystack, get_rag_prompt_and_sources, WELCOME_MESSAGE
 from app.parcours_util import build_parcours_info
+from app.telemetry import track_backend_chat_event
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -92,13 +91,14 @@ def _build_suggested_cases(
 
 
 @router.post("", response_model=ChatResponse)
-def chat(request: ChatRequest):
+def chat(request: ChatRequest, http_request: Request):
     """
     Envoie un message au chatbot.
     « ok / vas-y / oui » exécute l'action en attente (ex. détailler le cas) si pending_action est renvoyé.
     """
     settings = get_settings()
     history = [{"role": m.role, "content": m.content} for m in request.history]
+    session_id = http_request.headers.get("X-Session-Id") or http_request.headers.get("x-session-id")
     try:
         if settings.use_rag:
             last = _last_suggested_cases_to_dicts(request)
@@ -127,6 +127,14 @@ def chat(request: ChatRequest):
             suggested_cases = (
                 _build_suggested_cases(suggested_case_ids, full_contents, case_extras) if full_contents else None
             )
+            track_backend_chat_event(
+                event_name="backend_chat_response",
+                session_id=session_id,
+                use_rag=settings.use_rag,
+                suggested_cases_count=len(suggested_cases or []),
+                has_pending_action=bool(pending_action),
+                has_error=False,
+            )
             return ChatResponse(
                 answer=answer,
                 sources=sources,
@@ -140,12 +148,28 @@ def chat(request: ChatRequest):
                 selected_intention=selected_intention,
             )
         answer = chat_simple(request.message, history)
+        track_backend_chat_event(
+            event_name="backend_chat_response",
+            session_id=session_id,
+            use_rag=settings.use_rag,
+            suggested_cases_count=0,
+            has_pending_action=False,
+            has_error=False,
+        )
         return ChatResponse(answer=answer, sources=[])
     except Exception as e:
+        track_backend_chat_event(
+            event_name="backend_chat_error",
+            session_id=session_id,
+            use_rag=settings.use_rag,
+            suggested_cases_count=0,
+            has_pending_action=False,
+            has_error=True,
+        )
         raise HTTPException(status_code=500, detail=f"Erreur chat: {str(e)}")
 
 
-def _stream_chat(request: ChatRequest):
+def _stream_chat(request: ChatRequest, session_id: str | None):
     settings = get_settings()
     history = [{"role": m.role, "content": m.content} for m in request.history]
     try:
@@ -186,23 +210,48 @@ def _stream_chat(request: ChatRequest):
                 "selected_sector": selected_sector,
                 "selected_intention": selected_intention,
             }
+            track_backend_chat_event(
+                event_name="backend_chat_stream_done",
+                session_id=session_id,
+                use_rag=settings.use_rag,
+                suggested_cases_count=len(suggested_cases or []),
+                has_pending_action=False,
+                has_error=False,
+            )
             yield _sse_line(done_payload)
         else:
             for chunk in chat_simple_stream(request.message, history):
                 yield _sse_line({"t": chunk})
+            track_backend_chat_event(
+                event_name="backend_chat_stream_done",
+                session_id=session_id,
+                use_rag=settings.use_rag,
+                suggested_cases_count=0,
+                has_pending_action=False,
+                has_error=False,
+            )
             yield _sse_line({"done": True, "sources": []})
     except Exception as e:
+        track_backend_chat_event(
+            event_name="backend_chat_stream_error",
+            session_id=session_id,
+            use_rag=settings.use_rag,
+            suggested_cases_count=0,
+            has_pending_action=False,
+            has_error=True,
+        )
         yield _sse_line({"error": str(e)})
 
 
 @router.post("/stream")
-def chat_stream(request: ChatRequest):
+def chat_stream(request: ChatRequest, http_request: Request):
     """
     Envoie un message et stream la réponse (SSE). Chaque événement : data: {"t": "fragment"}.
     Fin : data: {"done": true, "sources": [...]}.
     """
+    session_id = http_request.headers.get("X-Session-Id") or http_request.headers.get("x-session-id")
     return StreamingResponse(
-        _stream_chat(request),
+        _stream_chat(request, session_id),
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )

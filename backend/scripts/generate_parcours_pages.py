@@ -10,6 +10,8 @@ import sys
 import hashlib
 from pathlib import Path
 from typing import Optional
+from datetime import datetime, timezone
+from jinja2 import Template
 
 # Jinja2 template (simplified version for demo)
 PARCOURS_PAGE_TEMPLATE = '''<!DOCTYPE html>
@@ -80,24 +82,26 @@ PARCOURS_PAGE_TEMPLATE = '''<!DOCTYPE html>
         </footer>
     </div>
 
+    {% raw %}
     <style>
-        * {{ margin: 0; padding: 0; }}
-        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }}
-        .parcours-container {{ max-width: 900px; margin: 0 auto; padding: 2rem; }}
-        .etape {{ border: 1px solid #ddd; margin: 1rem 0; border-radius: 4px; }}
-        .etape summary {{ padding: 1rem; cursor: pointer; background: #f5f5f5; }}
-        .etape-content {{ padding: 1rem; }}
-        .coche {{ margin-top: 1rem; }}
-        .coche input {{ margin-right: 0.5rem; }}
-        .transition {{ text-align: center; margin: 2rem 0; font-weight: bold; color: #1976d2; }}
-        .progress-bar {{ width: 100%; height: 8px; background: #ddd; border-radius: 4px; margin: 1rem 0; }}
-        .progress-fill {{ height: 100%; background: #4caf50; border-radius: 4px; }}
-        .progress-text {{ display: block; text-align: center; margin-top: 0.5rem; font-size: 0.9rem; color: #666; }}
-        .quickwin-accordion summary {{ background: #fff3cd; padding: 1rem; cursor: pointer; }}
-        .btn-copy {{ padding: 0.5rem 1rem; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer; }}
-        .btn-copy:hover {{ background: #1565c0; }}
-        footer {{ margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #ddd; color: #999; font-size: 0.85rem; }}
+        * { margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .parcours-container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+        .etape { border: 1px solid #ddd; margin: 1rem 0; border-radius: 4px; }
+        .etape summary { padding: 1rem; cursor: pointer; background: #f5f5f5; }
+        .etape-content { padding: 1rem; }
+        .coche { margin-top: 1rem; }
+        .coche input { margin-right: 0.5rem; }
+        .transition { text-align: center; margin: 2rem 0; font-weight: bold; color: #1976d2; }
+        .progress-bar { width: 100%; height: 8px; background: #ddd; border-radius: 4px; margin: 1rem 0; }
+        .progress-fill { height: 100%; background: #4caf50; border-radius: 4px; }
+        .progress-text { display: block; text-align: center; margin-top: 0.5rem; font-size: 0.9rem; color: #666; }
+        .quickwin-accordion summary { background: #fff3cd; padding: 1rem; cursor: pointer; }
+        .btn-copy { padding: 0.5rem 1rem; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-copy:hover { background: #1565c0; }
+        footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #ddd; color: #999; font-size: 0.85rem; }
     </style>
+    {% endraw %}
 </body>
 </html>
 '''
@@ -162,23 +166,19 @@ def generate_pages(output_dir: str = 'generated_pages', count: int = 1025):
     for case in cases:
         case_hash = generate_case_hash(case['case_id'], salt)
         
-        # Simple template substitution (replace Jinja2 with basic string replacements for demo)
-        page_html = PARCOURS_PAGE_TEMPLATE
-        page_html = page_html.replace('{{ case_title }}', case['title'])
-        page_html = page_html.replace('{{ case_hash }}', case_hash)
-        page_html = page_html.replace('{{ validation_questions }}', case['questions'][0])
-        page_html = page_html.replace('{{ question_1 }}', case['questions'][0])
-        page_html = page_html.replace('{{ question_2 }}', case['questions'][1])
-        page_html = page_html.replace('{{ question_3 }}', case['questions'][2])
-        page_html = page_html.replace('{{ duration }}', case['duration'])
-        page_html = page_html.replace('{{ steps[0] }}', case['steps'][0])
-        page_html = page_html.replace('{{ steps[1] }}', case['steps'][1])
-        page_html = page_html.replace('{{ steps[2] }}', case['steps'][2])
-        page_html = page_html.replace('{{ steps[3] }}', case['steps'][3])
-        page_html = page_html.replace('{{ steps[4] }}', case['steps'][4])
-        page_html = page_html.replace('{{ quickwin }}', case['quickwin'])
-        page_html = page_html.replace('{{ generated_at }}', 'now')
-        page_html = page_html.replace('{{ source_ref }}', case['case_id'])
+        page_html = Template(PARCOURS_PAGE_TEMPLATE).render(
+            case_title=case["title"],
+            case_hash=case_hash,
+            validation_questions=case["questions"][0],
+            question_1=case["questions"][0],
+            question_2=case["questions"][1],
+            question_3=case["questions"][2],
+            duration=case["duration"],
+            steps=case["steps"],
+            quickwin=case["quickwin"],
+            generated_at=datetime.now(timezone.utc).isoformat(),
+            source_ref=case["case_id"],
+        )
         
         # Save page
         page_file = output_path / f"{case_hash}.html"

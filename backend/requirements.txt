@@ -19,3 +19,4 @@ openpyxl==3.1.5
 # Utils
 python-multipart==0.0.17
 pydantic-settings==2.6.1
+azure-storage-blob==12.23.1

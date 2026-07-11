@@ -63,6 +63,14 @@ class Settings(BaseSettings):
     # DEBUG (env DEBUG) : True → niveau logging DEBUG pour le package app (ex. app.haystack_rag).
     debug: bool = True
 
+    # Parcours mapping (optional): local CSV or Blob Storage
+    parcours_mapping_local_path: str = ""
+    parcours_mapping_container: str = "parcours-mappings"
+    parcours_mapping_blob: str = "mapping_uc_hash.csv"
+    parcours_mapping_cache_ttl_seconds: int = 300
+    storage_account_name: str = ""
+    storage_account_key: str = ""
+
     @property
     def use_azure_openai(self) -> bool:
         return bool(self.azure_openai_api_key and self.azure_openai_endpoint)

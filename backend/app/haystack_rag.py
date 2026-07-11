@@ -17,6 +17,7 @@ from haystack_integrations.document_stores.chroma import ChromaDocumentStore
 from haystack_integrations.components.retrievers.chroma import ChromaEmbeddingRetriever
 
 from app.config import get_settings
+from app.parcours_util import build_parcours_info
 from app.rag_constants import (
     CASE_EXTRA_FIELD_ALIASES,
     CASE_EXTRA_KEYS,
@@ -183,6 +184,13 @@ def build_niveau2_block(case: dict, pertinence_phrase: str) -> str:
     guardrails = case.get("guardrails", "").strip()
     questions = case.get("questions_qualification", "").strip()
     _sensibilite = case.get("sensibilite_donnees", "").strip()
+    case_id = str(case.get("id", "") or "").strip()
+    parcours_url = ""
+    if case_id:
+        try:
+            parcours_url = str(build_parcours_info(case_id).get("parcours_url") or "").strip()
+        except Exception:
+            logger.debug("build_parcours_info failed for case_id=%s", case_id, exc_info=True)
 
     logger.debug('lvl 2 block')
     logger.debug(f"nom: {nom}")
@@ -238,6 +246,14 @@ def build_niveau2_block(case: dict, pertinence_phrase: str) -> str:
         parts.append(
             "Ces questions vous aideront à évaluer si ce cas "
             "répond à votre situation."
+        )
+
+    if parcours_url:
+        parts.extend(
+            [
+                "",
+                f"🔗 Voir le parcours pas à pas : {parcours_url}",
+            ]
         )
 
     return "\n".join(parts)
