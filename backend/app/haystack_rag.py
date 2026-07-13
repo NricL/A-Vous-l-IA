@@ -6,7 +6,9 @@ RAG avec Haystack + Chroma, via Azure AI Foundry.
 
 import logging
 import re
+import unicodedata
 from pathlib import Path
+from difflib import SequenceMatcher
 
 import chromadb
 from jinja2 import Template
@@ -2204,12 +2206,12 @@ def _retrieve_docs_for_question(
 
     min_docs = 3
     if not selected_sector:
-        return _run_retrieval(
+        return _rank_docs_by_query_overlap(question, _run_retrieval(
             _build_retrieval_filters(
                 domaine_code=selected_domain_code,
                 intention_code=selected_intention,
             )
-        )
+        ))
 
     # Étape 1: domaine + intention + secteur (AND)
     docs = _run_retrieval(
@@ -2220,7 +2222,7 @@ def _retrieve_docs_for_question(
         )
     )
     if len(docs) >= min_docs:
-        return docs
+        return _rank_docs_by_query_overlap(question, docs)
 
     # Étape 2: relâcher intention, garder domaine + secteur
     docs = _run_retrieval(
@@ -2230,7 +2232,7 @@ def _retrieve_docs_for_question(
         )
     )
     if len(docs) >= min_docs:
-        return docs
+        return _rank_docs_by_query_overlap(question, docs)
 
     # Étape 3: domaine + intention + (secteur OR multi-sectoriel)
     docs = _run_retrieval(
@@ -2242,7 +2244,7 @@ def _retrieve_docs_for_question(
         )
     )
     if len(docs) >= min_docs:
-        return docs
+        return _rank_docs_by_query_overlap(question, docs)
 
     # Étape 4: retrieval sans filtre secteur, puis post-filtrage Python sur secteur.
     broad_docs = _run_retrieval(
@@ -2254,7 +2256,8 @@ def _retrieve_docs_for_question(
     post_filtered = [
         doc for doc in broad_docs if _doc_matches_sector(doc, selected_sector, include_multisector=True)
     ]
-    return post_filtered or broad_docs
+    ranked = post_filtered or broad_docs
+    return _rank_docs_by_query_overlap(question, ranked)
 
 
 def _docs_to_payload(docs: list) -> tuple[list[str], list[str], list[str], list[dict[str, str | None]]]:
@@ -2265,6 +2268,79 @@ def _docs_to_payload(docs: list) -> tuple[list[str], list[str], list[str], list[
     full_contents = [c["content"] for c in case_dicts]
     case_extras = [_case_extras_from_case_dict(c) for c in case_dicts]
     return sources, suggested_case_ids, full_contents, case_extras
+
+
+def _normalize_query_text(text: str) -> str:
+    normalized = unicodedata.normalize("NFKD", (text or "").lower())
+    normalized = "".join(ch for ch in normalized if not unicodedata.combining(ch))
+    normalized = re.sub(r"[^a-z0-9]+", " ", normalized)
+    return re.sub(r"\s+", " ", normalized).strip()
+
+
+_QUERY_STOPWORDS = {
+    "a", "au", "aux", "avec", "ce", "ces", "de", "des", "du", "dans", "dans", "et", "en", "est", "la",
+    "le", "les", "leur", "leurs", "ma", "mais", "mon", "ne", "nos", "notre", "on", "ou", "pour", "sur",
+    "ta", "tes", "ton", "tu", "un", "une", "vos", "votre", "vous", "qui", "quoi", "par", "pas", "plus",
+    "par", "parmi", "rapport", "par rapport", "difficile", "difficiles", "situation", "probleme", "problème",
+    "concret", "actuellement", "faut", "faire", "leurs", "son", "sa", "ses",
+}
+
+
+def _query_keywords(text: str) -> list[str]:
+    normalized = _normalize_query_text(text)
+    if not normalized:
+        return []
+    out: list[str] = []
+    for token in normalized.split():
+        if len(token) < 3 or token in _QUERY_STOPWORDS:
+            continue
+        if token not in out:
+            out.append(token)
+    return out
+
+
+def _doc_search_blob(doc) -> str:
+    meta = getattr(doc, "meta", None) or {}
+    parts = [getattr(doc, "content", "") or ""]
+    for key in (
+        "cas_utilisation",
+        "description_cas_utilisation",
+        "declencheurs_typiques",
+        "questions_qualification",
+        "premiere_action_48h",
+        "guardrails",
+        "secteur",
+    ):
+        raw = meta.get(key)
+        if raw:
+            parts.append(str(raw))
+    return _normalize_query_text(" ".join(parts))
+
+
+def _rank_docs_by_query_overlap(question: str, docs: list) -> list:
+    """Trie les documents en favorisant les mots-clés explicitement présents dans la demande."""
+    keywords = _query_keywords(question)
+    if not keywords or len(docs) < 2:
+        return docs
+
+    ranked: list[tuple[int, int, object]] = []
+    for idx, doc in enumerate(docs):
+        blob = _doc_search_blob(doc)
+        blob_tokens = blob.split()
+        score = 0
+        for kw in keywords:
+            for token in blob_tokens:
+                if kw == token:
+                    score += 6
+                elif kw in token or token in kw:
+                    if len(kw) >= 5 and len(token) >= 5:
+                        score += 3
+                elif len(kw) >= 5 and len(token) >= 5 and SequenceMatcher(None, kw, token).ratio() >= 0.82:
+                    score += 1
+        ranked.append((score, idx, doc))
+
+    ranked.sort(key=lambda item: (-item[0], item[1]))
+    return [doc for _, _, doc in ranked]
 
 
 def get_rag_prompt_and_sources(
