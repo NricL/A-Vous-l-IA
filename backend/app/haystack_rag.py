@@ -1429,6 +1429,10 @@ def _build_niveau2_detail_payload(
     )
     pertinence = _run_pertinence_llm(rendered)
     answer = build_niveau2_block(case_row, pertinence)
+    parcours_info = build_parcours_info(str(case_row.get("id") or ""))
+    parcours_url = str(parcours_info.get("parcours_url") or "").strip()
+    if parcours_url and parcours_url not in answer:
+        answer = answer.rstrip() + "\n\nVoir le parcours web : " + parcours_url
     sources = [content[:400] + "..." if len(content) > 400 else content]
     ids = [str(c.get("id", "") or "") for c in cases]
     full_contents = [str(c.get("content", "") or "") for c in cases]
