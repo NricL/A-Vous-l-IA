@@ -68,7 +68,7 @@ class Settings(BaseSettings):
     parcours_mapping_container: str = "parcours-mappings"
     parcours_mapping_blob: str = "mapping_uc_hash.csv"
     parcours_mapping_cache_ttl_seconds: int = 300
-    parcours_base_url: str = "https://happy-desert-0f415f20f.7.azurestaticapps.net"
+    parcours_base_url: str = "https://avoulia-backend.purpleocean-980317d1.francecentral.azurecontainerapps.io"
     storage_account_name: str = ""
     storage_account_key: str = ""
 

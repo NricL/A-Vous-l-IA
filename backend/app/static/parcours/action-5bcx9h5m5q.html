@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>Passer à l'action — Préparation d’audit qualité établissement</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --encre:#16213A; --sourdine:#5A6478; --papier:#F5F7F4; --carte:#FFFFFF;
+  --action:#2B59C3; --action-fonce:#1E4094; --fait:#1E7A52; --fait-pale:#E3F1EA;
+  --ligne:#DFE3DB; --ticket:#111A2E; --ticket-texte:#E8ECF5;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+body{font-family:'Public Sans',system-ui,sans-serif;background:var(--papier);color:var(--encre);
+  font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.page{max-width:760px;margin:0 auto;padding:40px 20px 80px}
+
+/* ---------- entête ---------- */
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--action)}
+h1{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:clamp(26px,5vw,38px);
+  line-height:1.12;margin:10px 0 12px;letter-spacing:-.01em}
+.resume{color:var(--sourdine);font-size:17px;max-width:60ch}
+.puces{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.puce{font-size:12.5px;font-weight:600;background:var(--carte);border:1px solid var(--ligne);
+  border-radius:999px;padding:5px 12px;color:var(--encre)}
+.puce.sensible{border-color:#C9A227;background:#FBF6E5}
+
+/* ---------- quick win (accordion en bas) ---------- */
+.quickwin-accordion{margin-top:26px;background:var(--carte);border:1px solid var(--ligne);border-radius:12px;overflow:hidden}
+.quickwin-accordion summary{cursor:pointer;list-style:none;padding:16px 18px;display:flex;align-items:center;gap:10px;
+  font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:18px;border:none;background:var(--carte)}
+.quickwin-accordion summary::-webkit-details-marker{display:none}
+.quickwin-accordion summary .chevron{color:var(--sourdine);transition:transform .2s;font-size:13px;margin-left:auto}
+.quickwin-accordion[open] summary .chevron{transform:rotate(90deg)}
+.quickwin-accordion .contenu-qw{padding:2px 18px 18px;border-top:1px solid var(--ligne)}
+.quickwin-accordion p{margin:8px 0;max-width:62ch}
+.quickwin-accordion .note{font-size:13.5px;color:var(--sourdine)}
+.transition{margin:26px 0 4px;font-weight:600;max-width:62ch}
+
+/* ---------- barre de progression ---------- */
+.progression{position:sticky;top:0;z-index:5;background:var(--papier);padding:14px 0 12px;
+  margin:26px 0 8px;border-bottom:1px solid var(--ligne)}
+.progression .texte{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:7px}
+.progression .texte #prog-label{color:var(--sourdine)}
+.barre{height:6px;border-radius:99px;background:var(--ligne);overflow:hidden}
+.barre>div{height:100%;width:0%;background:var(--fait);border-radius:99px;transition:width .35s ease}
+
+/* ---------- rail + étapes ---------- */
+.parcours{position:relative;margin-top:26px}
+.parcours::before{content:"";position:absolute;left:19px;top:8px;bottom:8px;width:2px;background:var(--ligne)}
+.etape{position:relative;padding-left:58px;margin-bottom:14px}
+.marqueur{position:absolute;left:0;top:6px;width:40px;height:40px;border-radius:50%;
+  background:var(--carte);border:2px solid var(--ligne);display:flex;align-items:center;justify-content:center;
+  font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;z-index:1;transition:all .25s}
+.etape.faite .marqueur{background:var(--fait);border-color:var(--fait);color:#fff}
+.etape.faite .marqueur::after{content:"✓";position:absolute;font-size:18px}
+.etape.faite .marqueur span{visibility:hidden}
+details{background:var(--carte);border:1px solid var(--ligne);border-radius:12px;overflow:hidden}
+.etape.faite details{background:var(--fait-pale);border-color:#BFDCCB}
+summary{cursor:pointer;list-style:none;padding:16px 18px;display:flex;align-items:baseline;gap:10px}
+summary::-webkit-details-marker{display:none}
+summary .titre{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:18px;flex:1}
+summary .duree{font-size:12.5px;font-weight:600;color:var(--sourdine);white-space:nowrap}
+summary .chevron{color:var(--sourdine);transition:transform .2s;font-size:13px}
+details[open] summary .chevron{transform:rotate(90deg)}
+.contenu{padding:2px 18px 18px;border-top:1px solid var(--ligne)}
+.contenu p{margin:12px 0;max-width:62ch}
+.contenu p.note{font-size:14px;color:var(--sourdine)}
+
+/* ---------- cases à cocher ---------- */
+.coche{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px dashed var(--ligne)}
+.coche:last-of-type{border-bottom:none}
+.coche input{width:19px;height:19px;margin-top:2px;accent-color:var(--fait);flex-shrink:0;cursor:pointer}
+.coche label{cursor:pointer}
+.coche label small{display:block;color:var(--sourdine);font-size:13.5px;margin-top:2px}
+.valider{margin-top:16px;display:flex;gap:10px;align-items:center;background:var(--papier);
+  border:1px solid var(--ligne);border-radius:9px;padding:11px 14px;font-weight:700}
+.valider input{width:20px;height:20px;accent-color:var(--fait);cursor:pointer}
+.valider label{cursor:pointer}
+.critere{margin-top:14px;padding:11px 14px;border-left:3px solid var(--action);background:var(--papier);
+  border-radius:0 9px 9px 0;font-size:14.5px}
+.critere b{color:var(--action-fonce)}
+
+/* ---------- ticket prompt ---------- */
+.ticket{margin:14px 0;background:var(--ticket);color:var(--ticket-texte);border-radius:10px;overflow:hidden}
+.ticket .bandeau{display:flex;justify-content:space-between;align-items:center;padding:9px 14px;
+  border-bottom:1px dashed rgba(255,255,255,.25);font-size:12px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:#9FB0D0}
+.ticket button{font:600 13px 'Public Sans',sans-serif;color:#fff;background:var(--action);border:none;
+  border-radius:7px;padding:6px 14px;cursor:pointer}
+.ticket button:hover{background:var(--action-fonce)}
+.ticket button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.ticket pre{padding:14px 16px;white-space:pre-wrap;word-break:break-word;
+  font:400 13.5px/1.6 'IBM Plex Mono',monospace}
+.ticket.mini pre{font-size:13px}
+
+/* ---------- pied ---------- */
+footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--ligne);
+  font-size:13px;color:var(--sourdine)}
+footer a{color:var(--action)}
+input:focus-visible,summary:focus-visible{outline:2px solid var(--action);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <p class="eyebrow">Parcours de mise en œuvre · Avoulia</p>
+  <h1>Préparation d’audit qualité établissement</h1>
+  <p class="resume">Certification ISO qui approche, audit qualité annoncé — et les dossiers sont éparpillés entre services. L'IA consolide un dossier d'audit structuré avec documents classés par exigence, écarts identifiés et plan de remédiation. Le responsable qualité gagne un temps considérable.</p>
+  <div class="puces">
+    <span class="puce">Obligations & gestion des risques</span>
+    <span class="puce">Préparer audits et contrôles</span>
+    <span class="puce">Effort : Moyen</span>
+    <span class="puce sensible">Données : Données internes non sensibles</span>
+  </div>
+</header>
+
+<!-- ================= ÉTAPE 1 (validation d'abord) ================= -->
+<div class="parcours">
+  <section class="etape" data-etape="1">
+    <div class="marqueur"><span>1</span></div>
+    <details open>
+      <summary><span class="titre">Vérifiez que c'est le bon moment</span><span class="duree">2 min</span><span class="chevron">▶</span></summary>
+      <div class="contenu">
+        <p>Trois questions pour confirmer que ce cas d'usage répond à un vrai besoin chez vous :</p>
+        
+        <div class="coche">
+          <input type="checkbox" id="e1q1" data-suivi>
+          <label for="e1q1">Les transmissions sont-elles formalisées ?</label>
+        </div>
+        
+        <div class="coche">
+          <input type="checkbox" id="e1q2" data-suivi>
+          <label for="e1q2">Les informations clés sont-elles partagées systématiquement ?</label>
+        </div>
+        
+        <div class="coche">
+          <input type="checkbox" id="e1q3" data-suivi>
+          <label for="e1q3">Un référentiel commun est-il utilisé ?</label>
+        </div>
+        
+        <div class="coche">
+          <input type="checkbox" id="e1q4" data-suivi>
+          <label for="e1q4">Des incidents liés à un défaut de coordination ont-ils eu lieu ?</label>
+        </div>
+        
+        <p class="note">Vous avez répondu « non » ou « pas vraiment » à une de ces questions ? C'est justement le signe que ce parcours va vous être utile.</p>
+        <div class="valider"><input type="checkbox" id="fin-1" data-fin="1"><label for="fin-1">Étape terminée — c'est le bon moment</label></div>
+      </div>
+    </details>
+  </section>
+</div>
+
+<p class="transition">✓ OK, c'est pour vous. Voici votre plan d'action en 6 étapes — environ 2,5 h au total, en cochant au fur et à mesure. Votre avancement est enregistré sur cet appareil.</p>
+
+<div class="progression">
+  <div class="texte"><span id="prog-label">Votre avancement</span><span id="prog-count">1 étape sur 6</span></div>
+  <div class="barre"><div id="prog-fill"></div></div>
+</div>
+
+<div class="parcours">
+
+  <!-- ================= ÉTAPE 2 ================= -->
+  <section class="etape" data-etape="2">
+    <div class="marqueur"><span>2</span></div>
+    <details>
+      <summary><span class="titre">Rassemblez vos éléments</span><span class="duree">30 min</span><span class="chevron">▶</span></summary>
+      <div class="contenu">
+        <p>Voici ce dont vous aurez besoin. Un élément vous manque ? Pas bloquant : l'IA peut vous aider à le construire — utilisez le prompt sous chaque élément.</p>
+        
+        <div class="coche">
+          <input type="checkbox" id="e2p1" data-suivi>
+          <label for="e2p1">Référentiel d'audit applicable (ISO 9001, HAS, norme sectorielle)</label>
+        </div>
+        <div class="ticket mini">
+          <div class="bandeau"><span>Si vous ne l'avez pas encore</span><button type="button" data-copie>Copier</button></div>
+          <pre>Je suis dirigeant d'une PME/TPE française. Aide-moi à préparer l'élément suivant : Référentiel d'audit applicable (ISO 9001, HAS, norme sectorielle). Pose-moi les questions nécessaires une par une, puis produis un premier document simple et directement utilisable.</pre>
+        </div>
+        
+        <div class="coche">
+          <input type="checkbox" id="e2p2" data-suivi>
+          <label for="e2p2">Documents qualité existants (procédures, enregistrements, indicateurs)</label>
+        </div>
+        <div class="ticket mini">
+          <div class="bandeau"><span>Si vous ne l'avez pas encore</span><button type="button" data-copie>Copier</button></div>
+          <pre>Je suis dirigeant d'une PME/TPE française. Aide-moi à préparer l'élément suivant : Documents qualité existants (procédures, enregistrements, indicateurs). Pose-moi les questions nécessaires une par une, puis produis un premier document simple et directement utilisable.</pre>
+        </div>
+        
+        <div class="coche">
+          <input type="checkbox" id="e2p3" data-suivi>
+          <label for="e2p3">Rapport du précédent audit avec non-conformités relevées</label>
+        </div>
+        <div class="ticket mini">
+          <div class="bandeau"><span>Si vous ne l'avez pas encore</span><button type="button" data-copie>Copier</button></div>
+          <pre>Je suis dirigeant d'une PME/TPE française. Aide-moi à préparer l'élément suivant : Rapport du précédent audit avec non-conformités relevées. Pose-moi les questions nécessaires une par une, puis produis un premier document simple et directement utilisable.</pre>
+        </div>
+        
+        <div class="valider"><input type="checkbox" id="fin-2" data-fin="2"><label for="fin-2">Étape terminée — mes éléments sont prêts</label></div>
+      </div>
+    </details>
+  </section>
+
+  <!-- ================= ÉTAPE 3 ================= -->
+  <section class="etape" data-etape="3">
+    <div class="marqueur"><span>3</span></div>
+    <details>
+      <summary><span class="titre">Posez le cadre de sécurité</span><span class="duree">10 min</span><span class="chevron">▶</span></summary>
+      <div class="contenu">
+        <p>Ces règles ne sont pas optionnelles : elles protègent votre entreprise, vos salariés et vos clients. Cochez-les une fois mises en place.</p>
+        
+        <div class="coche">
+          <input type="checkbox" id="e3g1" data-suivi>
+          <label for="e3g1">L'IA fournit une aide à la structuration, pas un avis juridique.</label>
+        </div>
+        
+        <div class="coche">
+          <input type="checkbox" id="e3g2" data-suivi>
+          <label for="e3g2">Travailler sur des cas anonymisés.</label>
+        </div>
+        
+        <div class="coche">
+          <input type="checkbox" id="e3g3" data-suivi>
+          <label for="e3g3">Validation par un professionnel qualifié obligatoire.</label>
+        </div>
+        
+        <div class="coche">
+          <input type="checkbox" id="e3rgpd" data-suivi>
+          <label for="e3rgpd">Aucune donnée personnelle identifiable ne sera collée dans l'assistant IA
+            <small>Niveau de sensibilité de ce cas : Données internes non sensibles</small></label>
+        </div>
+        <div class="valider"><input type="checkbox" id="fin-3" data-fin="3"><label for="fin-3">Étape terminée — le cadre est posé</label></div>
+      </div>
+    </details>
+  </section>
+
+  <!-- ================= ÉTAPE 4 ================= -->
+  <section class="etape" data-etape="4">
+    <div class="marqueur"><span>4</span></div>
+    <details>
+      <summary><span class="titre">Produisez votre premier livrable</span><span class="duree">1 h</span><span class="chevron">▶</span></summary>
+      <div class="contenu">
+        <p><b>Votre première action, dans les 48 h :</b></p>
+        <p>Identifier le référentiel d'audit applicable et rassembler les documents qualité existants (procédures, indicateurs, enregistrements). Ouvrir un assistant IA conversationnel gratuit et lui fournir le référentiel et la liste des documents disponibles, puis lui demander de produire une matrice de correspondance exigences/preuves avec les écarts et les actions à mener avant l'audit. Astuce : dans votre demande à l'IA, précisez (1) votre rôle et contexte — ex. « Je suis responsable qualité dans un établissement médico-social, audit HAS dans 2 mois » (2) la tâche exacte attendue (3) le format de sortie souhaité — ex. « matrice exigences/preuves avec statut (conforme, écart, manquant) et plan d'action » (4) les contraintes — ex. « 15 exigences prioritaires, documents existants à réutiliser ». Vérifier : faire valider par la direction qualité. Livrable : dossier de préparation d'audit structuré avec checklist de conformité.</p>
+        <p class="note">Réutilisez <a href="#prompt-demarrage">votre prompt de démarrage</a> (en haut de page) — cette fois avec vos vrais éléments de l'étape 2, pas des exemples.</p>
+        <div class="critere"><b>C'est fait quand :</b> le livrable existe et a été relu par la personne concernée dans l'entreprise.</div>
+        <div class="valider"><input type="checkbox" id="fin-4" data-fin="4"><label for="fin-4">Étape terminée — premier livrable produit</label></div>
+      </div>
+    </details>
+  </section>
+
+  <!-- ================= ÉTAPE 5 ================= -->
+  <section class="etape" data-etape="5">
+    <div class="marqueur"><span>5</span></div>
+    <details>
+      <summary><span class="titre">Testez en conditions réelles</span><span class="duree">cette semaine</span><span class="chevron">▶</span></summary>
+      <div class="contenu">
+        <p>Utilisez votre premier livrable sur une situation réelle cette semaine — pas un exercice, un vrai besoin en cours.</p>
+<ul>
+<div class="coche"><input type="checkbox" id="auto1" data-suivi><label for="auto1">Choisissez un cas réel en cours dans l'entreprise</label></div>
+<div class="coche"><input type="checkbox" id="auto2" data-suivi><label for="auto2">Appliquez le livrable produit à l'étape 4 sur ce cas</label></div>
+<div class="coche"><input type="checkbox" id="auto3" data-suivi><label for="auto3">Comparez avec votre méthode habituelle : temps passé, qualité du résultat</label></div>
+<div class="coche"><input type="checkbox" id="auto4" data-suivi><label for="auto4">Notez ce qui doit être ajusté (ton, format, précision) et redemandez à l'IA de corriger</label></div>
+</ul>
+<p><strong>C'est fait quand</strong> : le livrable a servi au moins une fois en conditions réelles et vous savez ce que vous garderiez ou changeriez.</p>
+        <div class="valider"><input type="checkbox" id="fin-5" data-fin="5"><label for="fin-5">Étape terminée — testé en réel</label></div>
+      </div>
+    </details>
+  </section>
+
+  <!-- ================= ÉTAPE 6 ================= -->
+  <section class="etape" data-etape="6">
+    <div class="marqueur"><span>6</span></div>
+    <details>
+      <summary><span class="titre">Installez l'usage durablement</span><span class="duree">30 min</span><span class="chevron">▶</span></summary>
+      <div class="contenu">
+        <p>Un usage qui dépend d'un copier-coller retrouvé dans un vieil onglet meurt en trois semaines. Installez-le pour de bon.</p>
+<ul>
+<div class="coche"><input type="checkbox" id="auto5" data-suivi><label for="auto5">Enregistrez votre assistant en permanent : « GPT » (ChatGPT), Projet (Claude), Agent (Le Chat), Gem (Gemini), Agent (Copilot / Microsoft 365) — collez-y vos instructions une fois pour toutes</label></div>
+<div class="coche"><input type="checkbox" id="auto6" data-suivi><label for="auto6">Désignez qui s'en sert : une personne responsable, une suppléante</label></div>
+<div class="coche"><input type="checkbox" id="auto7" data-suivi><label for="auto7">Fixez le déclencheur : « à chaque fois que [situation], on démarre par l'assistant »</label></div>
+<div class="coche"><input type="checkbox" id="auto8" data-suivi><label for="auto8">Mettez ce parcours dans les favoris de l'équipe pour les prochaines fois</label></div>
+</ul>
+<p><strong>C'est fait quand</strong> : quelqu'un d'autre que vous a utilisé l'assistant sans votre aide.</p>
+        <div class="valider"><input type="checkbox" id="fin-6" data-fin="6"><label for="fin-6">Étape terminée — l'usage est installé</label></div>
+      </div>
+    </details>
+  </section>
+
+</div>
+
+<!-- ================= QUICK WIN (accordion en bas) ================= -->
+<details class="quickwin-accordion">
+  <summary><span class="titre">Si vous voulez tester sans attendre — votre prompt prêt</span><span class="chevron">▶</span></summary>
+  <div class="contenu-qw">
+    <p>Vous pouvez commencer tout de suite avec ce prompt. Copiez-le, collez-le dans votre assistant IA habituel — ChatGPT, Claude, Le Chat, Gemini, Copilot… la version gratuite suffit — complétez les parties entre [crochets] et laissez-vous guider.</p>
+    <div class="ticket" id="prompt-demarrage">
+      <div class="bandeau"><span>Votre prompt de démarrage</span><button type="button" data-copie>Copier</button></div>
+      <pre>Je suis dirigeant d'une PME/TPE française. Mon contexte : [votre secteur, taille d'entreprise, situation actuelle].
+
+Mon besoin — Préparation d’audit qualité établissement : Certification ISO qui approche, audit qualité annoncé — et les dossiers sont éparpillés entre services. L'IA consolide un dossier d'audit structuré avec documents classés par exigence, écarts identifiés et plan de remédiation. Le responsable qualité gagne un temps considérable.
+
+Procède ainsi :
+1. Pose-moi d'abord ces questions, une par une : Les transmissions sont-elles formalisées ? Les informations clés sont-elles partagées systématiquement ? Un référentiel commun est-il utilisé ? Des incidents liés à un défaut de coordination ont-ils eu lieu ?
+2. Demande-moi ensuite les éléments suivants (ou aide-moi à les préparer si je ne les ai pas) : Référentiel d'audit applicable (ISO 9001, HAS, norme sectorielle) ; Documents qualité existants (procédures, enregistrements, indicateurs) ; Rapport du précédent audit avec non-conformités relevées.
+3. Produis alors un premier livrable concret, en français, directement utilisable dans une PME.
+
+Règles à respecter impérativement : L'IA fournit une aide à la structuration, pas un avis juridique. Travailler sur des cas anonymisés. Validation par un professionnel qualifié obligatoire. Ne me demande jamais de données personnelles identifiables.
+
+Termine chaque livrable par : « À faire valider en interne avant usage. »</pre>
+    </div>
+    <p class="note">Les règles de prudence essentielles sont déjà intégrées au prompt : l'assistant vous les rappellera.</p>
+    <p class="note">💡 Vous aussi vous retrouverez ce prompt dans l'étape 4 du parcours, à réutiliser avec vos vrais éléments.</p>
+  </div>
+</details>
+
+<footer>
+  <p>Contenu vérifié, issu de la base Avoulia v4.5.3 — cas UC-0690.
+  Ce parcours vous a été remis à l'issue de votre diagnostic sur <a href="https://avouslia.fr">avouslia.fr</a>.
+  Il ne constitue pas un conseil professionnel ; faites valider vos livrables en interne.</p>
+</footer>
+
+</div>
+<script>
+(function(){
+  var CLE="avoulia-parcours-5bcx9h5m5q";
+  var etat={};
+  try{ etat=JSON.parse(localStorage.getItem(CLE)||"{}"); }catch(e){}
+  function sauve(){ try{ localStorage.setItem(CLE,JSON.stringify(etat)); }catch(e){} }
+
+  // restauration + suivi de toutes les cases
+  document.querySelectorAll('input[type=checkbox]').forEach(function(cb){
+    if(etat[cb.id]) cb.checked=true;
+    cb.addEventListener('change',function(){ etat[cb.id]=cb.checked; sauve(); maj(); });
+  });
+
+  function maj(){
+    var faites=0;
+    for(var i=1;i<=6;i++){
+      var fin=document.querySelector('[data-fin="'+i+'"]');
+      var sec=document.querySelector('[data-etape="'+i+'"]');
+      if(fin&&fin.checked){ faites++; sec.classList.add('faite'); }
+      else if(sec){ sec.classList.remove('faite'); }
+    }
+    document.getElementById('prog-count').textContent=faites+(faites>1?" étapes":" étape")+" sur 6";
+    document.getElementById('prog-fill').style.width=(faites/6*100)+"%";
+    document.getElementById('prog-label').textContent=
+      faites===6?"Bravo — usage installé !":faites>0?"Continuez, vous êtes lancé":"Votre avancement";
+  }
+
+  // boutons copier
+  document.querySelectorAll('[data-copie]').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var txt=btn.closest('.ticket').querySelector('pre').textContent;
+      function ok(){ btn.textContent="Copié ✓"; setTimeout(function(){btn.textContent="Copier";},2000); }
+      if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(ok); }
+      else{ var t=document.createElement('textarea'); t.value=txt; document.body.appendChild(t);
+            t.select(); try{document.execCommand('copy'); ok();}catch(e){} document.body.removeChild(t); }
+    });
+  });
+
+  maj();
+})();
+</script>
+</body>
+</html>

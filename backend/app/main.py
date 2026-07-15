@@ -3,9 +3,11 @@ Point d'entrée FastAPI : montage des routes chat + documents sous /api/v1.
 """
 
 import logging
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.config import get_settings
 from app.routes import chat
@@ -57,7 +59,6 @@ app.add_middleware(
 )
 
 app.include_router(chat.router, prefix=settings.api_prefix)
-# Note: parcours pages are served directly from Azure Static Web Apps, not through this API
 
 
 @app.on_event("startup")
@@ -75,3 +76,8 @@ def log_config():
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+parcours_static_dir = Path(__file__).resolve().parent / "static" / "parcours"
+if parcours_static_dir.exists():
+    app.mount("/", StaticFiles(directory=str(parcours_static_dir), html=True), name="parcours")
