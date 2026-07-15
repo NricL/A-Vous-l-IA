@@ -129,12 +129,12 @@ def build_parcours_url(case_id: str, salt: Optional[str] = None) -> str:
     """Build complete parcours URL for a case."""
     base_url = os.getenv("PARCOURS_BASE_URL", "https://happy-desert-0f415f20f.7.azurestaticapps.net").rstrip("/")
     case_hash = _resolve_case_hash(case_id, salt)
-    return f"{base_url}/action/{case_hash}/"
+    return f"{base_url}/action/{case_hash}.html"
 
 
 def build_parcours_info(case_id: str, salt: Optional[str] = None) -> dict:
     """Build dictionary with case_hash and parcours_url."""
     case_hash = _resolve_case_hash(case_id, salt)
     base_url = os.getenv("PARCOURS_BASE_URL", "https://happy-desert-0f415f20f.7.azurestaticapps.net").rstrip("/")
-    parcours_url = f"{base_url}/action/{case_hash}/"
+    parcours_url = f"{base_url}/action/{case_hash}.html"
     return {"case_hash": case_hash, "parcours_url": parcours_url}
