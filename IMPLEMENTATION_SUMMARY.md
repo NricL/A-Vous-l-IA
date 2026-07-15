@@ -4,6 +4,13 @@
 
 ---
 
+### Update 2026-07-15
+- 🔧 Frontend startup regression reproduced on the deployed bundle (`lastSuggestedCases is not defined`)
+- ✅ Restored `HomeView.vue` and `ChatView.vue`, then added the missing `*.vue` TypeScript declaration
+- ✅ Local frontend build passes again; deployment needs to pick up the refreshed bundle
+
+---
+
 ## 🎯 Accomplishments (This Session)
 
 ### 1. Frontend Telemetry Integration ✅

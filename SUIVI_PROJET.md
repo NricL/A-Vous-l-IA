@@ -5,6 +5,11 @@
 **Tenant cible:** Production Azure (westeurope, tenant officiel)  
 **Repo:** `NricL/A-Vous-l-IA` (privé — source unique)
 
+### Update 2026-07-15
+- 🔧 Régression frontend identifiée sur le bundle Azure Container Apps (`lastSuggestedCases is not defined`)
+- ✅ `HomeView.vue`, `ChatView.vue` restaurés, et `frontend/env.d.ts` complété pour les imports `.vue`
+- ✅ Build frontend validé localement; le prochain déploiement doit publier ce bundle corrigé
+
 ---
 
 ## 📐 Vision & Architecture
