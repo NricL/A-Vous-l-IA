@@ -29,6 +29,8 @@ export interface ChatMessage {
 export interface SuggestedCase {
   id: string
   content: string
+  parcours_url?: string
+  case_hash?: string
 }
 
 export interface ChatRequest {

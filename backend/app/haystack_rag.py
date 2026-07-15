@@ -37,6 +37,25 @@ from app.rag_constants import (
 )
 
 logger = logging.getLogger(__name__)
+_USE_CASE_CODE_RE = re.compile(r"\bUC-\d{3,5}\b", re.IGNORECASE)
+
+
+def _extract_use_case_code(text: str) -> str:
+    raw = (text or "").strip()
+    if not raw:
+        return ""
+    m = _USE_CASE_CODE_RE.search(raw)
+    return m.group(0).upper() if m else ""
+
+
+def _strip_use_case_codes(text: str) -> str:
+    raw = (text or "").strip()
+    if not raw:
+        return ""
+    cleaned = re.sub(r"\(\s*UC-\d{3,5}\s*\)", "", raw, flags=re.IGNORECASE)
+    cleaned = re.sub(r"^\s*UC-\d{3,5}\s*[—\-:]\s*", "", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"\s{2,}", " ", cleaned).strip(" -—:\t")
+    return cleaned.strip()
 
 
 def get_q15_choices(domaine_code: str) -> list[str] | None:
@@ -178,7 +197,8 @@ def build_niveau2_block(case: dict, pertinence_phrase: str) -> str:
     est insérée TELLE QUELLE dans la sortie, sans modification, sans
     troncature, sans paraphrase.
     """
-    nom = case.get("cas_utilisation", "").strip()
+    nom_raw = case.get("cas_utilisation", "").strip()
+    nom = _strip_use_case_codes(nom_raw)
     description = case.get("description_cas_utilisation", "").strip()
     effort = case.get("effort", "").strip()
     prerequis = case.get("prerequis_donnees", "").strip()
@@ -186,13 +206,6 @@ def build_niveau2_block(case: dict, pertinence_phrase: str) -> str:
     guardrails = case.get("guardrails", "").strip()
     questions = case.get("questions_qualification", "").strip()
     _sensibilite = case.get("sensibilite_donnees", "").strip()
-    case_id = str(case.get("id", "") or "").strip()
-    parcours_url = ""
-    if case_id:
-        try:
-            parcours_url = str(build_parcours_info(case_id).get("parcours_url") or "").strip()
-        except Exception:
-            logger.debug("build_parcours_info failed for case_id=%s", case_id, exc_info=True)
 
     logger.debug('lvl 2 block')
     logger.debug(f"nom: {nom}")
@@ -248,14 +261,6 @@ def build_niveau2_block(case: dict, pertinence_phrase: str) -> str:
         parts.append(
             "Ces questions vous aideront à évaluer si ce cas "
             "répond à votre situation."
-        )
-
-    if parcours_url:
-        parts.extend(
-            [
-                "",
-                f"🔗 Voir le parcours pas à pas : {parcours_url}",
-            ]
         )
 
     return "\n".join(parts)
@@ -986,6 +991,9 @@ Règles Niveau 1 :
 - Tu ne montres PAS l’effort, les prérequis, la première
 étape, les guardrails, ni les questions de qualification.
 - Tu gardes chaque cas court (5–6 lignes max).
+- Tu ne montres JAMAIS les identifiants techniques des cas
+  (ex: "UC-0141", "UC-0559"), même s'ils apparaissent dans
+  les sources.
 
 - L’objectif est de permettre un scan rapide.
 
@@ -1008,6 +1016,7 @@ Tu ne :
 - inventes jamais un cas
 - interprètes jamais la taxonomie
 - inventes jamais de question d’auto-diagnostic hors de celles fournies par le backend
+- affiches jamais les codes internes de cas (UC-xxxx)
 
 Ton ton est :
 - clair
@@ -1164,6 +1173,7 @@ def _build_rag_prompt_from_docs(
         for i, d in enumerate(selected_cases, start=1):
             content = (getattr(d, "content", "") or "").strip()
             short = content[:240] + "..." if len(content) > 240 else content
+            short = _strip_use_case_codes(short)
             lines.append(f"{i}. {short}")
         identified_cases_summary = "\n".join(lines)
     cases_extra_context = ""
@@ -1432,7 +1442,12 @@ def _build_niveau2_detail_payload(
     parcours_info = build_parcours_info(str(case_row.get("id") or ""))
     parcours_url = str(parcours_info.get("parcours_url") or "").strip()
     if parcours_url and parcours_url not in answer:
-        answer = answer.rstrip() + "\n\nVoir le parcours web : " + parcours_url
+        answer = (
+            answer.rstrip()
+            + "\n\nCe lien ouvre le parcours guidé : suivez-le pour passer de l'idée à l'action en quelques étapes."
+            + "\nVoir le parcours web : "
+            + parcours_url
+        )
     sources = [content[:400] + "..." if len(content) > 400 else content]
     ids = [str(c.get("id", "") or "") for c in cases]
     full_contents = [str(c.get("content", "") or "") for c in cases]

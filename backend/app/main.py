@@ -57,6 +57,7 @@ app.add_middleware(
 )
 
 app.include_router(chat.router, prefix=settings.api_prefix)
+# Note: parcours pages are served directly from Azure Static Web Apps, not through this API
 
 
 @app.on_event("startup")

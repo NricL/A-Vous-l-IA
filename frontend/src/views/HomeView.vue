@@ -23,7 +23,27 @@
                         <template v-else>
                             <div
                                 v-for="(msg, i) in messages"
-                                :key="`${i}-${msg.role}`"
+                                :key="`${i                                }
+
+                                .parcours-link-card {
+                                    margin-top: 0.75rem;
+                                    padding: 0.8rem 0.95rem;
+                                    border: 1px solid #d0d7de;
+                                    border-radius: 14px;
+                                    background: #fff;
+                                    display: flex;
+                                    gap: 0.5rem;
+                                    align-items: center;
+                                    flex-wrap: wrap;
+                                }
+
+                                .parcours-link-label {
+                                    font-weight: 600;
+                                }
+
+                                .parcours-link-card a {
+                                    word-break: break-word;
+                                }-${msg.role}`"
                                 :class="['msg', msg.role === 'user' ? 'msg-user' : 'msg-bot']"
                             >{{ msg.content }}</div>
                         </template>
@@ -33,6 +53,10 @@
                         </div>
 
                         <div v-if="error" class="msg msg-bot">Désolé, une erreur s'est produite : {{ error }}</div>
+                    </div>
+                    <div v-if="featuredParcoursUrl" class="parcours-link-card">
+                        <span class="parcours-link-label">Voir le parcours web :</span>
+                        <a :href="featuredParcoursUrl" target="_blank" rel="noreferrer">{{ featuredParcoursUrl }}</a>
                     </div>
                     <form class="chat-input-bar" @submit.prevent="submit()">
                         <input
@@ -361,7 +385,7 @@ const chatInputRef = ref(null)
 const initialChips = ['RH', 'Finance', 'Ventes', 'IT', 'Opérations', 'Marketing']
 const showInitialChips = computed(() => messages.value.length === 1 && !loading.value)
 
-const lastSuggestedCases = ref(null)
+const featuredParcoursUrl = computed(() => lastSuggestedCases.value?.[0]?.parcours_url ?? '')
 const selectedDomainCode = ref(null)
 const selectedSector = ref(null)
 const selectedIntention = ref(null)

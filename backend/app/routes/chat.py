@@ -1,4 +1,5 @@
 import json
+import re
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
@@ -11,6 +12,7 @@ from app.parcours_util import build_parcours_info
 from app.telemetry import track_backend_chat_event
 
 router = APIRouter(prefix="/chat", tags=["chat"])
+_UC_CODE_RE = re.compile(r"\bUC-\d{3,5}\b", re.IGNORECASE)
 
 
 @router.get("/welcome")
@@ -90,6 +92,63 @@ def _build_suggested_cases(
     return rows
 
 
+def _append_parcours_links_to_answer(
+    answer: str,
+    suggested_cases: list[SuggestedCase] | None,
+    pending_use_case_id: str | None = None,
+    pending_case_index: int | None = None,
+) -> str:
+    """
+    Garantit qu'au moins un lien parcours est visible dans le texte final.
+    - Si un cas précis est ciblé (pending_use_case_id / pending_case_index), on ajoute ce lien.
+    - Sinon, on ajoute le lien du 1er cas suggéré.
+    """
+    text = (answer or "").strip()
+    if not text or not suggested_cases:
+        return answer
+    if ("http://" in text or "https://" in text) and "/action/" in text:
+        return answer
+
+    target: SuggestedCase | None = None
+    if pending_use_case_id:
+        target = next((c for c in suggested_cases if c.id == pending_use_case_id), None)
+    elif pending_case_index is not None and 0 <= pending_case_index < len(suggested_cases):
+        target = suggested_cases[pending_case_index]
+    else:
+        target = suggested_cases[0]
+
+    parcours_url = (target.parcours_url or "").strip() if target else ""
+    if not parcours_url or parcours_url in text:
+        return answer
+
+    return text + f"\n\nVoir le parcours web : {parcours_url}"
+
+
+def _sanitize_answer_text(answer: str) -> str:
+    text = (answer or "").strip()
+    if not text:
+        return answer
+    text = re.sub(r"\(\s*UC-\d{3,5}\s*\)", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"^\s*UC-\d{3,5}\s*[—\-:]\s*", "", text, flags=re.IGNORECASE | re.MULTILINE)
+    text = _UC_CODE_RE.sub("", text)
+    text = re.sub(r"[ \t]{2,}", " ", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
+
+
+def _looks_like_detail_answer(answer: str) -> bool:
+    text = (answer or "").lower()
+    detail_markers = (
+        "nom du cas",
+        "niveau d'effort",
+        "ce qu'il vous faut pour démarrer",
+        "première action",
+        "première étape",
+        "point de vigilance",
+    )
+    return any(marker in text for marker in detail_markers)
+
+
 @router.post("", response_model=ChatResponse)
 def chat(request: ChatRequest, http_request: Request):
     """
@@ -127,6 +186,13 @@ def chat(request: ChatRequest, http_request: Request):
             suggested_cases = (
                 _build_suggested_cases(suggested_case_ids, full_contents, case_extras) if full_contents else None
             )
+            answer = _append_parcours_links_to_answer(
+                answer,
+                suggested_cases,
+                pending_use_case_id=pending_use_case_id,
+                pending_case_index=pending_case_index,
+            )
+            answer = _sanitize_answer_text(answer)
             track_backend_chat_event(
                 event_name="backend_chat_response",
                 session_id=session_id,
@@ -195,12 +261,29 @@ def _stream_chat(request: ChatRequest, session_id: str | None):
                 selected_sector=request.selected_sector,
                 selected_intention=request.selected_intention,
             )
-            if niveau2_prebuilt:
-                yield _sse_line({"t": niveau2_prebuilt})
-            else:
-                for chunk in stream_prompt(prompt_text):
-                    yield _sse_line({"t": chunk})
             suggested_cases = _build_suggested_cases(suggested_case_ids, full_contents, case_extras)
+            niveau2_prebuilt = _append_parcours_links_to_answer(
+                niveau2_prebuilt,
+                suggested_cases,
+                pending_use_case_id=request.pending_use_case_id,
+                pending_case_index=None,
+            )
+            if niveau2_prebuilt:
+                yield _sse_line({"t": _sanitize_answer_text(niveau2_prebuilt)})
+            else:
+                streamed_chunks: list[str] = []
+                for chunk in stream_prompt(prompt_text):
+                    streamed_chunks.append(chunk)
+                streamed_answer = _sanitize_answer_text("".join(streamed_chunks))
+                if _looks_like_detail_answer(streamed_answer):
+                    streamed_answer = _append_parcours_links_to_answer(
+                        streamed_answer,
+                        suggested_cases,
+                        pending_use_case_id=request.pending_use_case_id,
+                        pending_case_index=None,
+                    )
+                if streamed_answer:
+                    yield _sse_line({"t": streamed_answer})
             done_payload = {
                 "done": True,
                 "sources": sources,

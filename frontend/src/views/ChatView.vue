@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, nextTick, onMounted } from 'vue'
+import { computed, ref, nextTick, onMounted } from 'vue'
 import type { ChatMessage, SuggestedCase } from '@/api/chat'
 import { sendMessageStream, getWelcomeMessage } from '@/api/chat'
 import microsoftLogo from '@/assets/microsoft-logo.svg'
@@ -18,6 +18,7 @@ const selectedSector = ref<string | null>(null)
 const selectedIntention = ref<string | null>(null)
 const pendingAction = ref<string | null>(null)
 const pendingUseCaseId = ref<string | null>(null)
+const featuredParcoursUrl = computed(() => lastSuggestedCases.value?.[0]?.parcours_url ?? '')
 
 function scrollToBottom() {
   nextTick(() => {
@@ -155,6 +156,11 @@ async function submit() {
           <div ref="messagesEnd" />
         </div>
 
+        <div v-if="featuredParcoursUrl" class="parcours-link-card">
+          <span class="parcours-link-label">Voir le parcours web :</span>
+          <a :href="featuredParcoursUrl" target="_blank" rel="noreferrer">{{ featuredParcoursUrl }}</a>
+        </div>
+
         <div v-if="error" class="error-banner">{{ error }}</div>
 
         <div v-if="loading" class="typing-line typing-above-input">Réflexion…</div>
@@ -226,6 +232,26 @@ async function submit() {
   padding: 1.25rem;
   background: var(--color-background-soft);
   box-shadow: var(--shadow-sm);
+}
+
+.parcours-link-card {
+  margin: 0.75rem 0 0;
+  padding: 0.8rem 0.95rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-background);
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.parcours-link-label {
+  font-weight: 600;
+}
+
+.parcours-link-card a {
+  word-break: break-word;
 }
 
 .chat-section h2 {
