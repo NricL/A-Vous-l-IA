@@ -7,7 +7,9 @@
 ### Update 2026-07-15
 - 🔧 Frontend startup regression reproduced on the deployed bundle (`lastSuggestedCases is not defined`)
 - ✅ Restored `HomeView.vue` and `ChatView.vue`, then added the missing `*.vue` TypeScript declaration
-- ✅ Local frontend build passes again; deployment needs to pick up the refreshed bundle
+- ✅ Local frontend build passes again
+- ✅ Frontend image rebuilt and deployed to Azure Container Apps (`v2-202607151604`)
+- ✅ Live validation passed on the new revision and on the main frontend URL with cache-buster
 
 ---
 

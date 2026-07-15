@@ -8,7 +8,9 @@
 ### Update 2026-07-15
 - 🔧 Régression frontend identifiée sur le bundle Azure Container Apps (`lastSuggestedCases is not defined`)
 - ✅ `HomeView.vue`, `ChatView.vue` restaurés, et `frontend/env.d.ts` complété pour les imports `.vue`
-- ✅ Build frontend validé localement; le prochain déploiement doit publier ce bundle corrigé
+- ✅ Image frontend reconstruite et poussée: `acravoulia97186.azurecr.io/avoulia-frontend:v2-202607151604`
+- ✅ Container App `avoulia-frontend` mis à jour sur `rg-avoulia-fr-dev`
+- ✅ Validation live réussie sur la révision `avoulia-frontend--0000003` et sur l’URL principale avec cache-buster
 
 ---
 
