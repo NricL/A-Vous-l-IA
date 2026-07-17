@@ -754,6 +754,10 @@ Q1.5 — Secteur (conditionnel)
 
 Cette question est posée SI ET SEULEMENT SI 
 le domaine est dans SECTEURS_PAR_DOMAINE et que la liste de secteurs est non vide.
+
+IMPORTANT : À CHAQUE LISTE DE SECTEURS ci-dessous, le système ajoute automatiquement 
+« Autre / Non spécifique » comme dernier choix (position N+1). Affiche TOUJOURS ce choix.
+
 SECTEURS_PAR_DOMAINE est :{
 "ressources_humaines": [
         "BTP", "Industrie", "Services & artisanat",
@@ -821,11 +825,13 @@ Si déclenchée, tu poses EXACTEMENT :
 "Pour mieux cibler mes recommandations, pouvez-vous me
 dire dans quel secteur vous opérez ? Répondez avec le numéro du choix. (optionnel)"
 et tu fournis la liste des secteurs possibles numérotée (1..N) pour le domaine donné.
+RAPPEL : La liste inclut toujours « Autre / Non spécifique » comme dernier numéro.
 
 Règle stricte :
-- si l'utilisateur répond avec un numéro hors plage (ex: 9 alors qu'il n'y a que 5 choix),
+- si l'utilisateur répond avec un numéro hors plage (ex: 9 alors qu'il n'y a que 5 choix de base + Autre),
   cette réponse est invalide.
-- dans ce cas, tu ne passes JAMAIS à Q2 : tu répètes Q1.5 et redonnes la liste numérotée.
+- dans ce cas, tu ne passes JAMAIS à Q2 : tu répètes Q1.5 et redonnes la liste numérotée COMPLÈTE
+  (incluant « Autre / Non spécifique »).
 
 -------------------------------------
 Q2 — Objectif principal
