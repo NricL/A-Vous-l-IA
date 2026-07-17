@@ -1164,25 +1164,28 @@ def _build_rag_prompt_from_docs(
             f"- Intention: {intention_label or 'non sélectionnée'}",
         ]
     )
-    identified_cases_summary = ""
+    
+    # LOGIQUE CENTRALISÉE : déterminer les cas réellement affichés (3 à 5)
+    displayed_cases = []
     if docs:
-        selected_cases = docs[:5]
-        if len(selected_cases) < 3 and len(docs) >= 3:
-            selected_cases = docs[:3]
+        displayed_cases = docs[:5]  # Maximum 5
+        if len(displayed_cases) < 3 and len(docs) >= 3:
+            displayed_cases = docs[:3]  # Minimum 3
+    
+    identified_cases_summary = ""
+    if displayed_cases:
         lines = []
-        for i, d in enumerate(selected_cases, start=1):
+        for i, d in enumerate(displayed_cases, start=1):
             content = (getattr(d, "content", "") or "").strip()
             short = content[:240] + "..." if len(content) > 240 else content
             short = _strip_use_case_codes(short)
             lines.append(f"{i}. {short}")
         identified_cases_summary = "\n".join(lines)
+    
     cases_extra_context = ""
-    if docs and not _should_omit_multi_case_structured_context(query, last_suggested_cases):
-        selected_for_context = docs[:5]
-        if len(selected_for_context) < 3 and len(docs) >= 3:
-            selected_for_context = docs[:3]
+    if displayed_cases and not _should_omit_multi_case_structured_context(query, last_suggested_cases):
         blocks: list[str] = []
-        for i, d in enumerate(selected_for_context, start=1):
+        for i, d in enumerate(displayed_cases, start=1):
             ex = _case_extra_fields_from_meta(getattr(d, "meta", None) or {})
             blk = _format_case_extra_block(ex)
             if blk:
@@ -1202,7 +1205,7 @@ def _build_rag_prompt_from_docs(
         identified_cases_summary=identified_cases_summary,
         cases_extra_context=cases_extra_context,
         conversation_history=conversation_history or "",
-        documents=docs,
+        documents=displayed_cases,  # Passer les cas AFFICHÉS (3-5), pas tous les docs du RAG
         q3_triggers_affichage=q3_triggers_affichage or "",
     )
 
