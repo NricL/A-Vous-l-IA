@@ -293,6 +293,20 @@ Two related bugs were found and fixed in the RAG retrieval/qualification pipelin
 
 ---
 
+## 🔗 Parcours Link CTA (2026-08-25) — Single Source of Truth for Button/Text Wording
+
+The parcours link is **no longer shown as raw text** requiring copy-paste — the frontend (`ChatView.vue`) renders it as a clickable button (`SuggestedCase.parcours_url`).
+
+The text/label around it (step count, duration, CTA wording) is **not hardcoded in multiple places**. It all comes from one function: `backend/app/parcours_util.get_parcours_pitch()`, driven by two constants:
+- `PARCOURS_STEPS_COUNT` (currently 6)
+- `PARCOURS_ACTIVE_MINUTES` (currently 132, i.e. sum of the fixed-duration steps in `generate_parcours_pages.py`, excluding the open-ended "test during your week" step)
+
+Both `routes/chat.py` and `haystack_rag.py` call this function for the chat message text, and `models.SuggestedCase.parcours_cta_label` propagates the same computed button label to the frontend — so text and button are always in sync.
+
+**If the parcours page template changes** (more/fewer steps, different durations), update only the two constants in `parcours_util.py`. Do not hardcode new wording anywhere else — that would defeat the purpose of this single source of truth and risks the button/text drifting out of sync again.
+
+---
+
 ## 🐛 Troubleshooting
 
 | Issue | Solution |
