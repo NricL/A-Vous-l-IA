@@ -137,6 +137,43 @@ def _sanitize_answer_text(answer: str) -> str:
     return text.strip()
 
 
+def _align_level1_list_with_selectable_cases(answer: str, selectable_count: int) -> str:
+    """
+    Empêche tout décalage UX entre les cas affichés et les cas réellement sélectionnables.
+    Si le modèle affiche plus de cas numérotés que `selectable_count`, on tronque
+    strictement la liste au nombre de cas réellement disponibles.
+    """
+    text = (answer or "").strip()
+    if not text or selectable_count <= 0:
+        return answer
+    if "Souhaitez-vous approfondir l’un de ces cas" not in text:
+        return answer
+
+    # Isoler la zone "liste de cas" avant la question de clôture
+    closing_match = re.search(
+        r"(?is)(?:«\s*)?souhaitez[- ]vous approfondir l.?un de ces cas",
+        text,
+    )
+    list_part = text[: closing_match.start()].rstrip() if closing_match else text
+    closing_part = text[closing_match.start() :].strip() if closing_match else ""
+
+    case_block_re = re.compile(
+        r"(?ms)^\s*[1-9]\d*\.\s+\S.*?(?=^\s*[1-9]\d*\.\s+\S|\Z)"
+    )
+    blocks = list(case_block_re.finditer(list_part))
+    if len(blocks) <= selectable_count:
+        return answer
+
+    prefix = list_part[: blocks[0].start()].rstrip()
+    kept_blocks = [m.group(0).rstrip() for m in blocks[:selectable_count]]
+    trimmed_list = "\n\n".join(kept_blocks).strip()
+    rebuilt_main = "\n\n".join(part for part in (prefix, trimmed_list) if part).strip()
+
+    if closing_part:
+        return f"{rebuilt_main}\n\n{closing_part}".strip()
+    return rebuilt_main
+
+
 def _looks_like_detail_answer(answer: str) -> bool:
     text = (answer or "").lower()
     detail_markers = (
@@ -193,6 +230,7 @@ def chat(request: ChatRequest, http_request: Request):
                 pending_use_case_id=pending_use_case_id,
                 pending_case_index=pending_case_index,
             )
+            answer = _align_level1_list_with_selectable_cases(answer, len(suggested_cases or []))
             answer = _sanitize_answer_text(answer)
             track_backend_chat_event(
                 event_name="backend_chat_response",
@@ -283,6 +321,9 @@ def _stream_chat(request: ChatRequest, session_id: str | None):
                         pending_use_case_id=request.pending_use_case_id,
                         pending_case_index=None,
                     )
+                streamed_answer = _align_level1_list_with_selectable_cases(
+                    streamed_answer, len(suggested_cases or [])
+                )
                 if streamed_answer:
                     yield _sse_line({"t": streamed_answer})
             done_payload = {
