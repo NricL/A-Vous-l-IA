@@ -35,18 +35,27 @@ function linkifyParts(text: string): TextPart[] {
  * (app.parcours_util.get_parcours_pitch) : le frontend ne fait qu'afficher ce qu'il reçoit,
  * il n'y a donc rien à mettre à jour ici si la structure du parcours évolue côté serveur.
  */
-function resolveParcoursCta(payload: StreamDonePayload): { url: string | null; ctaLabel: string | null } {
-  const cases: SuggestedCase[] = payload.suggested_cases ?? []
+function resolveParcoursCta(
+  payload: StreamDonePayload,
+  question: string,
+  previousCases: SuggestedCase[] | null,
+): { url: string | null; ctaLabel: string | null } {
+  const cases: SuggestedCase[] =
+    payload.suggested_cases && payload.suggested_cases.length > 0
+      ? payload.suggested_cases
+      : previousCases ?? []
   if (!cases.length) return { url: null, ctaLabel: null }
   let target: SuggestedCase | undefined
   if (payload.pending_use_case_id) {
     target = cases.find((c) => c.id === payload.pending_use_case_id)
   } else if (
     payload.pending_case_index != null &&
-    payload.pending_case_index >= 0 &&
-    payload.pending_case_index < cases.length
+    payload.pending_case_index >= 1 &&
+    payload.pending_case_index <= cases.length
   ) {
-    target = cases[payload.pending_case_index]
+    target = cases[payload.pending_case_index - 1]
+  } else if (/^\s*[1-5]\s*$/.test(question)) {
+    target = cases[Number.parseInt(question.trim(), 10) - 1]
   } else if (cases.length === 1) {
     target = cases[0]
   }
@@ -135,7 +144,11 @@ async function submit() {
           }
           if (payload.pending_action !== undefined) pendingAction.value = payload.pending_action
           if (payload.pending_use_case_id !== undefined) pendingUseCaseId.value = payload.pending_use_case_id
-          const { url: parcoursUrl, ctaLabel: parcoursCtaLabel } = resolveParcoursCta(payload)
+          const { url: parcoursUrl, ctaLabel: parcoursCtaLabel } = resolveParcoursCta(
+            payload,
+            text,
+            lastSuggestedCases.value,
+          )
           const idx = messages.value.length - 1
           if (idx >= 0 && messages.value[idx]?.role === 'assistant') {
             messages.value = [

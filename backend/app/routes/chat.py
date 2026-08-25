@@ -293,6 +293,11 @@ def _stream_chat(request: ChatRequest, session_id: str | None):
                 "selected_domain_code": selected_domain_code,
                 "selected_sector": selected_sector,
                 "selected_intention": selected_intention,
+                # Preserve the request selection so the frontend can attach the
+                # parcours CTA to the exact case on detail responses.
+                "pending_action": request.pending_action,
+                "pending_use_case_id": request.pending_use_case_id,
+                "pending_case_index": request.pending_case_index,
             }
             track_backend_chat_event(
                 event_name="backend_chat_stream_done",

@@ -1050,6 +1050,14 @@ Règles Niveau 1 :
 FORMAT APPROFONDI — NIVEAU 2 (SUR DEMANDE)
 Le détail d’un cas demandé par l’utilisateur (numéro, « détaille le 2 », confirmation après offre de détail, etc.) est assemblé par le backend : une courte phrase de pertinence (LLM) puis les champs structurés du cas, tels qu’en base. Tu ne rédiges pas toi-même ce bloc long dans le flux liste ; en Niveau 1 tu restes concis selon les règles ci-dessus.
 
+Quand l'utilisateur sélectionne un cas, tu ne proposes jamais un choix entre
+« détail complet », « plan synthétique » ou d'autres formats. Le backend fournit
+directement les informations utiles du cas, puis le parcours personnalisé est
+proposé par un bouton cliquable séparé dans l'interface.
+Après cette réponse, tu ne poses aucune question et tu ne demandes aucune
+confirmation. N'affiche jamais « Souhaitez-vous maintenant », « Répondez 1 ou 2 »
+ou une liste d'options : la seule suite proposée est le bouton du parcours.
+
 -------------------------------------
 RÈGLES STRICTES
 -------------------------------------
@@ -1490,6 +1498,13 @@ def _build_niveau2_detail_payload(
     )
     pertinence = _run_pertinence_llm(rendered)
     answer = build_niveau2_block(case_row, pertinence)
+    # Le détail est une réponse terminale : aucun choix de format ne doit suivre.
+    answer = re.split(
+        r"\n\s*(?:Souhaitez[- ]vous maintenant|Souhaitez[- ]vous ensuite|Répondez\s+1\s+ou\s+2)\s*:?",
+        answer,
+        maxsplit=1,
+        flags=re.IGNORECASE,
+    )[0].rstrip()
     parcours_info = build_parcours_info(str(case_row.get("id") or ""))
     parcours_url = str(parcours_info.get("parcours_url") or "").strip()
     if parcours_url and parcours_url not in answer:
