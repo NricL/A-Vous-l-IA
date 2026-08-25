@@ -13,7 +13,8 @@ from difflib import SequenceMatcher
 import chromadb
 from jinja2 import Template
 from haystack import Document, Pipeline
-from haystack.components.builders import PromptBuilder
+from haystack.components.builders import ChatPromptBuilder
+from haystack.dataclasses import ChatMessage
 from haystack.utils import Secret
 from haystack_integrations.document_stores.chroma import ChromaDocumentStore
 from haystack_integrations.components.retrievers.chroma import ChromaEmbeddingRetriever
@@ -704,16 +705,16 @@ def _get_generator():
     """Générateur chat Foundry (gpt-5-chat)."""
     s = get_settings()
     if s.use_azure_openai:
-        from haystack.components.generators import AzureOpenAIGenerator
-        return AzureOpenAIGenerator(
+        from haystack.components.generators.chat import AzureOpenAIChatGenerator
+        return AzureOpenAIChatGenerator(
             azure_endpoint=s.azure_endpoint_normalized_chat,
             api_key=_secret(s.azure_openai_api_key_chat),
             api_version=s.azure_openai_api_version_chat,
             azure_deployment=s.azure_chat_deployment,
         )
 
-    from haystack.components.generators import OpenAIGenerator
-    return OpenAIGenerator(
+    from haystack.components.generators.chat import OpenAIChatGenerator
+    return OpenAIChatGenerator(
         api_key=_secret(s.openai_api_key),
         model=s.openai_chat_model,
     )
@@ -1459,12 +1460,14 @@ def _enrich_case_from_document_store(case: dict) -> dict:
 
 def _run_pertinence_llm(pertinence_prompt_rendered: str) -> str:
     """Un appel LLM : uniquement la phrase de pertinence (prompt PERTINENCE_PROMPT déjà rendu)."""
-    prompt_builder = PromptBuilder(template=_PERTINENCE_WRAPPER_TEMPLATE)
+    prompt_builder = ChatPromptBuilder(
+        template=[ChatMessage.from_user(_PERTINENCE_WRAPPER_TEMPLATE)]
+    )
     generator = _get_generator()
     pipeline = Pipeline()
     pipeline.add_component("prompt_builder", prompt_builder)
     pipeline.add_component("generator", generator)
-    pipeline.connect("prompt_builder.prompt", "generator.prompt")
+    pipeline.connect("prompt_builder.prompt", "generator.messages")
     result = pipeline.run({"prompt_builder": {"pertinence_prompt": pertinence_prompt_rendered}})
     replies = result.get("generator", {}).get("replies", [])
     out = replies[0] if replies else ""
@@ -1725,7 +1728,7 @@ def build_rag_prompt_only_pipeline():
     store = get_document_store()
     embedder = _get_text_embedder()
     retriever = ChromaEmbeddingRetriever(document_store=store, top_k=s.top_k_retrieve)
-    prompt_builder = PromptBuilder(template=RAG_PROMPT)
+    prompt_builder = ChatPromptBuilder(template=[ChatMessage.from_user(RAG_PROMPT)])
     pipeline = Pipeline()
     pipeline.add_component("embedder", embedder)
     pipeline.add_component("retriever", retriever)
@@ -1741,7 +1744,7 @@ def build_rag_pipeline():
     store = get_document_store()
     embedder = _get_text_embedder()
     retriever = ChromaEmbeddingRetriever(document_store=store, top_k=s.top_k_retrieve)
-    prompt_builder = PromptBuilder(template=RAG_PROMPT)
+    prompt_builder = ChatPromptBuilder(template=[ChatMessage.from_user(RAG_PROMPT)])
     generator = _get_generator()
 
     pipeline = Pipeline()
@@ -1751,7 +1754,7 @@ def build_rag_pipeline():
     pipeline.add_component("generator", generator)
     pipeline.connect("embedder.embedding", "retriever.query_embedding")
     pipeline.connect("retriever.documents", "prompt_builder.documents")
-    pipeline.connect("prompt_builder.prompt", "generator.prompt")
+    pipeline.connect("prompt_builder.prompt", "generator.messages")
     return pipeline
 
 
@@ -2828,7 +2831,7 @@ def query_rag_haystack(
     _pt = prompt_text or "Aucun contexte."
     logger.debug("query_rag_haystack prompt_len=%s preview=%r", len(_pt), _pt[:1200])
     generator = _get_generator()
-    gen_result = generator.run(prompt=prompt_text)
+    gen_result = generator.run(messages=[ChatMessage.from_user(prompt_text)])
     replies = gen_result.get("replies", [])
     answer = replies[0] if replies else "Aucune réponse générée."
     if hasattr(answer, "content"):
