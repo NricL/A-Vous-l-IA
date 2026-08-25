@@ -297,7 +297,7 @@ def _stream_chat(request: ChatRequest, session_id: str | None):
                 # parcours CTA to the exact case on detail responses.
                 "pending_action": request.pending_action,
                 "pending_use_case_id": request.pending_use_case_id,
-                "pending_case_index": request.pending_case_index,
+                "pending_case_index": None,
             }
             track_backend_chat_event(
                 event_name="backend_chat_stream_done",
