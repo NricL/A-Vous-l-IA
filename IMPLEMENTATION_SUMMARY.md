@@ -10,6 +10,13 @@
 - ✅ Local frontend build passes again
 - ✅ Frontend image rebuilt and deployed to Azure Container Apps (`v2-202607151604`)
 - ✅ Live validation passed on the new revision and on the main frontend URL with cache-buster
+- 🔧 Parcours links now need a short explanatory sentence, and backend must resolve slugs via the embedded mapping when no Blob mapping is configured
+
+### Update 2026-07-15 — parcours mapping fix
+- ✅ Added `backend/app/static/parcours/mapping_uc_hash.csv` generated from the existing static pages
+- ✅ `backend/app/parcours_util.py` now falls back to that local mapping automatically
+- ✅ Backend image rebuilt and deployed as `acravoulia97186.azurecr.io/avoulia-backend:v2-202607151510`
+- ✅ Live verification succeeded on `action-8khzcn5jmb.html` (UC-0569)
 
 ---
 

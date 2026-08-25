@@ -106,7 +106,7 @@ def _append_parcours_links_to_answer(
     text = (answer or "").strip()
     if not text or not suggested_cases:
         return answer
-    if ("http://" in text or "https://" in text) and "/action/" in text:
+    if ("http://" in text or "https://" in text) and ("/action/" in text or "/action-" in text):
         return answer
 
     target: SuggestedCase | None = None
@@ -121,7 +121,12 @@ def _append_parcours_links_to_answer(
     if not parcours_url or parcours_url in text:
         return answer
 
-    return text + f"\n\nVoir le parcours web : {parcours_url}"
+    return (
+        text
+        + "\n\nPour aller plus loin, voici votre parcours personnalisé : il détaille les étapes concrètes "
+        + "à suivre sur ce cas d'usage et le quick win à tester."
+        + f"\nVoir le parcours web : {parcours_url}"
+    )
 
 
 def _sanitize_answer_text(answer: str) -> str:

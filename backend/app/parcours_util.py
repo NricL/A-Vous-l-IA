@@ -8,6 +8,7 @@ import io
 import logging
 import os
 import time
+from pathlib import Path
 from typing import Optional
 
 logger = logging.getLogger(__name__)
@@ -41,13 +42,15 @@ def _normalize_case_id(case_id: str) -> str:
 def generate_case_hash(case_id: str, salt: Optional[str] = None) -> str:
     """Generate deterministic hash from case id + salt."""
     if salt is None:
-        salt = os.getenv("AVOULIA_SALT", "default-salt-dev")
+        salt = os.getenv("AVOULIA_SALT", "dev-salt-12345")
     data = f"{_normalize_case_id(case_id)}|{salt}".encode("utf-8")
     return hashlib.sha256(data).hexdigest()[:16]
 
 
 def _load_mapping_from_local_csv() -> dict[str, str]:
     csv_path = (os.getenv("PARCOURS_MAPPING_LOCAL_PATH") or "").strip()
+    if not csv_path:
+        csv_path = str(Path(__file__).resolve().parent / "static" / "parcours" / "mapping_uc_hash.csv")
     if not csv_path or not os.path.exists(csv_path):
         return {}
     mapping: dict[str, str] = {}

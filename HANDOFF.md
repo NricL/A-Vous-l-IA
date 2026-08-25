@@ -271,6 +271,28 @@ If not using dynamic mapping, case hashes are generated deterministically via `A
 
 ---
 
+## 🩹 Known Issues Fixed (2026-08-25) — Read Before Modifying `haystack_rag.py`
+
+Two related bugs were found and fixed in the RAG retrieval/qualification pipeline (`backend/app/haystack_rag.py`). **Both share the same root cause pattern**, and it's important Simplon's team understands it before touching this file, to avoid reintroducing it.
+
+**Symptoms observed:**
+1. When a user selected a specific marketing objective (e.g. "Créer des contenus marketing"), the reformulation examples (Q3) and some suggested cases actually belonged to *other* marketing objectives (acquisition, market analysis, campaigns, etc.) — an intention mismatch.
+2. The bot displayed up to 5 numbered use cases, but rejected the user's selection of case 4 or 5 ("Le choix « 4 » n'est pas disponible... 1, 2 ou 3") — meaning fewer real cases were actually retrieved than were shown in the text.
+
+**Root cause (anti-pattern):** several places in the retrieval pipeline had a "graceful fallback" of the form `filtered_docs if filtered_docs else all_domain_docs` (or literally dropping the `intention` filter condition) to avoid returning an empty result when the strict filter (`domaine` + `intention` + `secteur`) matched too few documents. This silently reintroduced off-topic documents from *other* intentions into the pool. Separately, the RAG prompt hard-coded a "minimum 3 cases" instruction with no guarantee that 3 real documents existed, which caused the LLM to invent extra cases to satisfy the minimum — explaining the gap between displayed cases and selectable `suggested_case_ids`.
+
+**Fix applied:**
+- `build_pool()`: removed the `docs = filtered if filtered else docs` fallback — now returns an empty list rather than mixing intentions.
+- `_retrieve_docs_for_question()`: reordered the fallback cascade so the `intention` filter is **never dropped** (domain+intention+secteur → domain+intention+secteur-élargi → domain+intention only, with sector applied as a Python post-filter).
+- `RAG_PROMPT`: replaced "Minimum 3 cas / Maximum 5 cas" with an absolute anti-hallucination rule — never present more cases than actually provided, never pad below 3 with invented ones.
+- `_build_rag_prompt_from_docs()`: removed a dead code branch that implied (but never enforced) a minimum-3 display rule.
+- Added 3 regression tests in `backend/tests/test_haystack_rag.py` (all 9 tests in that file pass).
+- Deployed to `avoulia-backend` (revision `avoulia-backend--0000023`) in `rg-avoulia-fr-dev`.
+
+**⚠️ Guidance for future changes:** if you see a similar "no results, so fall back to something broader" pattern anywhere else in `haystack_rag.py`, treat it as a code smell — prefer returning an empty/partial result (and letting the LLM say "no matching case found") over silently mixing categories. See `SUIVI_PROJET.md`, entry "Update 2026-08-25 — Fix filtrage RAG", for full detail.
+
+---
+
 ## 🐛 Troubleshooting
 
 | Issue | Solution |
@@ -280,6 +302,7 @@ If not using dynamic mapping, case hashes are generated deterministically via `A
 | Parcours URL always 404 | Verify `AVOULIA_SALT` matches prod environment; check hash generation logic |
 | Dashboard shows no data | Wait 5-10 min for events to flow; check KQL query syntax in Logs |
 | App Insights quota exceeded | Check data retention settings (prod = 90 days); consider sampling rate |
+| Cases from wrong intention appear, or fewer selectable cases than displayed | See "Known Issues Fixed (2026-08-25)" above — check for a silent fallback reintroducing off-topic docs in `haystack_rag.py` |
 
 ---
 

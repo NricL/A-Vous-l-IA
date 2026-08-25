@@ -141,11 +141,47 @@ def _case_extras_from_case_dict(case: dict) -> dict[str, str | None]:
     return out
 
 
+def _extract_case_id_from_meta(meta: dict | None) -> str:
+    """
+    Extrait un identifiant métier de cas (UC-xxxx) depuis les métadonnées.
+    Priorité aux colonnes explicites, puis fallback sur tout le payload meta.
+    """
+    meta = meta or {}
+    normalized: dict[str, str] = {}
+    for k, v in meta.items():
+        key = re.sub(r"[^a-z0-9]+", "", str(k or "").lower())
+        if key:
+            normalized[key] = str(v or "").strip()
+
+    for key in (
+        "caseid",
+        "usecaseid",
+        "idcas",
+        "idducas",
+        "codeducas",
+        "codecas",
+        "uccode",
+        "ucid",
+    ):
+        candidate = _extract_use_case_code(normalized.get(key, ""))
+        if candidate:
+            return candidate
+
+    for value in meta.values():
+        candidate = _extract_use_case_code(str(value or ""))
+        if candidate:
+            return candidate
+
+    return ""
+
+
 def _doc_to_case_dict(doc, index: int) -> dict:
     meta = getattr(doc, "meta", None) or {}
     extras = _case_extra_fields_from_meta(meta)
+    resolved_case_id = _extract_case_id_from_meta(meta)
     return {
-        "id": str(getattr(doc, "id", None) or index),
+        # Utilise l'ID métier UC-xxxx quand disponible pour aligner parcours/mapping.
+        "id": resolved_case_id or str(getattr(doc, "id", None) or index),
         "content": getattr(doc, "content", None) or "",
         **extras,
     }
@@ -443,7 +479,9 @@ def _get_triggers_from_store(domaine_code: str, intention: str | None = None) ->
             doc_int = _get_intention_from_meta(meta)
             if doc_int and doc_int.strip().lower() == intention_norm:
                 filtered.append(d)
-        docs = filtered if filtered else docs
+        # Ne jamais élargir silencieusement au domaine entier : cela mélange
+        # les exemples d'autres intentions et invalide la qualification Q2.
+        docs = filtered
 
     seen: set[str] = set()
     out: list[str] = []
@@ -498,7 +536,7 @@ def build_pool(
             for d in docs
             if _normalize_metadata_value(_get_intention_from_meta(getattr(d, "meta", None) or {}))
             == intention_norm
-        ] or docs
+        ]
 
     # Conserver le meilleur score par trigger.
     trigger_scores: dict[str, int] = {}
@@ -950,11 +988,17 @@ Tu ne reclasses jamais.
 Tu ne scores rien.
 Tu ne supprimes rien sauf si plus de 5 cas sont fournis.
 
+RÈGLE ABSOLUE — INTERDICTION D'INVENTER DES CAS :
+Tu ne présentes JAMAIS plus de cas que ceux réellement fournis en entrée.
+S'il y a moins de 3 cas fournis, tu présentes uniquement ces cas
+(1 ou 2), tu n'inventes RIEN pour atteindre 3. Un cas non fourni dans
+les sources ne doit jamais apparaître, même partiellement plausible.
+
 Tu présentes :
-- Minimum 3 cas
-- Maximum 5 cas
+- Autant de cas que fournis, dans la limite de 5 (jamais plus)
 - Un seul use_case_id par bloc
 - Aucun mélange
+- Aucun cas inventé ou complété au-delà des sources fournies
 
 -------------------------------------
 PHASE 3 — CLOTURE
@@ -983,14 +1027,14 @@ Tu présentes :
 - tu ne proposes jamais de nouveaux micro-thèmes
 
 FORMAT OBLIGATOIRE POUR CHAQUE CAS — NIVEAU 1 (APERÇU)
-(présentation initiale, 3 à 5 cas)
+(présentation initiale, jusqu'à 5 cas parmi ceux réellement fournis)
  [Numéro]. Nom du cas
 Pourquoi c’est pertinent pour vous :
 (1 à 2 phrases contextualisées par rapport au problème Q3.)
 Ce que cela permet concrètement :
 (Description claire et opérationnelle, sans jargon technique.)
 ---
-Après les 3–5 cas, tu ajoutes EXACTEMENT :
+Après les cas, tu ajoutes EXACTEMENT :
 « Souhaitez-vous approfondir l’un de ces cas ?
 Indiquez son numéro pour obtenir le détail complet. »
 Règles Niveau 1 :
@@ -1171,12 +1215,10 @@ def _build_rag_prompt_from_docs(
         ]
     )
     
-    # LOGIQUE CENTRALISÉE : déterminer les cas réellement affichés (3 à 5)
-    displayed_cases = []
-    if docs:
-        displayed_cases = docs[:5]  # Maximum 5
-        if len(displayed_cases) < 3 and len(docs) >= 3:
-            displayed_cases = docs[:3]  # Minimum 3
+    # LOGIQUE CENTRALISÉE : déterminer les cas réellement affichés (jusqu'à 5, jamais plus que ce qui est fourni).
+    # Ne jamais forcer un minimum : s'il y a moins de cas réels, on les affiche tels quels
+    # plutôt que de laisser le modèle en inventer pour atteindre un quota.
+    displayed_cases = docs[:5] if docs else []
     
     identified_cases_summary = ""
     if displayed_cases:
@@ -2232,7 +2274,10 @@ def _retrieve_docs_for_question(
             docs = [d for sub in docs for d in sub]
         return docs
 
-    min_docs = 3
+    # IMPORTANT : l'intention (Q2) ne doit JAMAIS être relâchée silencieusement.
+    # Un cas d'une autre intention ne doit jamais être proposé pour combler le
+    # quota de 3-5 cas : on relâche uniquement le critère secteur, jamais le
+    # couple domaine+intention validé par l'utilisateur.
     if not selected_sector:
         return _rank_docs_by_query_overlap(question, _run_retrieval(
             _build_retrieval_filters(
@@ -2249,20 +2294,10 @@ def _retrieve_docs_for_question(
             selected_sector=selected_sector,
         )
     )
-    if len(docs) >= min_docs:
+    if docs:
         return _rank_docs_by_query_overlap(question, docs)
 
-    # Étape 2: relâcher intention, garder domaine + secteur
-    docs = _run_retrieval(
-        _build_retrieval_filters(
-            domaine_code=selected_domain_code,
-            selected_sector=selected_sector,
-        )
-    )
-    if len(docs) >= min_docs:
-        return _rank_docs_by_query_overlap(question, docs)
-
-    # Étape 3: domaine + intention + (secteur OR multi-sectoriel)
+    # Étape 2: domaine + intention + (secteur OR multi-sectoriel) — jamais l'intention relâchée.
     docs = _run_retrieval(
         _build_retrieval_filters(
             domaine_code=selected_domain_code,
@@ -2271,10 +2306,10 @@ def _retrieve_docs_for_question(
             include_multisector=True,
         )
     )
-    if len(docs) >= min_docs:
+    if docs:
         return _rank_docs_by_query_overlap(question, docs)
 
-    # Étape 4: retrieval sans filtre secteur, puis post-filtrage Python sur secteur.
+    # Étape 3: domaine + intention sans filtre secteur, puis post-filtrage Python sur secteur.
     broad_docs = _run_retrieval(
         _build_retrieval_filters(
             domaine_code=selected_domain_code,
@@ -2284,6 +2319,9 @@ def _retrieve_docs_for_question(
     post_filtered = [
         doc for doc in broad_docs if _doc_matches_sector(doc, selected_sector, include_multisector=True)
     ]
+    # Si le post-filtrage secteur ne retient rien, on garde quand même les
+    # documents de la bonne intention (domaine+intention) plutôt que de les
+    # écarter : mieux vaut un secteur imparfait qu'une intention différente.
     ranked = post_filtered or broad_docs
     return _rank_docs_by_query_overlap(question, ranked)
 
