@@ -138,12 +138,54 @@ def build_parcours_url(case_id: str, salt: Optional[str] = None) -> str:
     return f"{base_url}/action-{case_hash}.html"
 
 
+# --- Contenu incitatif "parcours" ------------------------------------------------------------
+# Source UNIQUE de vérité pour le pitch du parcours (texte chat + libellé bouton frontend).
+# Reflète la structure réelle du template generate_parcours_pages.py (identique sur les 1025 pages) :
+# Diagnostic (2 min) -> Rassembler infos (30 min) -> Cadre de prudence (10 min)
+# -> Produire 1er livrable (1 h) -> Tester (durée terrain, non comptée en travail actif)
+# -> Installer la routine (30 min).
+# Si le template de parcours change (nb d'étapes / durées), modifier UNIQUEMENT ces 2 constantes :
+# le texte du chatbot et le libellé du bouton se mettent à jour automatiquement partout.
+PARCOURS_STEPS_COUNT = 6
+PARCOURS_ACTIVE_MINUTES = 2 + 30 + 10 + 60 + 30  # hors étape 5 "tester sur la semaine en cours"
+
+
+def _format_duration_label(total_minutes: int) -> str:
+    """Arrondit à la demi-heure la plus proche pour un affichage naturel (ex: "~2h" plutôt
+    que "~2h12"), tout en restant dérivé automatiquement de PARCOURS_ACTIVE_MINUTES."""
+    rounded = max(30, round(total_minutes / 30) * 30)
+    hours, minutes = divmod(rounded, 60)
+    if hours and minutes:
+        return f"~{hours}h{minutes:02d}"
+    if hours:
+        return f"~{hours}h"
+    return f"~{minutes} min"
+
+
+def get_parcours_pitch() -> dict:
+    """Texte incitatif + libellé bouton, dérivés dynamiquement de la structure du parcours."""
+    duration_label = _format_duration_label(PARCOURS_ACTIVE_MINUTES)
+    cta_label = f"🚀 Démarrer mon parcours ({PARCOURS_STEPS_COUNT} étapes, {duration_label})"
+    message_suffix = (
+        "\n\n🚀 Passez à l'action : votre parcours personnalisé transforme ce cas d'usage en plan concret — "
+        f"{PARCOURS_STEPS_COUNT} étapes guidées ({duration_label} de travail actif), un quick win à tester "
+        "tout de suite, et des prompts prêts à copier-coller pour votre IA. Cliquez sur le bouton ci-dessous "
+        "pour démarrer."
+    )
+    return {
+        "steps": PARCOURS_STEPS_COUNT,
+        "duration_label": duration_label,
+        "cta_label": cta_label,
+        "message_suffix": message_suffix,
+    }
+
+
 def build_parcours_info(case_id: str, salt: Optional[str] = None) -> dict:
-    """Build dictionary with case_hash and parcours_url."""
+    """Build dictionary with case_hash, parcours_url and the parcours pitch (cta_label, message_suffix)."""
     case_hash = _resolve_case_hash(case_id, salt)
     base_url = os.getenv(
         "PARCOURS_BASE_URL",
         "https://avoulia-backend.purpleocean-980317d1.francecentral.azurecontainerapps.io",
     ).rstrip("/")
     parcours_url = f"{base_url}/action-{case_hash}.html"
-    return {"case_hash": case_hash, "parcours_url": parcours_url}
+    return {"case_hash": case_hash, "parcours_url": parcours_url, **get_parcours_pitch()}

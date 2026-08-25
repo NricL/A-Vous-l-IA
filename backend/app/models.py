@@ -16,6 +16,10 @@ class SuggestedCase(BaseModel):
     content: str = Field(..., description="Contenu du cas (complet pour le détail)")
     case_hash: Optional[str] = Field(default=None, description="Hash URL du cas (pour parcours)")
     parcours_url: Optional[str] = Field(default=None, description="URL parcours (si applicable)")
+    parcours_cta_label: Optional[str] = Field(
+        default=None,
+        description="Libellé bouton CTA parcours, dérivé dynamiquement de la structure du parcours (steps/durée)",
+    )
     effort: Optional[str] = Field(default=None, description="Niveau d'effort (colonne source)")
     prerequis_donnees: Optional[str] = Field(default=None, description="Prérequis données")
     guardrails: Optional[str] = Field(default=None, description="Guardrails / vigilance opérationnelle")

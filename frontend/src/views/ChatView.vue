@@ -1,10 +1,59 @@
 <script setup lang="ts">
 import { ref, nextTick, onMounted } from 'vue'
-import type { ChatMessage, SuggestedCase } from '@/api/chat'
+import type { ChatMessage, SuggestedCase, StreamDonePayload } from '@/api/chat'
 import { sendMessageStream, getWelcomeMessage } from '@/api/chat'
 import microsoftLogo from '@/assets/microsoft-logo.svg'
 
-const messages = ref<ChatMessage[]>([])
+/** Message affiché côté UI : ChatMessage + métadonnées d'affichage (jamais renvoyées au backend). */
+interface DisplayMessage extends ChatMessage {
+  parcoursUrl?: string | null
+  parcoursCtaLabel?: string | null
+}
+
+const DEFAULT_PARCOURS_CTA_LABEL = '🚀 Voir mon parcours personnalisé'
+
+/** Découpe un texte en segments texte / URL pour rendre les liens cliquables sans v-html. */
+type TextPart = { type: 'text' | 'link'; value: string }
+const URL_REGEX = /(https?:\/\/[^\s)<>]+)/g
+function linkifyParts(text: string): TextPart[] {
+  const parts: TextPart[] = []
+  let lastIndex = 0
+  let match: RegExpExecArray | null
+  URL_REGEX.lastIndex = 0
+  while ((match = URL_REGEX.exec(text)) !== null) {
+    if (match.index > lastIndex) parts.push({ type: 'text', value: text.slice(lastIndex, match.index) })
+    parts.push({ type: 'link', value: match[0] })
+    lastIndex = match.index + match[0].length
+  }
+  if (lastIndex < text.length || parts.length === 0) parts.push({ type: 'text', value: text.slice(lastIndex) })
+  return parts
+}
+
+/**
+ * Détermine le cas (URL + libellé bouton dynamique, fournis par le backend) auquel se
+ * rapporte la réponse qui vient d'arriver. Le libellé est entièrement piloté côté backend
+ * (app.parcours_util.get_parcours_pitch) : le frontend ne fait qu'afficher ce qu'il reçoit,
+ * il n'y a donc rien à mettre à jour ici si la structure du parcours évolue côté serveur.
+ */
+function resolveParcoursCta(payload: StreamDonePayload): { url: string | null; ctaLabel: string | null } {
+  const cases: SuggestedCase[] = payload.suggested_cases ?? []
+  if (!cases.length) return { url: null, ctaLabel: null }
+  let target: SuggestedCase | undefined
+  if (payload.pending_use_case_id) {
+    target = cases.find((c) => c.id === payload.pending_use_case_id)
+  } else if (
+    payload.pending_case_index != null &&
+    payload.pending_case_index >= 0 &&
+    payload.pending_case_index < cases.length
+  ) {
+    target = cases[payload.pending_case_index]
+  } else if (cases.length === 1) {
+    target = cases[0]
+  }
+  return { url: target?.parcours_url ?? null, ctaLabel: target?.parcours_cta_label ?? null }
+}
+
+const messages = ref<DisplayMessage[]>([])
 const input = ref('')
 const loading = ref(false)
 const error = ref<string | null>(null)
@@ -49,7 +98,8 @@ async function submit() {
     await sendMessageStream(
       {
         message: text,
-        history: messages.value.slice(0, -2),
+        // On ne renvoie jamais les métadonnées d'affichage (parcoursUrl) au backend.
+        history: messages.value.slice(0, -2).map(({ role, content }) => ({ role, content })),
         last_suggested_cases: lastSuggestedCases.value ?? undefined,
         pending_action: pendingAction.value ?? undefined,
         pending_use_case_id: pendingUseCaseId.value ?? undefined,
@@ -85,6 +135,14 @@ async function submit() {
           }
           if (payload.pending_action !== undefined) pendingAction.value = payload.pending_action
           if (payload.pending_use_case_id !== undefined) pendingUseCaseId.value = payload.pending_use_case_id
+          const { url: parcoursUrl, ctaLabel: parcoursCtaLabel } = resolveParcoursCta(payload)
+          const idx = messages.value.length - 1
+          if (idx >= 0 && messages.value[idx]?.role === 'assistant') {
+            messages.value = [
+              ...messages.value.slice(0, idx),
+              { ...messages.value[idx]!, parcoursUrl, parcoursCtaLabel },
+            ]
+          }
           loading.value = false
           nextTick(() => {
             scrollToBottom()
@@ -149,7 +207,28 @@ async function submit() {
               :class="['message', msg.role]"
             >
               <span class="message-role">{{ msg.role === 'user' ? 'Vous' : 'Assistant' }}</span>
-              <div class="message-content">{{ msg.content }}</div>
+              <div class="message-content">
+                <template v-for="(part, pi) in linkifyParts(msg.content)" :key="pi">
+                  <a
+                    v-if="part.type === 'link'"
+                    :href="part.value"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-link"
+                  >{{ part.value }}</a>
+                  <template v-else>{{ part.value }}</template>
+                </template>
+              </div>
+              <a
+                v-if="msg.role === 'assistant' && msg.parcoursUrl"
+                :href="msg.parcoursUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="parcours-cta"
+              >
+                {{ msg.parcoursCtaLabel || DEFAULT_PARCOURS_CTA_LABEL }}
+                <span class="parcours-cta-sub">Guide étape par étape · s'ouvre dans un nouvel onglet</span>
+              </a>
             </div>
           </template>
           <div ref="messagesEnd" />
@@ -322,6 +401,46 @@ async function submit() {
   border: 1px solid var(--color-border);
   margin-left: 2rem;
   color: var(--color-text);
+}
+
+.inline-link {
+  color: var(--accent);
+  text-decoration: underline;
+  word-break: break-all;
+}
+
+.inline-link:hover {
+  color: var(--accent-hover);
+}
+
+.parcours-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  margin: 0.5rem 0 0 2rem;
+  padding: 0.75rem 1.1rem;
+  background: var(--accent);
+  color: white;
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+  transition: background 0.2s, transform 0.15s;
+  width: fit-content;
+  max-width: calc(100% - 2rem);
+}
+
+.parcours-cta:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.parcours-cta-sub {
+  font-size: 0.75rem;
+  font-weight: 400;
+  opacity: 0.9;
 }
 
 .typing-line.typing-above-input {

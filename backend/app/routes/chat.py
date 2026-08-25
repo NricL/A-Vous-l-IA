@@ -8,7 +8,7 @@ from app.config import get_settings
 from app.models import ChatRequest, ChatResponse, SuggestedCase
 from app.rag import chat_simple, chat_simple_stream, stream_prompt
 from app.haystack_rag import query_rag_haystack, get_rag_prompt_and_sources, WELCOME_MESSAGE
-from app.parcours_util import build_parcours_info
+from app.parcours_util import build_parcours_info, get_parcours_pitch
 from app.telemetry import track_backend_chat_event
 
 router = APIRouter(prefix="/chat", tags=["chat"])
@@ -76,6 +76,7 @@ def _build_suggested_cases(
                 content=full_contents[i],
                 case_hash=parcours_info.get("case_hash"),
                 parcours_url=parcours_info.get("parcours_url"),
+                parcours_cta_label=parcours_info.get("cta_label"),
                 effort=ex.get("effort"),
                 prerequis_donnees=ex.get("prerequis_donnees"),
                 guardrails=ex.get("guardrails"),
@@ -121,12 +122,7 @@ def _append_parcours_links_to_answer(
     if not parcours_url or parcours_url in text:
         return answer
 
-    return (
-        text
-        + "\n\nPour aller plus loin, voici votre parcours personnalisé : il détaille les étapes concrètes "
-        + "à suivre sur ce cas d'usage et le quick win à tester."
-        + f"\nVoir le parcours web : {parcours_url}"
-    )
+    return text + get_parcours_pitch()["message_suffix"]
 
 
 def _sanitize_answer_text(answer: str) -> str:

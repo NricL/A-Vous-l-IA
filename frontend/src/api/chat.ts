@@ -30,6 +30,7 @@ export interface SuggestedCase {
   id: string
   content: string
   parcours_url?: string
+  parcours_cta_label?: string
   case_hash?: string
 }
 
