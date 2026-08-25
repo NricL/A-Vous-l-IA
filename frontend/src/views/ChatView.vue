@@ -129,8 +129,11 @@ async function submit() {
           }
         },
         onDone(payload) {
+          const previousSuggestedCases = lastSuggestedCases.value
           // Stocker les cas suggérés et le contexte pour la prochaine requête (détail « le 2 », ok, domaine/secteur)
-          lastSuggestedCases.value = payload.suggested_cases ?? null
+          if (payload.suggested_cases && payload.suggested_cases.length > 0) {
+            lastSuggestedCases.value = payload.suggested_cases
+          }
           const previousDomain = selectedDomainCode.value
           const previousSector = selectedSector.value
           if (payload.selected_domain_code !== undefined) selectedDomainCode.value = payload.selected_domain_code
@@ -147,7 +150,7 @@ async function submit() {
           const { url: parcoursUrl, ctaLabel: parcoursCtaLabel } = resolveParcoursCta(
             payload,
             text,
-            lastSuggestedCases.value,
+            previousSuggestedCases,
           )
           const idx = messages.value.length - 1
           if (idx >= 0 && messages.value[idx]?.role === 'assistant') {
