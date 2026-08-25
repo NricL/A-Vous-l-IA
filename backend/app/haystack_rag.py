@@ -2341,9 +2341,15 @@ def _retrieve_docs_for_question(
 
 
 def _docs_to_payload(docs: list) -> tuple[list[str], list[str], list[str], list[dict[str, str | None]]]:
-    """Transforme les docs en (sources, suggested_case_ids, full_contents, case_extras)."""
-    case_dicts = [_doc_to_case_dict(d, i) for i, d in enumerate(docs)]
-    sources = [d.content[:400] + "..." if len(d.content) > 400 else d.content for d in docs]
+    """Transforme les docs en (sources, suggested_case_ids, full_contents, case_extras).
+
+    IMPORTANT : le payload de sélection doit refléter EXACTEMENT les cas affichés à l'utilisateur.
+    Le prompt de niveau 1 n'affiche jamais plus de 5 cas ; on borne donc aussi ici à 5 pour éviter
+    tout décalage entre liste visible et choix acceptés.
+    """
+    displayed_docs = (docs or [])[:5]
+    case_dicts = [_doc_to_case_dict(d, i) for i, d in enumerate(displayed_docs)]
+    sources = [d.content[:400] + "..." if len(d.content) > 400 else d.content for d in displayed_docs]
     suggested_case_ids = [c["id"] for c in case_dicts]
     full_contents = [c["content"] for c in case_dicts]
     case_extras = [_case_extras_from_case_dict(c) for c in case_dicts]
@@ -2646,6 +2652,17 @@ def _execute_pending_expand_details(
     return None
 
 
+def _payload_from_last_suggested_cases(
+    last_suggested_cases: list[dict],
+) -> tuple[list[str], list[str], list[dict[str, str | None]], list[str]]:
+    """Construit (ids, full_contents, case_extras, sources) depuis la liste déjà affichée."""
+    ids = [str(c.get("id") or "") for c in last_suggested_cases]
+    full_contents = [str(c.get("content") or "") for c in last_suggested_cases]
+    case_extras = [_case_extras_from_case_dict(c) for c in last_suggested_cases]
+    sources = [fc[:400] + "..." if len(fc) > 400 else fc for fc in full_contents]
+    return ids, full_contents, case_extras, sources
+
+
 def query_rag_haystack(
     question: str,
     history: list[dict],
@@ -2673,6 +2690,33 @@ def query_rag_haystack(
     selected_domain_code/selected_sector/selected_intention : état explicite fourni par le client.
     Les trois derniers retours sont domaine/secteur/intention après ce message (à stocker côté client).
     """
+    raw_question = (question or "").strip()
+
+    # 0) Si l'utilisateur répond par un numéro alors qu'une liste est déjà affichée, ne jamais
+    # relancer un flux RAG libre : on reste dans un parcours contrôlé.
+    if last_suggested_cases and re.fullmatch(r"[1-5]", raw_question):
+        choice = int(raw_question)
+        max_valid = min(len(last_suggested_cases), 5)
+        if choice > max_valid:
+            ids, full_contents, case_extras, sources = _payload_from_last_suggested_cases(last_suggested_cases)
+            answer = (
+                f'Le choix "{choice}" n\'est pas disponible. '
+                f"Merci d'indiquer un numéro entre 1 et {max_valid}."
+            )
+            return (
+                answer,
+                sources,
+                ids,
+                full_contents,
+                case_extras,
+                None,
+                None,
+                None,
+                selected_domain_code,
+                selected_sector,
+                selected_intention,
+            )
+
     # 1) Affirmation + action en attente fournie par le client → exécuter l'action
     if _is_affirmation(question) and pending_action == "expand_details" and pending_use_case_id and last_suggested_cases:
         result = _execute_pending_expand_details(pending_use_case_id, last_suggested_cases, history, question)
@@ -2708,6 +2752,36 @@ def query_rag_haystack(
     if detail_result is not None:
         a, s, i, f, x = detail_result
         return a, s, i, f, x, None, None, None, selected_domain_code, selected_sector, selected_intention
+
+    # 3bis) Sélection numérique valide mais aucun payload construit : fallback terminal contrôlé
+    # pour éviter toute réponse hors cadre.
+    if last_suggested_cases and re.fullmatch(r"[1-5]", raw_question):
+        choice = int(raw_question)
+        if 1 <= choice <= len(last_suggested_cases):
+            idx = choice - 1
+            case_row = _enrich_case_from_document_store(last_suggested_cases[idx])
+            answer = build_niveau2_block(
+                case_row,
+                "Votre situation correspond à ce cas et permet de personnaliser vos messages plutôt que d'envoyer des contenus génériques.",
+            )
+            parcours_info = build_parcours_info(str(case_row.get("id") or ""))
+            parcours_url = str(parcours_info.get("parcours_url") or "").strip()
+            if parcours_url and parcours_url not in answer:
+                answer = answer.rstrip() + get_parcours_pitch()["message_suffix"]
+            ids, full_contents, case_extras, sources = _payload_from_last_suggested_cases(last_suggested_cases)
+            return (
+                answer,
+                sources,
+                ids,
+                full_contents,
+                case_extras,
+                None,
+                None,
+                None,
+                selected_domain_code,
+                selected_sector,
+                selected_intention,
+            )
 
     # 4) Flux RAG normal : utiliser l'état explicite client, mis à jour par le message courant
     history_with_current, current_domain, current_sector, current_intention = _resolve_current_selection_state(
