@@ -2,7 +2,7 @@
 
 ## Status
 
-Validated
+Deployed
 
 ## Scope
 
@@ -30,3 +30,6 @@ Validation completed:
 - `python -m py_compile backend\app\haystack_rag.py` — passed.
 - `az account show` — authenticated subscription confirmed.
 - `az containerapp show -n avoulia-backend -g rg-avoulia-fr-dev` — target succeeded and 100% traffic on latest revision.
+- `az acr task show-run --registry acravoulia97186 --run-id dd1b` — image build succeeded.
+- `az containerapp update ...` — revision `avoulia-backend--0000029` succeeded.
+- `curl https://avoulia-backend.purpleocean-980317d1.francecentral.azurecontainerapps.io/health` — `{"status":"ok"}`.
