@@ -1,6 +1,26 @@
 ## Objectif
 Chatbot open source pour aider à explorer et structurer des cas d’usage de
 l’IA.
+
+## Principe projet — Livraison Simplon & traçabilité (À LIRE EN PREMIER)
+Cette application est **co-construite puis livrée à Simplon**, qui l'héberge chez elle.
+Deux contraintes **régissent l'intégralité du projet** — pas seulement les évolutions à
+venir, mais **tout ce qui a été fait depuis la v1 et tout ce qui sera fait** :
+
+- **C1 — Simplicité.** Simplon n'a pas de dev au quotidien : le déploiement et la
+  maintenance doivent rester simples, automatisés et **documentés pas-à-pas**.
+- **C2 — Traçabilité v1 → v2.** Chaque évolution est documentée (**le quoi, le pourquoi,
+  le où dans le code**) pour qu'un futur dev Simplon — ayant participé à la v1 — comprenne
+  tout ce qui a changé depuis.
+
+**Où c'est documenté (points d'entrée d'onboarding) :**
+[`SUIVI_PROJET.md`](./SUIVI_PROJET.md) (journal chronologique de tous les correctifs &
+déploiements depuis le début) · [`HANDOFF.md`](./HANDOFF.md) (reprise, pièges connus,
+décisions techniques) · [`ROADMAP.md`](./ROADMAP.md) (évolutions & priorités).
+
+> Règle de travail : **aucune tâche n'est terminée tant qu'elle n'est pas consignée**
+> dans `SUIVI_PROJET.md` (et, si pertinent, `HANDOFF.md`).
+
 ## Transparence &amp; limites
 - Système IA : réponses potentiellement inexactes.
 - Ne saisissez pas de données personnelles ou confidentielles.

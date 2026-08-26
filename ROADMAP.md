@@ -26,7 +26,10 @@ sélection d'un cas → fiche détail + bouton parcours`.
 ## 1. Modèle de livraison — contraintes structurantes (Simplon)
 
 Cette V2 est **co-construite par Eneric puis livrée à Simplon**, qui l'héberge chez eux.
-Deux contraintes s'appliquent à **chaque** chantier de cette roadmap :
+Ces deux contraintes ne concernent pas que cette roadmap : elles **régissent l'intégralité
+du projet** (tout ce qui a été fait depuis la v1 et tout ce qui sera fait) — voir le
+principe projet en tête de [`README.md`](./README.md). Elles s'appliquent donc à **chaque**
+chantier ci-dessous :
 
 - **C1 — Simplicité (pas de dev chez Simplon au quotidien).** Le déploiement et la
   maintenance courante doivent rester accessibles sans compétence dev pointue :
