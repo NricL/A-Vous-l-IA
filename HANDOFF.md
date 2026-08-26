@@ -4,6 +4,12 @@
 **Target:** Deploy Avoulia V2 with Parcours Pages + App Insights Telemetry to Production Azure  
 **Audience:** Simplon DevOps / Backend Team
 
+> **Documents de référence (onboarding v1 → v2) :**
+> [`ROADMAP.md`](./ROADMAP.md) (évolutions prévues & priorités) ·
+> [`SUIVI_PROJET.md`](./SUIVI_PROJET.md) (journal chronologique des correctifs) ·
+> [`README.md`](./README.md) (install & lancement local). Un dev Simplon ayant fait la v1
+> doit lire ces trois fichiers + ce guide pour comprendre tout ce qui a changé depuis la v1.
+
 ---
 
 ## 📋 Overview
