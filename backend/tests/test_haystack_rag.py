@@ -319,5 +319,54 @@ class HaystackRagParcoursPitchDedupTests(unittest.TestCase):
         )
 
 
+class HaystackRagNiveau2VerbatimCardTests(unittest.TestCase):
+    def test_build_niveau2_block_is_verbatim_and_lean(self):
+        """
+        La carte niveau 2 doit être 100% verbatim (règle D1) : titre + badges + description +
+        déclencheurs, SANS le détail opérationnel (prérequis/première action/guardrails/auto-diagnostic)
+        qui vit désormais dans le parcours, et SANS phrase de pertinence générée par l'IA.
+        """
+        case = {
+            "cas_utilisation": "Créer des infographies et affiches commerciales percutantes",
+            "description_cas_utilisation": "L'IA conçoit le contenu de vos infographies. Vos supports deviennent plus percutants.",
+            "effort": "Faible",
+            "mode_execution": "no_code",
+            "sensibilite_donnees": "Données publiques",
+            "declencheurs_typiques": "arguments difficiles à visualiser|supports peu attractifs",
+            # Champs qui NE doivent PAS apparaître (ils sont dans le parcours) :
+            "prerequis_donnees": "Données chiffrées à mettre en valeur",
+            "premiere_action_48h": "Rassembler les 3 à 5 données chiffrées",
+            "guardrails": "Anonymiser toutes les données personnelles",
+            "questions_qualification": "Les visuels sont-ils standardisés ?",
+        }
+        out = haystack_rag.build_niveau2_block(case)
+
+        # Présents (verbatim)
+        self.assertIn("Créer des infographies et affiches commerciales percutantes", out)
+        self.assertIn("Sans code", out)  # mapping mode_execution
+        self.assertIn("Effort faible", out)
+        self.assertIn("Données publiques", out)
+        self.assertIn("Vos supports deviennent plus percutants.", out)  # description verbatim
+        self.assertIn("supports peu attractifs", out)  # déclencheur verbatim
+
+        # Absents (déplacés vers le parcours) + aucune phrase de pertinence IA
+        for forbidden in (
+            "Ce qu'il vous faut",
+            "Première étape",
+            "Point de vigilance",
+            "Auto-diagnostic",
+            "Pourquoi c'est pertinent",
+            "Données chiffrées à mettre en valeur",
+            "Anonymiser toutes les données personnelles",
+        ):
+            self.assertNotIn(forbidden, out)
+
+    def test_mode_execution_label_maps_known_values(self):
+        self.assertEqual(haystack_rag._mode_execution_label("no_code"), "Sans code")
+        self.assertEqual(haystack_rag._mode_execution_label("outil"), "Avec un outil")
+        # Valeur inconnue : renvoyée telle quelle (pas de génération)
+        self.assertEqual(haystack_rag._mode_execution_label("Autre mode"), "Autre mode")
+
+
 if __name__ == "__main__":
     unittest.main()

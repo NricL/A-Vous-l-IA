@@ -224,83 +224,65 @@ def _append_structured_case_fields_to_content(content: str, case: dict) -> str:
     return content.rstrip() + "\n\n" + block
 
 
-def build_niveau2_block(case: dict, pertinence_phrase: str) -> str:
+_MODE_EXECUTION_LABELS = {
+    "no code": "Sans code",
+    "nocode": "Sans code",
+    "outil": "Avec un outil",
+    "low code": "Peu de code",
+    "code": "Avec du code",
+}
+
+
+def _mode_execution_label(raw: str) -> str:
+    """Libellé lisible pour le mode d'exécution (dictionnaire figé, PAS de génération IA)."""
+    key = re.sub(r"[\s_\-]+", " ", (raw or "").strip().lower())
+    return _MODE_EXECUTION_LABELS.get(key, (raw or "").strip())
+
+
+def build_niveau2_block(case: dict) -> str:
     """
-    Construit le bloc Niveau 2 mécaniquement depuis les metadata du cas.
-    Seul `pertinence_phrase` provient du LLM ; tout le reste est verbatim
-    depuis la base v452.
-
-    INVARIANT : pour chaque champ structuré, la chaîne extraite de `case`
-    est insérée TELLE QUELLE dans la sortie, sans modification, sans
-    troncature, sans paraphrase.
+    Carte "miroir" d'un cas — 100 % VERBATIM depuis la base (aucune phrase générée par l'IA,
+    règle D1). Structure pensée pour donner envie de cliquer sur le bouton parcours :
+      - Titre (cas_utilisation)
+      - Badges scannables : mode d'exécution · effort · sensibilité des données
+      - « Ce que ça vous apporte » : description_cas_utilisation (valeur + résultat)
+      - « Particulièrement utile si vous rencontrez » : declencheurs_typiques (miroir de la douleur)
+    Le détail opérationnel (prérequis, première action, guardrails, auto-diagnostic) n'est PLUS ici :
+    il vit dans le parcours (on évite le doublon). Le pitch + bouton parcours sont ajoutés par l'appelant.
     """
-    nom_raw = case.get("cas_utilisation", "").strip()
-    nom = _strip_use_case_codes(nom_raw)
-    description = case.get("description_cas_utilisation", "").strip()
-    effort = case.get("effort", "").strip()
-    prerequis = case.get("prerequis_donnees", "").strip()
-    action_48h = case.get("premiere_action_48h", "").strip()
-    guardrails = case.get("guardrails", "").strip()
-    questions = case.get("questions_qualification", "").strip()
-    _sensibilite = case.get("sensibilite_donnees", "").strip()
+    nom = _strip_use_case_codes((case.get("cas_utilisation") or "").strip())
+    description = (case.get("description_cas_utilisation") or "").strip()
+    effort = (case.get("effort") or "").strip()
+    mode = _mode_execution_label(case.get("mode_execution") or "")
+    sensibilite = (case.get("sensibilite_donnees") or "").strip()
+    declencheurs = (case.get("declencheurs_typiques") or "").strip()
 
-    logger.debug('lvl 2 block')
-    logger.debug(f"nom: {nom}")
-    logger.debug(f"description: {description}")
-    logger.debug(f"effort: {effort}")
-    logger.debug(f"prerequis: {prerequis}")
-    logger.debug(f"action_48h: {action_48h}")
-    logger.debug(f"guardrails: {guardrails}")
-    logger.debug(f"questions: {questions}")
+    logger.debug("carte niveau 2 (verbatim) pour: %s", nom)
 
-    logger.debug(f"pertinence_phrase: {pertinence_phrase}")
+    parts: list[str] = [nom, ""]
 
-    # Helpers d'affichage — SEULES transformations autorisées
-    def _puces(raw: str) -> str:
-        if not raw:
-            return "(non renseigné)"
-        items = [x.strip() for x in raw.split("|") if x.strip()]
-        return "\n".join(f"• {item}" for item in items)
-
-    def _ou_placeholder(raw: str) -> str:
-        return raw if raw else "(non renseigné)"
-
-    parts = [
-        nom,
-        "",
-        f"Pourquoi c'est pertinent pour vous : {pertinence_phrase}",
-        "",
-        f"Ce que cela permet concrètement : {_ou_placeholder(description)}",
-        "",
-        f"Niveau d'effort : {_ou_placeholder(effort)}",
-        "",
-        "Ce qu'il vous faut pour démarrer :",
-        _puces(prerequis),
-        "",
-        f"Première étape simple : {_ou_placeholder(action_48h)}",
-        "",
-        f"⚠️ Point de vigilance : {_ou_placeholder(guardrails)}",
-        "",
-        "🔍 Auto-diagnostic rapide",
-        "Avant de vous lancer, posez-vous ces questions :",
-        _puces(questions),
-    ]
-    nb_questions = len([q for q in questions.split("|") if q.strip()])
-    if nb_questions >= 3:
+    badges = []
+    if mode:
+        badges.append(mode)
+    if effort:
+        badges.append(f"Effort {effort.lower()}")
+    if sensibilite:
+        badges.append(sensibilite)
+    if badges:
+        parts.append("  •  ".join(badges))
         parts.append("")
-        parts.append(
-            "Si vous répondez « non » à au moins 2 de ces "
-            "questions, ce cas est particulièrement pertinent "
-            "pour vous."
-        )
-    elif nb_questions == 2:
-        parts.append("")
-        parts.append(
-            "Ces questions vous aideront à évaluer si ce cas "
-            "répond à votre situation."
-        )
 
-    return "\n".join(parts)
+    if description:
+        parts.append("Ce que ça vous apporte :")
+        parts.append(description)
+        parts.append("")
+
+    decl_items = [x.strip() for x in declencheurs.split("|") if x.strip()]
+    if decl_items:
+        parts.append("Particulièrement utile si vous rencontrez :")
+        parts.extend(f"• {item}" for item in decl_items)
+
+    return "\n".join(parts).rstrip()
 
 
 def _build_metadata_or_filter(meta_keys: tuple[str, ...], values: list[str | None]) -> dict | None:
@@ -1499,25 +1481,14 @@ def _build_niveau2_detail_payload(
     history: list[dict],
     current_question: str,
 ) -> tuple[str, list[str], list[str], list[str], list[dict[str, str | None]]] | None:
-    """LLM pertinence + build_niveau2_block ; pas de cases_extra_context multi-cas au modèle."""
+    """Carte niveau 2 100% verbatim (build_niveau2_block) — plus d'appel LLM de pertinence (règle D1)."""
     if not (0 <= case_index < len(cases)):
         return None
     case_row = _enrich_case_from_document_store(cases[case_index])
     content = (case_row.get("content") or "").strip()
     if len(content) < 20:
         return None
-    desc = (case_row.get("description_cas_utilisation") or "").strip() or content
-    secteur = (case_row.get("secteur") or "").strip()
-    decl = (case_row.get("declencheurs_typiques") or "").strip()
-    q3 = _user_probleme_q3_text(history, current_question)
-    rendered = Template(PERTINENCE_PROMPT).render(
-        description=desc,
-        secteur=secteur or "—",
-        declencheurs=decl or "—",
-        probleme_q3=q3 or "—",
-    )
-    pertinence = _run_pertinence_llm(rendered)
-    answer = build_niveau2_block(case_row, pertinence)
+    answer = build_niveau2_block(case_row)
     # Le détail est une réponse terminale : aucun choix de format ne doit suivre.
     answer = re.split(
         r"\n\s*(?:Souhaitez[- ]vous maintenant|Souhaitez[- ]vous ensuite|Répondez\s+1\s+ou\s+2)\s*:?",
@@ -2818,10 +2789,7 @@ def query_rag_haystack(
         if 1 <= choice <= len(last_suggested_cases):
             idx = choice - 1
             case_row = _enrich_case_from_document_store(last_suggested_cases[idx])
-            answer = build_niveau2_block(
-                case_row,
-                "Votre situation correspond à ce cas et permet de personnaliser vos messages plutôt que d'envoyer des contenus génériques.",
-            )
+            answer = build_niveau2_block(case_row)
             parcours_info = build_parcours_info(str(case_row.get("id") or ""))
             parcours_url = str(parcours_info.get("parcours_url") or "").strip()
             if parcours_url and parcours_url not in answer:

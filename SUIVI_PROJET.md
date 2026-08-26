@@ -5,6 +5,31 @@
 **Tenant cible:** Production Azure (westeurope, tenant officiel)  
 **Repo:** `NricL/A-Vous-l-IA` (privé — source unique)
 
+### Update 2026-08-26 (6) — Carte de cas « miroir » verbatim (Axe 2.5) — DÉPLOYÉ ✅
+- 🎯 **Objectif :** rendre la réponse détaillée d'un cas plus courte et orientée « donne envie de
+  cliquer sur le bouton parcours », en **répartissant** le contenu : la réponse chat garde ce qui
+  crée l'envie, le **parcours** garde le détail opérationnel (on supprime le doublon).
+- 🔍 **Constat :** ~60 % de l'ancienne fiche était déjà dans le parcours (prérequis → étape 2,
+  guardrails → étape 3, première action → étape 4, auto-diagnostic → étape 1). Et un seul bloc était
+  **généré par l'IA** (« Pourquoi c'est pertinent », `_run_pertinence_llm`) — contraire à la règle
+  **D1 (verbatim)**.
+- ✅ **Fix (`backend/app/haystack_rag.py`) :** `build_niveau2_block(case)` réécrite en **carte miroir
+  100 % verbatim** depuis la base : Titre (`cas_utilisation`) · badges (`mode_execution` mappé via un
+  dictionnaire figé + `effort` + `sensibilite_donnees`) · « Ce que ça vous apporte » (`description_
+  cas_utilisation`) · « Particulièrement utile si vous rencontrez » (`declencheurs_typiques`). **Appel
+  LLM de pertinence supprimé** ; prérequis/première action/guardrails/auto-diagnostic retirés (→ parcours).
+- ✅ **Tests :** 2 tests de non-régression (carte verbatim & lean, mapping mode_execution). **14/14.**
+- 🐛🔧 **Bug d'infra corrigé au passage (récurrent) :** l'image ACR embarquait une **couche `COPY`
+  périmée** (le `.py` déployé ne contenait pas le nouveau code alors que la source locale, oui). Fix
+  durable : `backend/Dockerfile` ajoute `ARG CACHEBUST` avant `COPY app` ; build avec
+  `--build-arg CACHEBUST=<timestamp>` → la copie du code est toujours refaite à neuf.
+- ✅ **Déploiement :** `avoulia-backend:ux-carte-miroir2-20260826`, révision `avoulia-backend--0000036`.
+- 🧪 **Validation E2E navigateur (prod) :** sélection d'un cas → carte **891 car.** (vs ~1800 avant),
+  badges + description verbatim + déclencheurs, **0 pertinence IA**, **0 champ opérationnel**, bouton
+  présent, pitch unique. Smoke test 7/7.
+- ➡️ **Suite (Option B, base) :** possibilité d'ajouter une colonne `accroche_chat` (prompt Copilot
+  Excel fourni à Eneric) affichée verbatim en tête de carte pour une accroche encore plus vendeuse.
+
 ### Update 2026-08-26 (5) — J1 : UX (accueil + chips) & smoke test — DÉPLOYÉ ✅
 Premiers chantiers de la ROADMAP (Axe 2 UX, Axe 4 fiabilité). Livrés et validés E2E navigateur.
 

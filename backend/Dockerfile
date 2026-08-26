@@ -11,6 +11,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Cache-bust : garantit que la copie du code applicatif est TOUJOURS refaite à neuf.
+# Sans cela, ACR/Docker peut réutiliser une couche COPY en cache et embarquer une ancienne
+# version du code (bug "fantôme" : le correctif est dans la source mais pas dans l'image).
+# Passer une valeur unique à chaque build : --build-arg CACHEBUST=$(date +%s) (ou un tag/commit).
+ARG CACHEBUST=0
+RUN echo "cachebust=$CACHEBUST"
+
 COPY app ./app
 COPY documents ./documents
 COPY entrypoint.sh ./
