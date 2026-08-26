@@ -1458,6 +1458,25 @@ def _enrich_case_from_document_store(case: dict) -> dict:
     return merged
 
 
+def _reply_to_text(reply) -> str:
+    """
+    Extrait le texte d'une réponse de générateur Haystack.
+    Compatible avec l'API chat (ChatMessage.text), l'ancienne API (.content),
+    et les générateurs qui renvoient directement une chaîne.
+    """
+    if reply is None:
+        return ""
+    if isinstance(reply, str):
+        return reply
+    text = getattr(reply, "text", None)
+    if text is not None:
+        return text
+    content = getattr(reply, "content", None)
+    if isinstance(content, str):
+        return content
+    return str(reply)
+
+
 def _run_pertinence_llm(pertinence_prompt_rendered: str) -> str:
     """Un appel LLM : uniquement la phrase de pertinence (prompt PERTINENCE_PROMPT déjà rendu)."""
     prompt_builder = ChatPromptBuilder(
@@ -1470,9 +1489,7 @@ def _run_pertinence_llm(pertinence_prompt_rendered: str) -> str:
     pipeline.connect("prompt_builder.prompt", "generator.messages")
     result = pipeline.run({"prompt_builder": {"pertinence_prompt": pertinence_prompt_rendered}})
     replies = result.get("generator", {}).get("replies", [])
-    out = replies[0] if replies else ""
-    if hasattr(out, "content"):
-        out = out.content
+    out = _reply_to_text(replies[0]) if replies else ""
     return (out or "").strip() or "Votre situation correspond aux enjeux décrits dans ce cas."
 
 
@@ -2451,6 +2468,8 @@ def get_rag_prompt_and_sources(
     str | None,
     str | None,
     str | None,
+    str | None,
+    str | None,
 ]:
     """
     Retourne (
@@ -2463,13 +2482,44 @@ def get_rag_prompt_and_sources(
         selected_sector,
         selected_intention,
         niveau2_prebuilt_answer,
+        selected_parcours_url,
+        selected_parcours_cta_label,
     ).
     Si `niveau2_prebuilt_answer` est renseigné, le client ne doit pas streamer le prompt :
-    c'est la réponse Niveau 2 complète (pertinence LLM + bloc verbatim).
+    c'est la réponse Niveau 2 complète (pertinence LLM + bloc verbatim). Dans ce cas,
+    `selected_parcours_url` / `selected_parcours_cta_label` pointent vers le parcours du cas
+    réellement sélectionné, pour un bouton fiable côté frontend (sans devinette par index).
     """
-    def _ret_niveau2(payload: tuple[str, list[str], list[str], list[str], list[dict[str, str | None]]]) -> tuple:
+    def _ret_niveau2(
+        payload: tuple[str, list[str], list[str], list[str], list[dict[str, str | None]]],
+        selected_id: str | None = None,
+    ) -> tuple:
         _a, _s, _i, _f, _x = payload
-        return "", _s, _i, _f, _x, selected_domain_code, selected_sector, selected_intention, _a
+        # Le backend est autoritaire sur le bouton parcours : il calcule ici l'URL et le
+        # libellé du cas RÉELLEMENT sélectionné, afin que le frontend n'ait plus à deviner
+        # le cas via un index/chiffre (source de boutons manquants).
+        sel_url: str | None = None
+        sel_label: str | None = None
+        resolved_id = (selected_id or "").strip()
+        if not resolved_id and _i:
+            resolved_id = str(_i[0] or "").strip()
+        if resolved_id:
+            info = build_parcours_info(resolved_id)
+            sel_url = str(info.get("parcours_url") or "").strip() or None
+            sel_label = str(info.get("cta_label") or "").strip() or None
+        return (
+            "",
+            _s,
+            _i,
+            _f,
+            _x,
+            selected_domain_code,
+            selected_sector,
+            selected_intention,
+            _a,
+            sel_url,
+            sel_label,
+        )
 
     # Affirmation + action en attente (expand_details) : cas ciblé par id
     if _is_affirmation(question) and pending_action == "expand_details" and pending_use_case_id and last_suggested_cases:
@@ -2477,7 +2527,7 @@ def get_rag_prompt_and_sources(
             if (case.get("id") or "") == pending_use_case_id:
                 p = _build_niveau2_detail_payload(i, last_suggested_cases, history, question)
                 if p is not None:
-                    return _ret_niveau2(p)
+                    return _ret_niveau2(p, selected_id=str(case.get("id") or ""))
 
     # Affirmation « ok » : offre de détail dans le dernier message assistant
     if _is_affirmation(question) and last_suggested_cases:
@@ -2487,7 +2537,8 @@ def get_rag_prompt_and_sources(
             if case_index_1based is not None and 1 <= case_index_1based <= len(last_suggested_cases):
                 p = _build_niveau2_detail_payload(case_index_1based - 1, last_suggested_cases, history, question)
                 if p is not None:
-                    return _ret_niveau2(p)
+                    sel = last_suggested_cases[case_index_1based - 1]
+                    return _ret_niveau2(p, selected_id=str(sel.get("id") or ""))
 
     # Liste `last_suggested_cases` connue : détail / numéro explicite / chiffre seul 1–5
     if last_suggested_cases:
@@ -2501,7 +2552,8 @@ def get_rag_prompt_and_sources(
             if idx is not None:
                 p = _build_niveau2_detail_payload(idx, last_suggested_cases, history, question)
                 if p is not None:
-                    return _ret_niveau2(p)
+                    sel = last_suggested_cases[idx]
+                    return _ret_niveau2(p, selected_id=str(sel.get("id") or ""))
 
     # Demande de détail sans liste fiable : fallback par thème (pas de « point 2 » seul)
     if _is_detail_request(question) and not last_suggested_cases:
@@ -2524,7 +2576,8 @@ def get_rag_prompt_and_sources(
                     if idx is not None:
                         p = _build_niveau2_detail_payload(idx, cases_from_docs, history, question)
                         if p is not None:
-                            return _ret_niveau2(p)
+                            sel = cases_from_docs[idx]
+                            return _ret_niveau2(p, selected_id=str(sel.get("id") or ""))
 
     history_with_current, current_domain, current_sector, current_intention = _resolve_current_selection_state(
         history,
@@ -2582,6 +2635,8 @@ def get_rag_prompt_and_sources(
         current_domain,
         current_sector,
         current_intention,
+        None,
+        None,
         None,
     )
 
@@ -2833,9 +2888,7 @@ def query_rag_haystack(
     generator = _get_generator()
     gen_result = generator.run(messages=[ChatMessage.from_user(prompt_text)])
     replies = gen_result.get("replies", [])
-    answer = replies[0] if replies else "Aucune réponse générée."
-    if hasattr(answer, "content"):
-        answer = answer.content
+    answer = _reply_to_text(replies[0]) if replies else "Aucune réponse générée."
 
     pending_case_index = _parse_offer_detail_from_text(answer)
     if pending_case_index is not None and 1 <= pending_case_index <= len(suggested_case_ids):

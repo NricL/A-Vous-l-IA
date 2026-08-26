@@ -229,5 +229,52 @@ class HaystackRagCaseExtraFieldsTests(unittest.TestCase):
         self.assertEqual(row["id"], "UC-0170")
 
 
+class HaystackRagReplyExtractionTests(unittest.TestCase):
+    def test_reply_to_text_handles_chatmessage_str_and_none(self):
+        from haystack.dataclasses import ChatMessage
+
+        self.assertEqual(haystack_rag._reply_to_text(ChatMessage.from_assistant("hi")), "hi")
+        self.assertEqual(haystack_rag._reply_to_text("plain"), "plain")
+        self.assertEqual(haystack_rag._reply_to_text(None), "")
+
+
+class HaystackRagAuthoritativeParcoursTests(unittest.TestCase):
+    def test_selection_returns_authoritative_parcours_url_and_label(self):
+        """
+        Régression bouton parcours : quand l'utilisateur sélectionne un cas (chiffre seul),
+        get_rag_prompt_and_sources doit renvoyer l'URL et le libellé du parcours du cas
+        RÉELLEMENT choisi (positions 9 et 10 du tuple), pour un bouton fiable côté frontend.
+        """
+        cases = [
+            {"id": "UC-0001", "content": "c1"},
+            {"id": "UC-0002", "content": "c2"},
+            {"id": "UC-0003", "content": "c3"},
+        ]
+        niveau2_payload = ("Réponse détail cas 3", ["src"], ["UC-0001", "UC-0002", "UC-0003"], ["c1", "c2", "c3"], [{}, {}, {}])
+
+        with (
+            patch.object(haystack_rag, "_build_niveau2_detail_payload", return_value=niveau2_payload),
+            patch.object(
+                haystack_rag,
+                "build_parcours_info",
+                return_value={"parcours_url": "https://host/action-abc.html", "cta_label": "🚀 Démarrer (UC-0003)"},
+            ) as mock_info,
+        ):
+            result = haystack_rag.get_rag_prompt_and_sources(
+                "3",
+                history=[{"role": "user", "content": "3"}],
+                last_suggested_cases=cases,
+            )
+
+        niveau2_answer = result[8]
+        selected_url = result[9]
+        selected_label = result[10]
+        self.assertEqual(niveau2_answer, "Réponse détail cas 3")
+        self.assertEqual(selected_url, "https://host/action-abc.html")
+        self.assertEqual(selected_label, "🚀 Démarrer (UC-0003)")
+        # L'URL est bien calculée pour le cas sélectionné (UC-0003), pas un autre.
+        mock_info.assert_called_once_with("UC-0003")
+
+
 if __name__ == "__main__":
     unittest.main()

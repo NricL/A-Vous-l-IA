@@ -290,6 +290,8 @@ def _stream_chat(request: ChatRequest, session_id: str | None):
                 selected_sector,
                 selected_intention,
                 niveau2_prebuilt,
+                selected_parcours_url,
+                selected_parcours_cta_label,
             ) = get_rag_prompt_and_sources(
                 request.message,
                 history,
@@ -339,6 +341,11 @@ def _stream_chat(request: ChatRequest, session_id: str | None):
                 "pending_action": request.pending_action,
                 "pending_use_case_id": request.pending_use_case_id,
                 "pending_case_index": None,
+                # Bouton parcours AUTORITATIF : dès qu'un cas est réellement sélectionné
+                # (réponse détail), le backend fournit l'URL + le libellé exacts. Le frontend
+                # affiche le bouton directement à partir de ces champs, sans deviner le cas.
+                "parcours_url": selected_parcours_url,
+                "parcours_cta_label": selected_parcours_cta_label,
             }
             track_backend_chat_event(
                 event_name="backend_chat_stream_done",

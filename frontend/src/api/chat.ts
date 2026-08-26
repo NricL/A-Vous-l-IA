@@ -76,6 +76,9 @@ export interface StreamDonePayload {
   pending_action?: string | null
   pending_use_case_id?: string | null
   pending_case_index?: number | null
+  /** URL/label du parcours du cas sélectionné, fournis par le backend (bouton fiable). */
+  parcours_url?: string | null
+  parcours_cta_label?: string | null
 }
 
 export interface StreamCallbacks {
@@ -130,6 +133,8 @@ export async function sendMessageStream(
               pending_action?: string | null
               pending_use_case_id?: string | null
               pending_case_index?: number | null
+              parcours_url?: string | null
+              parcours_cta_label?: string | null
               error?: string
             }
             if (data.error) {
@@ -148,6 +153,8 @@ export async function sendMessageStream(
                 pending_action: data.pending_action ?? null,
                 pending_use_case_id: data.pending_use_case_id ?? null,
                 pending_case_index: data.pending_case_index ?? null,
+                parcours_url: data.parcours_url ?? null,
+                parcours_cta_label: data.parcours_cta_label ?? null,
               })
               return
             }
@@ -170,6 +177,8 @@ export async function sendMessageStream(
           pending_action?: string | null
           pending_use_case_id?: string | null
           pending_case_index?: number | null
+          parcours_url?: string | null
+          parcours_cta_label?: string | null
         }
         if (data.done === true) {
           callbacks.onDone({
@@ -182,6 +191,8 @@ export async function sendMessageStream(
             pending_action: data.pending_action ?? null,
             pending_use_case_id: data.pending_use_case_id ?? null,
             pending_case_index: data.pending_case_index ?? null,
+            parcours_url: data.parcours_url ?? null,
+            parcours_cta_label: data.parcours_cta_label ?? null,
           })
         } else {
           callbacks.onDone({ sources: [] })

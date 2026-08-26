@@ -40,6 +40,12 @@ function resolveParcoursCta(
   question: string,
   previousCases: SuggestedCase[] | null,
 ): { url: string | null; ctaLabel: string | null } {
+  // 1) Source autoritaire : le backend a désigné le parcours du cas réellement
+  //    sélectionné (réponse détail). On l'utilise en priorité — aucune devinette.
+  if (payload.parcours_url) {
+    return { url: payload.parcours_url, ctaLabel: payload.parcours_cta_label ?? null }
+  }
+  // 2) Fallback historique : résolution par id / index / chiffre saisi.
   const cases: SuggestedCase[] =
     payload.suggested_cases && payload.suggested_cases.length > 0
       ? payload.suggested_cases

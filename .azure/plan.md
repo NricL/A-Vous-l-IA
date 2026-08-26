@@ -2,7 +2,7 @@
 
 ## Status
 
-Deployed
+Deployed (revalidated 2026-08-26)
 
 ## Scope
 
