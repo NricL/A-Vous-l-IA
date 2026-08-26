@@ -286,7 +286,7 @@ Two related bugs were found and fixed in the RAG retrieval/qualification pipelin
 - `_retrieve_docs_for_question()`: reordered the fallback cascade so the `intention` filter is **never dropped** (domain+intention+secteur → domain+intention+secteur-élargi → domain+intention only, with sector applied as a Python post-filter).
 - `RAG_PROMPT`: replaced "Minimum 3 cas / Maximum 5 cas" with an absolute anti-hallucination rule — never present more cases than actually provided, never pad below 3 with invented ones.
 - `_build_rag_prompt_from_docs()`: removed a dead code branch that implied (but never enforced) a minimum-3 display rule.
-- Added 3 regression tests in `backend/tests/test_haystack_rag.py` (all 9 tests in that file pass).
+- Added 3 regression tests in `backend/tests/test_haystack_rag.py` (the file now has 11 tests, all passing).
 - Deployed to `avoulia-backend` (revision `avoulia-backend--0000023`) in `rg-avoulia-fr-dev`.
 
 **⚠️ Guidance for future changes:** if you see a similar "no results, so fall back to something broader" pattern anywhere else in `haystack_rag.py`, treat it as a code smell — prefer returning an empty/partial result (and letting the LLM say "no matching case found") over silently mixing categories. See `SUIVI_PROJET.md`, entry "Update 2026-08-25 — Fix filtrage RAG", for full detail.
@@ -307,6 +307,40 @@ Both `routes/chat.py` and `haystack_rag.py` call this function for the chat mess
 
 ---
 
+## 🎯 Parcours CTA — Backend Is Authoritative (2026-08-26)
+
+**Do not let the frontend guess which case was selected.** On any case-detail
+response, the backend (`get_rag_prompt_and_sources`) returns the selected case's
+`parcours_url` and `parcours_cta_label` as **top-level fields** of the SSE `done`
+payload. The frontend (`resolveParcoursCta` in `ChatView.vue`) reads these fields
+**first**; the old resolution-by-id/index/typed-digit is only a fallback.
+
+- **Why:** previously the button was reconstructed on the frontend by matching
+  `suggested_cases[index]` against the digit the user typed. That was fragile
+  (affirmations like "ok", free-text detail requests, uncaught numbers) and often
+  produced a missing button even though the message said "click the button below".
+- **Backend:** `_ret_niveau2(payload, selected_id=...)` computes the URL/label via
+  `build_parcours_info(selected_id)` and appends them to the returned tuple, which
+  `routes/chat.py` puts into `done_payload["parcours_url"] / ["parcours_cta_label"]`.
+- **Rule for future changes:** the selected-case parcours button must stay
+  **backend-driven**. Never reintroduce index-based guessing as the primary path.
+
+## 🧩 Haystack Chat Generator API (2026-08-26)
+
+The installed Haystack exposes **chat** generators only:
+`AzureOpenAIChatGenerator` / `OpenAIChatGenerator` (built via
+`ChatPromptBuilder` + `ChatMessage`, connected on `generator.messages`). The old
+`AzureOpenAIGenerator` / `OpenAIGenerator` (text-completion) no longer exist and
+importing them crashes at runtime.
+
+Replies are `ChatMessage` objects whose text is accessed via **`.text`** (not the
+old `.content`). Always extract text through the helper `_reply_to_text()` in
+`haystack_rag.py` — it handles `.text`, legacy `.content`, and plain strings.
+Calling `.strip()` directly on a reply crashes with
+`'ChatMessage' object has no attribute 'strip'`.
+
+---
+
 ## 🐛 Troubleshooting
 
 | Issue | Solution |
@@ -317,6 +351,9 @@ Both `routes/chat.py` and `haystack_rag.py` call this function for the chat mess
 | Dashboard shows no data | Wait 5-10 min for events to flow; check KQL query syntax in Logs |
 | App Insights quota exceeded | Check data retention settings (prod = 90 days); consider sampling rate |
 | Cases from wrong intention appear, or fewer selectable cases than displayed | See "Known Issues Fixed (2026-08-25)" above — check for a silent fallback reintroducing off-topic docs in `haystack_rag.py` |
+| Parcours button missing after selecting a case | Backend must send top-level `parcours_url` in the `done` payload — see "Parcours CTA — Backend Is Authoritative (2026-08-26)". Don't rely on frontend index matching |
+| `'ChatMessage' object has no attribute 'strip'` | Extract reply text via `_reply_to_text()`; the Haystack chat API returns `ChatMessage` (text via `.text`) — see "Haystack Chat Generator API (2026-08-26)" |
+
 
 ---
 
