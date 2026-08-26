@@ -35,6 +35,13 @@ Premiers chantiers de la ROADMAP (Axe 2 UX, Axe 4 fiabilité). Livrés et valid�
 - ⚠️ **Pour Simplon :** le clic-chip envoie le numéro (pas le libellé) pour rester robuste ; la
   sélection d'un cas reste au clavier (liste « riche » volontairement non transformée en chips).
 
+**Mobile-friendly (vérifié au navigateur en viewport 390×844)**
+- ✅ Aucun débordement horizontal (Q1 14 chips, liste, détail).
+- 🐛 Chips à 25 px de haut = cible tactile trop petite sur mobile.
+- ✅ Media query `max-width:580px` : `.choice-chip` passe à **40 px** de haut / police **13 px** /
+  gap 8 px. Bouton parcours CTA : 84 px de haut, pleine largeur utile, sans débordement.
+  Déployé `avoulia-frontend--0000013`.
+
 ### Update 2026-08-26 (4) — Bouton parcours affiché trop tôt (pendant les questions) — DÉPLOYÉ ✅
 - 🐛 **Symptôme :** le bouton « 🚀 Démarrer mon parcours » apparaissait dès qu'on répondait à une **question** par un chiffre (Q1.5 secteur, Q2 objectif, Q3 problème), alors qu'aucun cas n'était encore sélectionné.
 - 🔍 **Cause :** le *fallback* de `resolveParcoursCta` (dans `HomeView.vue`) devinait un cas à partir du chiffre saisi (`/^[1-5]$/`) même quand la réponse backend était une simple question — il piochait alors dans les cas précédents et affichait un bouton à tort.

@@ -1583,5 +1583,16 @@ async function submit(forcedText = null) {
         .hero-tagline {
             font-size: 1.6rem;
         }
+
+        /* Chips de choix : cibles tactiles plus grandes et plus lisibles sur mobile */
+        .choice-chip {
+            font-size: 13px;
+            padding: 9px 14px;
+            min-height: 40px;
+        }
+
+        .choice-chips {
+            gap: 8px;
+        }
     }
 </style>
