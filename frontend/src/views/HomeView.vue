@@ -27,6 +27,19 @@
                                 :class="['msg', msg.role === 'user' ? 'msg-user' : 'msg-bot']"
                             >
                                 <span class="msg-text">{{ msg.content }}</span>
+                                <div
+                                    v-if="msg.role !== 'user' && i === lastAssistantIndex && !loading && parseSimpleChoices(msg.content).length"
+                                    class="choice-chips"
+                                >
+                                    <button
+                                        v-for="c in parseSimpleChoices(msg.content)"
+                                        :key="c.num"
+                                        type="button"
+                                        class="chip choice-chip"
+                                        :disabled="loading"
+                                        @click="submit(String(c.num))"
+                                    >{{ c.label }}</button>
+                                </div>
                                 <a
                                     v-if="msg.role !== 'user' && msg.parcoursUrl"
                                     :href="msg.parcoursUrl"
@@ -379,6 +392,33 @@ function resolveParcoursCta(payload) {
     return { url: null, ctaLabel: null }
 }
 
+/**
+ * Extrait les choix cliquables d'un message de type "question guidée" (Q1 domaine,
+ * Q1.5 secteur, Q2 objectif) : une liste de lignes « N. libellé » contiguës.
+ * Retourne [] pour la liste de cas d'usage (où des paragraphes séparent les items) afin
+ * de NE PAS transformer ce contenu en chips — la sélection d'un cas reste au clavier/nombre.
+ */
+function parseSimpleChoices(content) {
+    const lines = String(content || '').split('\n')
+    const numRe = /^\s*(\d{1,2})\.\s+(.+?)\s*$/
+    let firstIdx = -1
+    for (let i = 0; i < lines.length; i++) {
+        if (numRe.test(lines[i])) { firstIdx = i; break }
+    }
+    if (firstIdx === -1) return []
+    const choices = []
+    for (let i = firstIdx; i < lines.length; i++) {
+        const t = lines[i].trim()
+        if (t === '') continue
+        const m = lines[i].match(numRe)
+        if (!m) return [] // texte non numéroté entre les items => liste "riche" (cas) : pas de chips
+        const label = m[2].trim().replace(/^[«"“]\s*/, '').replace(/\s*[»"”]$/, '')
+        choices.push({ num: Number(m[1]), label })
+    }
+    return choices.length >= 2 ? choices : []
+}
+
+
 const messages = ref([])
 const input = ref('')
 const loading = ref(false)
@@ -388,6 +428,15 @@ const chatInputRef = ref(null)
 
 const initialChips = ['RH', 'Finance', 'Ventes', 'IT', 'Opérations', 'Marketing']
 const showInitialChips = computed(() => messages.value.length === 1 && !loading.value)
+
+// Index du dernier message assistant : seul lui reçoit des chips de choix cliquables
+// (on ne rend pas actionnables les questions déjà passées).
+const lastAssistantIndex = computed(() => {
+    for (let i = messages.value.length - 1; i >= 0; i--) {
+        if (messages.value[i]?.role !== 'user') return i
+    }
+    return -1
+})
 
 const lastSuggestedCases = ref(null)
 const selectedDomainCode = ref(null)
@@ -936,6 +985,20 @@ async function submit(forcedText = null) {
         background: rgba(0, 96, 223, 0.28);
         border-color: rgba(0, 96, 223, 0.6);
         color: white;
+    }
+
+    /* Chips de choix cliquables sous une question guidée (Q1/Q1.5/Q2) */
+    .choice-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-self: flex-start;
+        margin-top: 2px;
+    }
+
+    .choice-chip:disabled {
+        opacity: 0.5;
+        cursor: default;
     }
 
     .typing {

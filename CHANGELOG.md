@@ -149,5 +149,8 @@ périmés (`.pyc`, cache, code mort).
 3. **Vérifier le bouton parcours** : il n'apparaît **qu'après** sélection d'un cas, une seule
    fois, et ouvre une page `action-<hash>.html` (HTTP 200).
 4. **Tests backend** : `python -m unittest discover -s tests` (doit être vert).
-5. En cas de « le fix ne prend pas en prod » : penser **bytecode `.pyc`** (B7) et **cache
+5. **Smoke test post-déploiement** : `node smoke-test.mjs [url-backend]` — script sans dépendance
+   qui vérifie en quelques secondes le contrat critique (health, welcome, sélection → parcours_url,
+   page 200, garde-fou timing). À lancer après **chaque** déploiement.
+6. En cas de « le fix ne prend pas en prod » : penser **bytecode `.pyc`** (B7) et **cache
    navigateur** (B9) avant tout.

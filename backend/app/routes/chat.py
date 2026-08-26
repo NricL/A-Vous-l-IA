@@ -14,6 +14,34 @@ from app.telemetry import track_backend_chat_event
 router = APIRouter(prefix="/chat", tags=["chat"])
 _UC_CODE_RE = re.compile(r"\bUC-\d{3,5}\b", re.IGNORECASE)
 
+# Le RAG_PROMPT demande au LLM de RÉAFFICHER le message d'accueil au début de CHAQUE réponse.
+# Or il est déjà affiché une seule fois au chargement du chat (GET /chat/welcome). On retire donc
+# ce préambule redondant en tête de chaque réponse (tolérant aux espaces/retours à la ligne, aux
+# guillemets, et — important — au type d'apostrophe : le LLM produit souvent des apostrophes
+# typographiques « ’ » là où WELCOME_MESSAGE utilise des apostrophes droites « ' »).
+# Normalisation 1:1 (un caractère → un caractère) : préserve les indices, donc on peut retirer la
+# portion trouvée sur le texte ORIGINAL sans le déformer.
+_WELCOME_NORMALIZE = {0x2019: 0x27, 0x2018: 0x27, 0x201C: 0x22, 0x201D: 0x22, 0x00AB: 0x22, 0x00BB: 0x22}
+
+
+def _normalize_quotes(s: str) -> str:
+    return s.translate(_WELCOME_NORMALIZE)
+
+
+_WELCOME_RE = re.compile(
+    r'^\s*"?\s*' + r"\s+".join(re.escape(tok) for tok in _normalize_quotes(WELCOME_MESSAGE).split()) + r'\s*"?',
+    re.IGNORECASE,
+)
+
+
+def _strip_repeated_welcome(text: str) -> str:
+    """Retire le préambule d'accueil répété par le LLM (déjà montré une fois au chargement)."""
+    match = _WELCOME_RE.match(_normalize_quotes(text))
+    if not match:
+        return text
+    return text[match.end():].lstrip()
+
+
 
 @router.get("/welcome")
 def chat_welcome():
@@ -135,6 +163,7 @@ def _sanitize_answer_text(answer: str) -> str:
     text = (answer or "").strip()
     if not text:
         return answer
+    text = _strip_repeated_welcome(text)
     text = re.sub(r"\(\s*UC-\d{3,5}\s*\)", "", text, flags=re.IGNORECASE)
     text = re.sub(r"^\s*UC-\d{3,5}\s*[—\-:]\s*", "", text, flags=re.IGNORECASE | re.MULTILINE)
     text = _UC_CODE_RE.sub("", text)

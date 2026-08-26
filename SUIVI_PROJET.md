@@ -5,6 +5,36 @@
 **Tenant cible:** Production Azure (westeurope, tenant officiel)  
 **Repo:** `NricL/A-Vous-l-IA` (privé — source unique)
 
+### Update 2026-08-26 (5) — J1 : UX (accueil + chips) & smoke test — DÉPLOYÉ ✅
+Premiers chantiers de la ROADMAP (Axe 2 UX, Axe 4 fiabilité). Livrés et validés E2E navigateur.
+
+**Axe 4.2 — Smoke test post-déploiement**
+- ✅ `smoke-test.mjs` à la racine : script **Node sans dépendance** (fetch natif) lançable via
+  `node smoke-test.mjs [baseUrl]`. Vérifie en quelques secondes : `/health`, endpoint welcome,
+  sélection d'un cas → `parcours_url` top-level + pas d'erreur ChatMessage + pitch unique,
+  page parcours = 200, et garde-fou timing (pas de bouton sur une question). **7/7 vert.**
+- Pensé pour **C1 (Simplon sans dev)** : aucune install, aucun navigateur à télécharger.
+
+**Axe 2.1 — Message d'accueil non répété**
+- 🐛 Le `RAG_PROMPT` fait ré-afficher l'accueil au début de CHAQUE réponse (déjà montré au chargement).
+- ✅ `routes/chat.py` : `_strip_repeated_welcome()` retire ce préambule dans `_sanitize_answer_text`
+  (donc sur tous les chemins). **Insensible au type d'apostrophe/guillemet** (le LLM produit des
+  apostrophes typographiques `’` là où `WELCOME_MESSAGE` a des apostrophes droites `'`) via une
+  normalisation 1:1 qui préserve les indices. Déployé `avoulia-backend--0000034`.
+
+**Axe 2.2 — Chips de choix cliquables**
+- ✅ `HomeView.vue` : les questions guidées Q1 (14), Q1.5 (secteur), Q2 (objectif) affichent des
+  **boutons cliquables** (`parseSimpleChoices` + `.choice-chip`). Le clic envoie le **numéro**
+  (100 % fiable côté backend) ; le texte de la question est conservé (aucune transformation risquée).
+- ✅ Chips uniquement sur le **dernier** message assistant. La **liste de cas** (paragraphes entre
+  les items) et **Q3** (texte libre) n'affichent **pas** de chips — préservés. Déployé
+  `avoulia-frontend--0000012`.
+- 🧪 **Validation E2E navigateur (prod) :** Q1→14 chips, clic « RH » → « 3 » → Q1.5 5 chips → clic →
+  Q2 8 chips (apostrophe « Gérer l'administration RH » OK) → clic → Q3 **0 chip** → liste **0 chip**
+  → sélection cas → **bouton parcours visible**, pitch unique, accueil absent. 0 erreur console.
+- ⚠️ **Pour Simplon :** le clic-chip envoie le numéro (pas le libellé) pour rester robuste ; la
+  sélection d'un cas reste au clavier (liste « riche » volontairement non transformée en chips).
+
 ### Update 2026-08-26 (4) — Bouton parcours affiché trop tôt (pendant les questions) — DÉPLOYÉ ✅
 - 🐛 **Symptôme :** le bouton « 🚀 Démarrer mon parcours » apparaissait dès qu'on répondait à une **question** par un chiffre (Q1.5 secteur, Q2 objectif, Q3 problème), alors qu'aucun cas n'était encore sélectionné.
 - 🔍 **Cause :** le *fallback* de `resolveParcoursCta` (dans `HomeView.vue`) devinait un cas à partir du chiffre saisi (`/^[1-5]$/`) même quand la réponse backend était une simple question — il piochait alors dans les cas précédents et affichait un bouton à tort.

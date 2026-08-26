@@ -163,3 +163,4 @@ C'est le **levier de pertinence n°1**, mais c'est un chantier éditorial lourd 
 | Date | Décision |
 |---|---|
 | 2026-08-26 | Création de la roadmap. Axes retenus : 2, 3, 4, 1. Axes 5 et 6 écartés. Ordre : 2/3/4 d'abord, 1 en dernier. Contraintes de livraison Simplon (C1 simplicité, C2 traçabilité v1→v2) posées comme transverses. |
+| 2026-08-26 | **J1 livré** : ✅ 4.2 smoke test (`smoke-test.mjs`) · ✅ 2.1 message d'accueil non répété · ✅ 2.2 chips de choix cliquables (Q1/Q1.5/Q2). Validés E2E navigateur en prod. Détails dans `SUIVI_PROJET.md` (entrée « J1 : UX (accueil + chips) & smoke test »). |
