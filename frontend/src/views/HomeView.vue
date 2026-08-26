@@ -25,7 +25,19 @@
                                 v-for="(msg, i) in messages"
                                 :key="`${i}-${msg.role}`"
                                 :class="['msg', msg.role === 'user' ? 'msg-user' : 'msg-bot']"
-                            >{{ msg.content }}</div>
+                            >
+                                <span class="msg-text">{{ msg.content }}</span>
+                                <a
+                                    v-if="msg.role !== 'user' && msg.parcoursUrl"
+                                    :href="msg.parcoursUrl"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="parcours-cta"
+                                >
+                                    {{ msg.parcoursCtaLabel || DEFAULT_PARCOURS_CTA_LABEL }}
+                                    <span class="parcours-cta-sub">Guide étape par étape · s'ouvre dans un nouvel onglet</span>
+                                </a>
+                            </div>
                         </template>
 
                         <div v-if="loading" class="typing" id="typing">
@@ -351,6 +363,40 @@
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { sendMessageStream, getWelcomeMessage } from '@/api/chat'
 
+const DEFAULT_PARCOURS_CTA_LABEL = '🚀 Voir mon parcours personnalisé'
+
+/**
+ * Résout le bouton "parcours" à afficher après une réponse.
+ * Priorité au champ autoritaire du backend (payload.parcours_url), présent dès qu'un
+ * cas a été réellement sélectionné. Fallback : résolution par id / index / chiffre saisi
+ * sur la liste de cas suggérés.
+ */
+function resolveParcoursCta(payload, question, previousCases) {
+    if (payload.parcours_url) {
+        return { url: payload.parcours_url, ctaLabel: payload.parcours_cta_label ?? null }
+    }
+    const cases =
+        payload.suggested_cases && payload.suggested_cases.length > 0
+            ? payload.suggested_cases
+            : (previousCases ?? [])
+    if (!cases.length) return { url: null, ctaLabel: null }
+    let target
+    if (payload.pending_use_case_id) {
+        target = cases.find((c) => c.id === payload.pending_use_case_id)
+    } else if (
+        payload.pending_case_index != null &&
+        payload.pending_case_index >= 1 &&
+        payload.pending_case_index <= cases.length
+    ) {
+        target = cases[payload.pending_case_index - 1]
+    } else if (/^\s*[1-5]\s*$/.test(question)) {
+        target = cases[Number.parseInt(question.trim(), 10) - 1]
+    } else if (cases.length === 1) {
+        target = cases[0]
+    }
+    return { url: target?.parcours_url ?? null, ctaLabel: target?.parcours_cta_label ?? null }
+}
+
 const messages = ref([])
 const input = ref('')
 const loading = ref(false)
@@ -422,7 +468,7 @@ async function submit(forcedText = null) {
         await sendMessageStream(
             {
                 message: text,
-                history: messages.value.slice(0, -2),
+                history: messages.value.slice(0, -2).map(({ role, content }) => ({ role, content })),
                 last_suggested_cases: lastSuggestedCases.value ?? undefined,
                 pending_action: pendingAction.value ?? undefined,
                 pending_use_case_id: pendingUseCaseId.value ?? undefined,
@@ -443,6 +489,7 @@ async function submit(forcedText = null) {
                     }
                 },
                 onDone(payload) {
+                    const previousSuggestedCases = lastSuggestedCases.value
                     lastSuggestedCases.value = payload.suggested_cases ?? null
 
                     const previousDomain = selectedDomainCode.value
@@ -461,6 +508,20 @@ async function submit(forcedText = null) {
 
                     if (payload.pending_action !== undefined) pendingAction.value = payload.pending_action
                     if (payload.pending_use_case_id !== undefined) pendingUseCaseId.value = payload.pending_use_case_id
+
+                    // Bouton "parcours" cliquable : attaché au dernier message assistant.
+                    const { url: parcoursUrl, ctaLabel: parcoursCtaLabel } = resolveParcoursCta(
+                        payload,
+                        text,
+                        previousSuggestedCases,
+                    )
+                    const idx = messages.value.length - 1
+                    if (idx >= 0 && messages.value[idx]?.role === 'assistant') {
+                        messages.value = [
+                            ...messages.value.slice(0, idx),
+                            { ...messages.value[idx], parcoursUrl, parcoursCtaLabel },
+                        ]
+                    }
 
                     loading.value = false
                     nextTick(() => {
@@ -835,6 +896,42 @@ async function submit(forcedText = null) {
         color: white;
         border-bottom-right-radius: 4px;
         align-self: flex-end;
+    }
+
+    .msg {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .parcours-cta {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+        align-self: stretch;
+        text-decoration: none;
+        background: var(--blue);
+        color: #fff;
+        padding: 10px 14px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 13px;
+        line-height: 1.3;
+        cursor: pointer;
+        transition: filter .18s, transform .18s;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.28);
+    }
+
+    .parcours-cta:hover {
+        filter: brightness(1.1);
+        transform: translateY(-1px);
+    }
+
+    .parcours-cta-sub {
+        font-size: 11px;
+        font-weight: 400;
+        opacity: 0.9;
     }
 
     .chips {

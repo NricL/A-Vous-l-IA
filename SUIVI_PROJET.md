@@ -5,6 +5,16 @@
 **Tenant cible:** Production Azure (westeurope, tenant officiel)  
 **Repo:** `NricL/A-Vous-l-IA` (privé — source unique)
 
+### Update 2026-08-26 (3) — LE bouton parcours enfin fonctionnel (composant mort + cache) — DÉPLOYÉ ✅
+- 🐛 **Symptôme persistant :** malgré tous les correctifs CTA précédents, le bouton parcours **ne s'affichait toujours pas** dans l'UI.
+- 🔍 **Cause racine n°1 (composant mort) :** tout le code du bouton (résolution CTA, template, CSS) avait été écrit dans `frontend/src/views/ChatView.vue`… **qui n'est importé nulle part** dans l'application. Le vrai composant de chat rendu à l'écran est **`frontend/src/views/HomeView.vue`**, qui n'avait aucune logique de bouton. Vite tree-shakait `ChatView.vue` → mes changements n'apparaissaient jamais dans le bundle (hash JS identique build après build). Vérifié : le bundle ne contenait pas la classe `parcours-cta`, et `grep ChatView` dans `src/` ne renvoyait **aucune** référence.
+  - ✅ Fix : implémentation du bouton dans **`HomeView.vue`** (helper `resolveParcoursCta` priorisant `payload.parcours_url` du backend, attache `parcoursUrl`/`parcoursCtaLabel` au dernier message dans `onDone`, rendu `<a class="parcours-cta">` + CSS). `ChatView.vue` (fichier mort) **supprimé** pour éviter toute confusion future.
+- 🔍 **Cause racine n°2 (cache navigateur) :** `nginx.conf` ne posait aucun en-tête de cache. Le navigateur servait un `index.html` en cache qui référençait l'ancien bundle JS → même après déploiement, l'utilisateur chargeait l'ancien code.
+  - ✅ Fix : `index.html` servi en `no-cache, no-store, must-revalidate` ; assets hashés (`/assets/`) en `max-age=1an, immutable`.
+- ✅ **Validation E2E navigateur (Playwright, prod) :** parcours complet Marketing → Commerce & retail → Créer des contenus marketing → problème → liste → sélection cas 1. Le bouton **« 🚀 Démarrer mon parcours (6 étapes, ~2h) »** est présent dans le DOM, **visible** (548×53px, fond bleu), `target="_blank"`, `href` = page parcours réelle (HTTP 200). Pitch affiché **une seule fois**. 0 erreur console.
+- ✅ **Build & déploiement :** frontend `avoulia-frontend:fix-cta-final-20260826`, révision `avoulia-frontend--0000010`.
+- ⚠️ **Pour Simplon (handoff) — leçon capitale :** le composant de chat réellement utilisé est **`HomeView.vue`**, PAS `ChatView.vue` (supprimé). Toute évolution de l'UI de chat se fait dans `HomeView.vue`. Et `index.html` doit rester en `no-cache` pour que les déploiements soient pris en compte immédiatement.
+
 ### Update 2026-08-26 (2) — Bloc « Passez à l'action » dupliqué + bytecode périmé — DÉPLOYÉ ✅
 - 🐛 **Symptôme :** après sélection d'un cas, le bloc CTA « 🚀 Passez à l'action… » s'affichait **deux fois** de suite.
 - 🔍 **Cause 1 (double ajout) :** le suffixe parcours était ajouté à la fois dans `_build_niveau2_detail_payload` (haystack_rag) **et** dans `_append_parcours_links_to_answer` (routes/chat) — ce dernier ne dédupliquait que si une URL brute était présente, or on ne met plus l'URL en texte.

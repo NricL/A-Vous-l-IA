@@ -312,8 +312,9 @@ Both `routes/chat.py` and `haystack_rag.py` call this function for the chat mess
 **Do not let the frontend guess which case was selected.** On any case-detail
 response, the backend (`get_rag_prompt_and_sources`) returns the selected case's
 `parcours_url` and `parcours_cta_label` as **top-level fields** of the SSE `done`
-payload. The frontend (`resolveParcoursCta` in `ChatView.vue`) reads these fields
-**first**; the old resolution-by-id/index/typed-digit is only a fallback.
+payload. The frontend (`resolveParcoursCta` in **`HomeView.vue`** — the live chat
+component) reads these fields **first**; the old resolution-by-id/index/typed-digit
+is only a fallback.
 
 - **Why:** previously the button was reconstructed on the frontend by matching
   `suggested_cases[index]` against the digit the user typed. That was fragile
@@ -355,6 +356,8 @@ Calling `.strip()` directly on a reply crashes with
 | `'ChatMessage' object has no attribute 'strip'` | Extract reply text via `_reply_to_text()`; the Haystack chat API returns `ChatMessage` (text via `.text`) — see "Haystack Chat Generator API (2026-08-26)" |
 | Duplicated `🚀 Passez à l'action` block after case selection | The parcours pitch was appended twice. Both append sites are now idempotent via `PARCOURS_PITCH_SENTINEL` (`parcours_util.py`) |
 | A code fix is in the deployed `.py` (confirmed by `grep` in the container) but prod still shows the OLD behavior | **Stale Python bytecode.** Old `__pycache__/*.pyc` (even from a different Python version, e.g. a dev machine's `cpython-314.pyc`) shipped in the image and ran instead of the up-to-date source. The `backend/Dockerfile` now purges `__pycache__` after `COPY app` and sets `PYTHONDONTWRITEBYTECODE=1`. Never copy/commit `__pycache__` into the build context |
+| A frontend change doesn't appear in the built bundle (same JS hash every build) | The edited component may be **dead code** (not imported anywhere) and tree-shaken out. The live chat UI is **`frontend/src/views/HomeView.vue`**, NOT `ChatView.vue` (deleted). Verify with `grep -r ComponentName src/`. Edit `HomeView.vue` for chat/CTA changes |
+| Users don't see a new deployment (old JS keeps loading) | `index.html` must be served `no-cache` so browsers re-fetch it and pick up the new content-hashed assets. See `frontend/nginx.conf` (`location = /index.html`) |
 
 
 ---
