@@ -325,6 +325,8 @@ is only a fallback.
   `routes/chat.py` puts into `done_payload["parcours_url"] / ["parcours_cta_label"]`.
 - **Rule for future changes:** the selected-case parcours button must stay
   **backend-driven**. Never reintroduce index-based guessing as the primary path.
+  (A digit-based fallback was removed on 2026-08-26 because it made the button
+  appear during the Q1.5/Q2/Q3 questions whenever the user answered with a digit.)
 
 ## 🧩 Haystack Chat Generator API (2026-08-26)
 

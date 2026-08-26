@@ -5,6 +5,17 @@
 **Tenant cible:** Production Azure (westeurope, tenant officiel)  
 **Repo:** `NricL/A-Vous-l-IA` (privé — source unique)
 
+### Update 2026-08-26 (4) — Bouton parcours affiché trop tôt (pendant les questions) — DÉPLOYÉ ✅
+- 🐛 **Symptôme :** le bouton « 🚀 Démarrer mon parcours » apparaissait dès qu'on répondait à une **question** par un chiffre (Q1.5 secteur, Q2 objectif, Q3 problème), alors qu'aucun cas n'était encore sélectionné.
+- 🔍 **Cause :** le *fallback* de `resolveParcoursCta` (dans `HomeView.vue`) devinait un cas à partir du chiffre saisi (`/^[1-5]$/`) même quand la réponse backend était une simple question — il piochait alors dans les cas précédents et affichait un bouton à tort.
+- ✅ **Fix :** suppression totale du fallback. Le bouton s'appuie désormais **uniquement** sur le champ autoritaire `payload.parcours_url` (envoyé par le backend seulement sur une vraie réponse-détail après sélection d'un cas). `resolveParcoursCta(payload)` ne prend plus qu'un argument.
+- ✅ **Validation E2E navigateur (Playwright, prod, scénario RH du bug) :**
+  - Q1.5 secteur / Q2 objectif / Q3 problème → **aucun bouton** ✅
+  - liste de 5 cas → **aucun bouton** ✅
+  - sélection d'un cas → bouton **visible**, bon `href` (page 200), pitch **une seule fois** ✅
+- ✅ **Build & déploiement :** `avoulia-frontend:fix-cta-timing-20260826`, révision `avoulia-frontend--0000011`.
+- ⚠️ **Pour Simplon (handoff) :** le bouton parcours est **strictement piloté par le backend** (`payload.parcours_url`). Ne jamais réintroduire de résolution par chiffre/index côté frontend — c'est exactement ce qui faisait apparaître le bouton pendant les questions.
+
 ### Update 2026-08-26 (3) — LE bouton parcours enfin fonctionnel (composant mort + cache) — DÉPLOYÉ ✅
 - 🐛 **Symptôme persistant :** malgré tous les correctifs CTA précédents, le bouton parcours **ne s'affichait toujours pas** dans l'UI.
 - 🔍 **Cause racine n°1 (composant mort) :** tout le code du bouton (résolution CTA, template, CSS) avait été écrit dans `frontend/src/views/ChatView.vue`… **qui n'est importé nulle part** dans l'application. Le vrai composant de chat rendu à l'écran est **`frontend/src/views/HomeView.vue`**, qui n'avait aucune logique de bouton. Vite tree-shakait `ChatView.vue` → mes changements n'apparaissaient jamais dans le bundle (hash JS identique build après build). Vérifié : le bundle ne contenait pas la classe `parcours-cta`, et `grep ChatView` dans `src/` ne renvoyait **aucune** référence.

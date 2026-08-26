@@ -367,34 +367,16 @@ const DEFAULT_PARCOURS_CTA_LABEL = '🚀 Voir mon parcours personnalisé'
 
 /**
  * Résout le bouton "parcours" à afficher après une réponse.
- * Priorité au champ autoritaire du backend (payload.parcours_url), présent dès qu'un
- * cas a été réellement sélectionné. Fallback : résolution par id / index / chiffre saisi
- * sur la liste de cas suggérés.
+ * RÈGLE STRICTE : le bouton n'apparaît QUE lorsque le backend a désigné un parcours
+ * (payload.parcours_url), c'est-à-dire uniquement après la sélection réelle d'un cas
+ * (réponse détail). On ne devine JAMAIS à partir du chiffre saisi : sinon le bouton
+ * s'affiche à tort pendant les questions Q1.5 / Q2 / Q3 quand l'utilisateur tape "5".
  */
-function resolveParcoursCta(payload, question, previousCases) {
+function resolveParcoursCta(payload) {
     if (payload.parcours_url) {
         return { url: payload.parcours_url, ctaLabel: payload.parcours_cta_label ?? null }
     }
-    const cases =
-        payload.suggested_cases && payload.suggested_cases.length > 0
-            ? payload.suggested_cases
-            : (previousCases ?? [])
-    if (!cases.length) return { url: null, ctaLabel: null }
-    let target
-    if (payload.pending_use_case_id) {
-        target = cases.find((c) => c.id === payload.pending_use_case_id)
-    } else if (
-        payload.pending_case_index != null &&
-        payload.pending_case_index >= 1 &&
-        payload.pending_case_index <= cases.length
-    ) {
-        target = cases[payload.pending_case_index - 1]
-    } else if (/^\s*[1-5]\s*$/.test(question)) {
-        target = cases[Number.parseInt(question.trim(), 10) - 1]
-    } else if (cases.length === 1) {
-        target = cases[0]
-    }
-    return { url: target?.parcours_url ?? null, ctaLabel: target?.parcours_cta_label ?? null }
+    return { url: null, ctaLabel: null }
 }
 
 const messages = ref([])
@@ -489,7 +471,6 @@ async function submit(forcedText = null) {
                     }
                 },
                 onDone(payload) {
-                    const previousSuggestedCases = lastSuggestedCases.value
                     lastSuggestedCases.value = payload.suggested_cases ?? null
 
                     const previousDomain = selectedDomainCode.value
@@ -510,11 +491,8 @@ async function submit(forcedText = null) {
                     if (payload.pending_use_case_id !== undefined) pendingUseCaseId.value = payload.pending_use_case_id
 
                     // Bouton "parcours" cliquable : attaché au dernier message assistant.
-                    const { url: parcoursUrl, ctaLabel: parcoursCtaLabel } = resolveParcoursCta(
-                        payload,
-                        text,
-                        previousSuggestedCases,
-                    )
+                    // Il n'apparaît que si le backend a désigné un parcours (cas sélectionné).
+                    const { url: parcoursUrl, ctaLabel: parcoursCtaLabel } = resolveParcoursCta(payload)
                     const idx = messages.value.length - 1
                     if (idx >= 0 && messages.value[idx]?.role === 'assistant') {
                         messages.value = [
