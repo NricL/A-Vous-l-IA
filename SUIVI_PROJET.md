@@ -42,6 +42,21 @@ Premiers chantiers de la ROADMAP (Axe 2 UX, Axe 4 fiabilité). Livrés et valid�
   gap 8 px. Bouton parcours CTA : 84 px de haut, pleine largeur utile, sans débordement.
   Déployé `avoulia-frontend--0000013`.
 
+**Axe 2.2b — Chips de sélection de cas (« Cas 1 / Cas 2… »)**
+- ✅ Sur la **liste de cas**, on garde le **texte complet** (les descriptions « Pourquoi c'est
+  pertinent » / « Ce que cela permet » sont utiles) et on ajoute des chips courtes **« Cas N »**
+  qui envoient le numéro du cas → sélection en un clic (`HomeView.vue` : `parseCaseChoices` +
+  `choicesFor`). Détection robuste par **≥2 lignes « N. » en début de ligne** (indépendante du
+  format LLM, qui met parfois « --- »/« approfondir », parfois non). Q3 (texte libre) et la fiche
+  détail n'ont pas de lignes « N. » → pas de faux positif.
+- 🧪 **Validation E2E navigateur (prod) :** liste → chips « Cas 1…Cas 5 » + texte complet préservé ;
+  clic « Cas 2 » → envoie « 2 » → détail du bon cas + **bouton parcours** (href OK), **pitch unique**,
+  **0 chip** sur le détail. Chips de cas héritent du dimensionnement tactile mobile (40 px).
+  Déployé `avoulia-frontend--0000015`.
+- ⚠️ **Note test :** après un `containerapp update`, prévoir un délai de propagation (l'ancienne
+  révision peut répondre quelques secondes) — utiliser un cache-buster à la navigation. Les réponses
+  LLM peuvent dépasser 10 s : attendre la fin du streaming (`.typing` disparu) avant d'assert.
+
 ### Update 2026-08-26 (4) — Bouton parcours affiché trop tôt (pendant les questions) — DÉPLOYÉ ✅
 - 🐛 **Symptôme :** le bouton « 🚀 Démarrer mon parcours » apparaissait dès qu'on répondait à une **question** par un chiffre (Q1.5 secteur, Q2 objectif, Q3 problème), alors qu'aucun cas n'était encore sélectionné.
 - 🔍 **Cause :** le *fallback* de `resolveParcoursCta` (dans `HomeView.vue`) devinait un cas à partir du chiffre saisi (`/^[1-5]$/`) même quand la réponse backend était une simple question — il piochait alors dans les cas précédents et affichait un bouton à tort.

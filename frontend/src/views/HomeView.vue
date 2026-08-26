@@ -28,11 +28,11 @@
                             >
                                 <span class="msg-text">{{ msg.content }}</span>
                                 <div
-                                    v-if="msg.role !== 'user' && i === lastAssistantIndex && !loading && parseSimpleChoices(msg.content).length"
+                                    v-if="msg.role !== 'user' && i === lastAssistantIndex && !loading && choicesFor(msg.content).length"
                                     class="choice-chips"
                                 >
                                     <button
-                                        v-for="c in parseSimpleChoices(msg.content)"
+                                        v-for="c in choicesFor(msg.content)"
                                         :key="c.num"
                                         type="button"
                                         class="chip choice-chip"
@@ -411,12 +411,40 @@ function parseSimpleChoices(content) {
         const t = lines[i].trim()
         if (t === '') continue
         const m = lines[i].match(numRe)
-        if (!m) return [] // texte non numéroté entre les items => liste "riche" (cas) : pas de chips
+        if (!m) return [] // texte non numéroté entre les items => liste "riche" (cas) : pas de chips ici
         const label = m[2].trim().replace(/^[«"“]\s*/, '').replace(/\s*[»"”]$/, '')
         choices.push({ num: Number(m[1]), label })
     }
     return choices.length >= 2 ? choices : []
 }
+
+/**
+ * Chips de sélection pour la LISTE DE CAS : chaque cas est une ligne « N. Titre » suivie de
+ * paragraphes de description. On garde le texte complet (les descriptions sont utiles) et on
+ * propose des chips courtes « Cas N » pour sélectionner d'un clic. On ne s'active que sur une
+ * vraie liste de cas (marqueurs « approfondir » / séparateurs « --- ») pour éviter les faux
+ * positifs sur la fiche détail (qui n'a pas de lignes « N. » en début de ligne).
+ */
+function parseCaseChoices(content) {
+    // Une liste de cas = plusieurs lignes « N. Titre » en début de ligne, séparées par des
+    // paragraphes de description (donc parseSimpleChoices a déjà renvoyé [] avant d'arriver ici).
+    // On ne dépend PAS de marqueurs de texte (« approfondir »/« --- ») car le format LLM varie.
+    // La fiche détail et Q3 n'ont pas de lignes « N. » en début de ligne → pas de faux positif.
+    const numRe = /^\s*(\d{1,2})\.\s+.+$/
+    const choices = []
+    for (const line of String(content || '').split('\n')) {
+        const m = line.match(numRe)
+        if (m) choices.push({ num: Number(m[1]), label: `Cas ${m[1]}` })
+    }
+    return choices.length >= 2 ? choices : []
+}
+
+/** Choix cliquables du message courant : questions guidées (libellés) OU sélection de cas (« Cas N »). */
+function choicesFor(content) {
+    const simple = parseSimpleChoices(content)
+    return simple.length ? simple : parseCaseChoices(content)
+}
+
 
 
 const messages = ref([])
