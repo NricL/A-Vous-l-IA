@@ -14,6 +14,7 @@ venir, mais **tout ce qui a été fait depuis la v1 et tout ce qui sera fait** :
   tout ce qui a changé depuis.
 
 **Où c'est documenté (points d'entrée d'onboarding) :**
+[`CHANGELOG.md`](./CHANGELOG.md) (**synthèse v1 → v2 en une lecture** — commencer ici) ·
 [`SUIVI_PROJET.md`](./SUIVI_PROJET.md) (journal chronologique de tous les correctifs &
 déploiements depuis le début) · [`HANDOFF.md`](./HANDOFF.md) (reprise, pièges connus,
 décisions techniques) · [`ROADMAP.md`](./ROADMAP.md) (évolutions & priorités).
