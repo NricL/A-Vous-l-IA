@@ -20,7 +20,7 @@ from haystack_integrations.document_stores.chroma import ChromaDocumentStore
 from haystack_integrations.components.retrievers.chroma import ChromaEmbeddingRetriever
 
 from app.config import get_settings
-from app.parcours_util import build_parcours_info, get_parcours_pitch
+from app.parcours_util import build_parcours_info, get_parcours_pitch, PARCOURS_PITCH_SENTINEL
 from app.rag_constants import (
     CASE_EXTRA_FIELD_ALIASES,
     CASE_EXTRA_KEYS,
@@ -1527,12 +1527,12 @@ def _build_niveau2_detail_payload(
     )[0].rstrip()
     parcours_info = build_parcours_info(str(case_row.get("id") or ""))
     parcours_url = str(parcours_info.get("parcours_url") or "").strip()
-    if parcours_url and parcours_url not in answer:
-        # Le lien réel est transmis au frontend via suggested_cases[].parcours_url et
-        # affiché comme bouton cliquable dédié : on ne réinjecte donc plus l'URL brute
-        # en texte brut ici (elle n'était pas cliquable dans le chat). Le message est
-        # généré dynamiquement à partir de la structure réelle du parcours (get_parcours_pitch).
-        answer = answer.rstrip() + get_parcours_pitch()["message_suffix"]
+    pitch = get_parcours_pitch()
+    # Idempotence : n'ajouter le pitch que s'il n'est pas déjà présent (évite le bloc
+    # "Passez à l'action" dupliqué). Le lien réel n'est plus injecté en texte brut :
+    # il est transmis au frontend via suggested_cases[].parcours_url + le bouton cliquable.
+    if parcours_url and PARCOURS_PITCH_SENTINEL not in answer:
+        answer = answer.rstrip() + pitch["message_suffix"]
     sources = [content[:400] + "..." if len(content) > 400 else content]
     ids = [str(c.get("id", "") or "") for c in cases]
     full_contents = [str(c.get("content", "") or "") for c in cases]

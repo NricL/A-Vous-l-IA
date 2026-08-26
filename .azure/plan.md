@@ -2,7 +2,7 @@
 
 ## Status
 
-Deployed (revalidated 2026-08-26)
+Deployed (revalidated 2026-08-26, pitch-dedup + bytecode purge)
 
 ## Scope
 

@@ -276,5 +276,48 @@ class HaystackRagAuthoritativeParcoursTests(unittest.TestCase):
         mock_info.assert_called_once_with("UC-0003")
 
 
+class HaystackRagParcoursPitchDedupTests(unittest.TestCase):
+    def test_niveau2_detail_does_not_duplicate_parcours_pitch(self):
+        """
+        Régression bloc "Passez à l'action" dupliqué : si le bloc niveau 2 contient déjà
+        le pitch parcours, _build_niveau2_detail_payload ne doit pas en rajouter un second.
+        """
+        from app.parcours_util import PARCOURS_PITCH_SENTINEL, get_parcours_pitch
+
+        cases = [{"id": "UC-0152", "content": "Optimiser vos pages web pour convertir"}]
+        # Le bloc niveau 2 construit contient DÉJÀ le pitch (sentinelle présente).
+        block_with_pitch = "Détail du cas.\n\n" + get_parcours_pitch()["message_suffix"]
+
+        with (
+            patch.object(
+                haystack_rag,
+                "_enrich_case_from_document_store",
+                return_value={
+                    "id": "UC-0152",
+                    "content": "Optimiser vos pages web pour convertir plus de visiteurs (contenu long).",
+                    "description_cas_utilisation": "desc",
+                    "secteur": "Commerce & retail",
+                    "declencheurs_typiques": "pages peu performantes",
+                },
+            ),
+            patch.object(haystack_rag, "_run_pertinence_llm", return_value="Votre situation..."),
+            patch.object(haystack_rag, "build_niveau2_block", return_value=block_with_pitch),
+            patch.object(
+                haystack_rag,
+                "build_parcours_info",
+                return_value={"parcours_url": "https://h/action-x.html", "cta_label": "🚀 Démarrer"},
+            ),
+        ):
+            result = haystack_rag._build_niveau2_detail_payload(0, cases, [], "1")
+
+        self.assertIsNotNone(result)
+        answer = result[0]
+        self.assertEqual(
+            answer.count(PARCOURS_PITCH_SENTINEL),
+            1,
+            f"Le pitch parcours ne doit apparaître qu'une fois, trouvé {answer.count(PARCOURS_PITCH_SENTINEL)}x.",
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

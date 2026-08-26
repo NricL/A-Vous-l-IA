@@ -8,7 +8,7 @@ from app.config import get_settings
 from app.models import ChatRequest, ChatResponse, SuggestedCase
 from app.rag import chat_simple, chat_simple_stream, stream_prompt
 from app.haystack_rag import query_rag_haystack, get_rag_prompt_and_sources, WELCOME_MESSAGE
-from app.parcours_util import build_parcours_info, get_parcours_pitch
+from app.parcours_util import build_parcours_info, get_parcours_pitch, PARCOURS_PITCH_SENTINEL
 from app.telemetry import track_backend_chat_event
 
 router = APIRouter(prefix="/chat", tags=["chat"])
@@ -106,6 +106,12 @@ def _append_parcours_links_to_answer(
     """
     text = (answer or "").strip()
     if not text or not suggested_cases:
+        return answer
+    # Idempotence : si un pitch parcours (bloc "Passez à l'action") est déjà présent,
+    # ne pas en rajouter un second. Couvre le cas où _build_niveau2_detail_payload a déjà
+    # ajouté le suffixe côté haystack_rag, puis où cette fonction est rappelée sur la
+    # réponse pré-construite (source du bloc dupliqué constaté en prod).
+    if PARCOURS_PITCH_SENTINEL in text:
         return answer
     if ("http://" in text or "https://" in text) and ("/action/" in text or "/action-" in text):
         return answer

@@ -149,6 +149,11 @@ def build_parcours_url(case_id: str, salt: Optional[str] = None) -> str:
 PARCOURS_STEPS_COUNT = 6
 PARCOURS_ACTIVE_MINUTES = 2 + 30 + 10 + 60 + 30  # hors étape 5 "tester sur la semaine en cours"
 
+# Marqueur stable présent dans le message_suffix ci-dessous. Sert de sentinelle pour
+# détecter qu'un pitch parcours a DÉJÀ été ajouté au texte (idempotence : évite le bloc
+# "Passez à l'action" dupliqué quand plusieurs couches tentent de l'ajouter).
+PARCOURS_PITCH_SENTINEL = "Passez à l'action"
+
 
 def _format_duration_label(total_minutes: int) -> str:
     """Arrondit à la demi-heure la plus proche pour un affichage naturel (ex: "~2h" plutôt
