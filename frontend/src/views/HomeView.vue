@@ -16,6 +16,19 @@
                             <div class="chrome-status"></div>
                         </div>
                     </div>
+                    <div v-if="showStepper" class="stepper" aria-label="Progression">
+                        <template v-for="(step, si) in steps" :key="step.label">
+                            <div :class="['stepper-item', `is-${step.state}`]">
+                                <span class="stepper-dot">
+                                    <span v-if="step.state === 'done'">✓</span>
+                                    <span v-else-if="step.state === 'skipped'">–</span>
+                                    <span v-else>{{ si + 1 }}</span>
+                                </span>
+                                <span class="stepper-label">{{ step.label }}</span>
+                            </div>
+                            <span v-if="si < steps.length - 1" class="stepper-sep"></span>
+                        </template>
+                    </div>
                     <div class="chat-messages" id="chatMessages" ref="messagesBox">
                         <template v-if="!messages.length">
                             <div class="msg msg-bot">Chargement…</div>
@@ -373,7 +386,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { sendMessageStream, getWelcomeMessage } from '@/api/chat'
 
 const DEFAULT_PARCOURS_CTA_LABEL = '🚀 Voir mon parcours personnalisé'
@@ -464,6 +477,47 @@ const lastAssistantIndex = computed(() => {
         if (messages.value[i]?.role !== 'user') return i
     }
     return -1
+})
+
+// --- Indicateur de progression (stepper) ---------------------------------------------------
+// Phases du questionnaire guidé : Domaine → (Secteur, conditionnel) → Objectif → Problème.
+// On détecte la phase courante depuis le dernier message assistant qui a du contenu (libellés fixes).
+const sectorEverShown = ref(false)
+
+function detectPhase(text) {
+    const t = (text || '').toLowerCase()
+    if (/dans quel domaine/.test(t)) return 0
+    if (/quel secteur/.test(t)) return 1
+    if (/objectif principal/.test(t)) return 2
+    if (/probl[èe]me concret|décrire le probl/.test(t)) return 3
+    return 4 // liste de cas / détail / autre => hors questionnaire
+}
+
+const currentPhase = computed(() => {
+    for (let i = messages.value.length - 1; i >= 0; i--) {
+        const m = messages.value[i]
+        if (m?.role !== 'user' && (m?.content || '').trim()) return detectPhase(m.content)
+    }
+    return -1
+})
+
+// Mémorise si une question "secteur" a réellement été posée (certains domaines n'ont pas de secteur).
+watch(currentPhase, (p) => { if (p === 1) sectorEverShown.value = true })
+
+const showStepper = computed(() => currentPhase.value >= 0 && currentPhase.value <= 3)
+
+const steps = computed(() => {
+    const labels = ['Domaine', 'Secteur', 'Objectif', 'Problème']
+    const cur = currentPhase.value
+    return labels.map((label, i) => {
+        let state
+        if (i === cur) state = 'current'
+        else if (i < cur) state = 'done'
+        else state = 'upcoming'
+        // Secteur sauté : on a dépassé l'étape secteur sans qu'elle ait été posée.
+        if (i === 1 && cur > 1 && !sectorEverShown.value) state = 'skipped'
+        return { label, state }
+    })
 })
 
 const lastSuggestedCases = ref(null)
@@ -1022,6 +1076,76 @@ async function submit(forcedText = null) {
         gap: 6px;
         align-self: flex-start;
         margin-top: 2px;
+    }
+
+    /* Indicateur de progression (stepper) au-dessus des messages */
+    .stepper {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 8px 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        overflow-x: auto;
+    }
+
+    .stepper-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        flex: 0 0 auto;
+    }
+
+    .stepper-dot {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        font-size: 10px;
+        font-weight: 700;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        color: rgba(255, 255, 255, 0.55);
+        background: transparent;
+    }
+
+    .stepper-label {
+        font-size: 11px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.5);
+        white-space: nowrap;
+    }
+
+    .stepper-sep {
+        width: 14px;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.18);
+        flex: 0 0 auto;
+    }
+
+    .stepper-item.is-current .stepper-dot {
+        border-color: var(--blue);
+        color: #fff;
+        background: var(--blue);
+    }
+
+    .stepper-item.is-current .stepper-label {
+        color: rgba(255, 255, 255, 0.95);
+        font-weight: 600;
+    }
+
+    .stepper-item.is-done .stepper-dot {
+        border-color: var(--blue);
+        color: var(--blue);
+    }
+
+    .stepper-item.is-done .stepper-label {
+        color: rgba(255, 255, 255, 0.75);
+    }
+
+    .stepper-item.is-skipped .stepper-dot,
+    .stepper-item.is-skipped .stepper-label {
+        opacity: 0.4;
     }
 
     .choice-chip:disabled {

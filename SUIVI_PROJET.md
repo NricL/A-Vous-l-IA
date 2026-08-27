@@ -5,6 +5,18 @@
 **Tenant cible:** Production Azure (westeurope, tenant officiel)  
 **Repo:** `NricL/A-Vous-l-IA` (privé — source unique)
 
+### Update 2026-08-27 — Axe 2.4 : indicateur de progression (stepper) — DÉPLOYÉ ✅
+- 🎯 Situer le dirigeant dans le questionnaire (éviter l'abandon) sans dénominateur trompeur.
+- ✅ `HomeView.vue` : **stepper compact** au-dessus du chat — `Domaine › Secteur › Objectif › Problème`.
+  Phase courante détectée depuis le dernier message assistant (libellés fixes). États : à venir / en
+  cours / fait (✓) / **sauté** (« – ») pour le secteur quand le domaine n'en a pas (ex. Direction).
+  Masqué dès qu'on arrive aux résultats (liste de cas / détail). 100 % frontend, aucun risque backend.
+- 🧪 **Validation E2E navigateur (prod) :**
+  - Domaine **avec** secteur (Marketing) : Domaine→Secteur→Objectif→Problème progressent, stepper masqué aux résultats.
+  - Domaine **sans** secteur (Direction) : « Secteur » affiché **sauté**, Objectif devient l'étape courante.
+  - Mobile 390×844 : stepper 35 px, tient sans débordement ni scroll. 0 erreur console.
+- ✅ Déployé `avoulia-frontend--0000016`.
+
 ### Update 2026-08-26 (6) — Carte de cas « miroir » verbatim (Axe 2.5) — DÉPLOYÉ ✅
 - 🎯 **Objectif :** rendre la réponse détaillée d'un cas plus courte et orientée « donne envie de
   cliquer sur le bouton parcours », en **répartissant** le contenu : la réponse chat garde ce qui
