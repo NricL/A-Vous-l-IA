@@ -18,13 +18,21 @@
                     </div>
                     <div v-if="showStepper" class="stepper" aria-label="Progression">
                         <template v-for="(step, si) in steps" :key="step.label">
-                            <div :class="['stepper-item', `is-${step.state}`]">
+                            <div
+                                :class="['stepper-item', `is-${step.state}`, { 'is-clickable': step.state === 'done' }]"
+                                :role="step.state === 'done' ? 'button' : null"
+                                :tabindex="step.state === 'done' ? 0 : null"
+                                :title="step.state === 'done' ? `Modifier : ${step.label}` : null"
+                                @click="step.state === 'done' ? goBackToStep(si) : null"
+                                @keydown.enter="step.state === 'done' ? goBackToStep(si) : null"
+                            >
                                 <span class="stepper-dot">
                                     <span v-if="step.state === 'done'">✓</span>
                                     <span v-else-if="step.state === 'skipped'">–</span>
                                     <span v-else>{{ si + 1 }}</span>
                                 </span>
                                 <span class="stepper-label">{{ step.label }}</span>
+                                <span v-if="step.state === 'done'" class="stepper-edit" aria-hidden="true">↩</span>
                             </div>
                             <span v-if="si < steps.length - 1" class="stepper-sep"></span>
                         </template>
@@ -523,6 +531,31 @@ const steps = computed(() => {
         return { label, state }
     })
 })
+
+/**
+ * Retour arrière / correction (Axe 2.3). Le backend étant stateless, revenir en arrière =
+ * tronquer l'historique local jusqu'à la question de l'étape choisie + réinitialiser les
+ * choix en aval. La question redevient le dernier message → ses chips se réactivent, et
+ * la prochaine réponse relance le flux normal. Seules les étapes « faites » sont cliquables.
+ */
+function goBackToStep(stepIndex) {
+    let qIdx = -1
+    for (let k = 0; k < messages.value.length; k++) {
+        const m = messages.value[k]
+        if (m.role !== 'user' && (m.content || '').trim() && detectPhase(m.content) === stepIndex) { qIdx = k; break }
+    }
+    if (qIdx === -1) return
+    messages.value = messages.value.slice(0, qIdx + 1)
+    if (stepIndex <= 0) selectedDomainCode.value = null
+    if (stepIndex <= 1) { selectedSector.value = null; sectorEverShown.value = false }
+    if (stepIndex <= 2) selectedIntention.value = null
+    if (stepIndex <= 3) lastSuggestedCases.value = null // les cas dépendent des questions en amont
+    pendingAction.value = null
+    pendingUseCaseId.value = null
+    error.value = null
+    loading.value = false
+    nextTick(() => { scrollToBottom(); chatInputRef.value?.focus() })
+}
 
 const lastSuggestedCases = ref(null)
 const selectedDomainCode = ref(null)
@@ -1152,6 +1185,37 @@ async function submit(forcedText = null) {
         opacity: 0.4;
     }
 
+    /* Affordance "cliquable" pour corriger une étape déjà faite (Axe 2.3) */
+    .stepper-item.is-clickable {
+        cursor: pointer;
+        border-radius: 6px;
+        padding: 2px 5px;
+        transition: background 0.15s;
+    }
+
+    .stepper-item.is-clickable:hover,
+    .stepper-item.is-clickable:focus-visible {
+        background: rgba(255, 255, 255, 0.08);
+        outline: none;
+    }
+
+    .stepper-item.is-clickable:hover .stepper-label {
+        color: #fff;
+    }
+
+    .stepper-edit {
+        font-size: 10px;
+        opacity: 0;
+        color: rgba(180, 210, 255, 0.95);
+        margin-left: 1px;
+        transition: opacity 0.15s;
+    }
+
+    .stepper-item.is-clickable:hover .stepper-edit,
+    .stepper-item.is-clickable:focus-visible .stepper-edit {
+        opacity: 0.95;
+    }
+
     .choice-chip:disabled {
         opacity: 0.5;
         cursor: default;
@@ -1751,9 +1815,9 @@ async function submit(forcedText = null) {
             gap: 8px;
         }
 
-        /* Stepper mobile : 6 étapes ne tiennent pas en largeur → on ne montre que le
-           libellé de l'étape en cours ; les autres restent visibles sous forme de pastilles. */
-        .stepper-item:not(.is-current) .stepper-label {
+        /* Stepper mobile : on masque uniquement les libellés des étapes À VENIR (les étapes
+           faites gardent leur libellé pour rester éditables au doigt). Scroll horizontal si besoin. */
+        .stepper-item.is-upcoming .stepper-label {
             display: none;
         }
     }

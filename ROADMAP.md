@@ -141,7 +141,7 @@ C'est le **levier de pertinence n°1**, mais c'est un chantier éditorial lourd 
 |---|---|---|
 | **J1 — Quick wins (immédiat)** | 2.1 · 3.1 · 3.2 · 4.2 · 4.3 | Débloquer la **mesure**, corriger les irritants visibles, sécuriser les releases |
 | **J2 — Consolidation UX & industrialisation** | 2.2 · 2.5 · 3.3 · 3.4 · 4.1 · 4.4 · 4.5 | Fluidifier le parcours, automatiser le déploiement (C1), A/B |
-| **J3 — Confort UX** | 2.3 · 2.4 | Retour arrière, progression |
+| **J3 — Confort UX** | 2.3 · 2.4 | Retour arrière, progression | ✅ Fait (stepper cliquable + 6 étapes) |
 | **J4 — Base (en dernier, ensemble)** | 1.1 · 1.2 · 1.3 · 1.4 | Refonte éditoriale de la taxonomie, nourrie par le feedback J1 |
 
 > L'ordre exact au sein d'un jalon reste ajustable ; la règle fixe est : **2/3/4 avant 1**.

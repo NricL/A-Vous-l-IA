@@ -5,6 +5,27 @@
 **Tenant cible:** Production Azure (westeurope, tenant officiel)  
 **Repo:** `NricL/A-Vous-l-IA` (privé — source unique)
 
+### Update 2026-08-27 (3) — Axe 2.3 : retour arrière / correction — DÉPLOYÉ ✅ (clôt l'Axe 2)
+- 🎯 Permettre de corriger un choix (domaine/secteur/objectif…) **sans tout recommencer**.
+- 💡 **Choix UX (validé avec Eneric) :** stepper cliquable plutôt que « Étape N/4 » chiffré, AVEC de vrais
+  signaux d'interactivité (le point faible d'un stepper = on ne devine pas qu'il est cliquable).
+- ✅ **Archi :** le backend étant **stateless** (il re-déduit l'état à partir de l'historique + des choix
+  renvoyés), « revenir en arrière » = opération **100 % frontend** : `goBackToStep()` tronque l'historique
+  local jusqu'à la question voulue + réinitialise les choix en aval. **Aucune modif backend.**
+- ✅ **UI (`HomeView.vue`) :** les étapes **faites** (✓) du stepper deviennent cliquables — curseur main,
+  surbrillance au survol, **↩ au survol**, tooltip « Modifier : <étape> », accessible clavier (role/tabindex/Enter).
+  Reset ciblé : Domaine efface tout ; Objectif garde domaine+secteur ; etc. « Cas d'usage » ramène à la liste.
+- ✅ **Mobile :** les libellés des étapes **faites** restent affichés (donc éditables au doigt) ; seuls les
+  libellés des étapes **à venir** sont masqués. Pas de débordement de page.
+- 🧪 **Validation E2E navigateur (prod) :**
+  - À Q3, clic « Objectif » → retour à Q2 (question + 6 chips réaffichées), historique tronqué (9→7), stepper à jour.
+  - Re-réponse → le flux repart correctement vers Q3 (backend re-déduit), 0 erreur console.
+  - Clic « Domaine » → reset total (Q1, 14 chips, tout réinitialisé).
+  - Mobile 390×844 : étapes faites labellisées + cliquables, pas de débordement.
+- ✅ Déployé `avoulia-frontend--0000018`.
+- ✅ **Axe 2 (Fluidité UX) terminé :** 2.1 accueil · 2.2 chips questions · 2.2b chips cas · 2.3 retour arrière ·
+  2.4 stepper (6 étapes) · 2.5 carte miroir verbatim · mobile.
+
 ### Update 2026-08-27 (2) — Stepper : ajout des étapes « Cas d'usage » et « Parcours » — DÉPLOYÉ ✅
 - 🎯 Rendre tout le parcours visible et **matérialiser la destination** (« Parcours ») pour renforcer le bouton.
 - ✅ `HomeView.vue` : le stepper passe à **6 étapes** — `Domaine › Secteur › Objectif › Problème › Cas d'usage › Parcours`.
