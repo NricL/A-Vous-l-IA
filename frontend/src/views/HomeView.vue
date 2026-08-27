@@ -490,7 +490,11 @@ function detectPhase(text) {
     if (/quel secteur/.test(t)) return 1
     if (/objectif principal/.test(t)) return 2
     if (/probl[èe]me concret|décrire le probl/.test(t)) return 3
-    return 4 // liste de cas / détail / autre => hors questionnaire
+    // Fiche détail d'un cas (la carte + le pitch parcours) => étape "Parcours"
+    if (/passez à l'action|ce que ça vous apporte/.test(t)) return 5
+    // Liste de cas à choisir => étape "Cas d'usage"
+    if (/approfondir|indiquez son num/.test(t) || /(^|\n)\s*1\.\s/.test(text || '')) return 4
+    return -1 // hors questionnaire / message d'accueil
 }
 
 const currentPhase = computed(() => {
@@ -504,10 +508,10 @@ const currentPhase = computed(() => {
 // Mémorise si une question "secteur" a réellement été posée (certains domaines n'ont pas de secteur).
 watch(currentPhase, (p) => { if (p === 1) sectorEverShown.value = true })
 
-const showStepper = computed(() => currentPhase.value >= 0 && currentPhase.value <= 3)
+const showStepper = computed(() => currentPhase.value >= 0)
 
 const steps = computed(() => {
-    const labels = ['Domaine', 'Secteur', 'Objectif', 'Problème']
+    const labels = ['Domaine', 'Secteur', 'Objectif', 'Problème', "Cas d'usage", 'Parcours']
     const cur = currentPhase.value
     return labels.map((label, i) => {
         let state
@@ -1745,6 +1749,12 @@ async function submit(forcedText = null) {
 
         .choice-chips {
             gap: 8px;
+        }
+
+        /* Stepper mobile : 6 étapes ne tiennent pas en largeur → on ne montre que le
+           libellé de l'étape en cours ; les autres restent visibles sous forme de pastilles. */
+        .stepper-item:not(.is-current) .stepper-label {
+            display: none;
         }
     }
 </style>

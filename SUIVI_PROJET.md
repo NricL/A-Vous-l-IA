@@ -5,6 +5,17 @@
 **Tenant cible:** Production Azure (westeurope, tenant officiel)  
 **Repo:** `NricL/A-Vous-l-IA` (privé — source unique)
 
+### Update 2026-08-27 (2) — Stepper : ajout des étapes « Cas d'usage » et « Parcours » — DÉPLOYÉ ✅
+- 🎯 Rendre tout le parcours visible et **matérialiser la destination** (« Parcours ») pour renforcer le bouton.
+- ✅ `HomeView.vue` : le stepper passe à **6 étapes** — `Domaine › Secteur › Objectif › Problème › Cas d'usage › Parcours`.
+  - « Cas d'usage » = **en cours** quand la liste de cas est affichée.
+  - « Parcours » = **en cours** sur la fiche détail (là où le bouton apparaît) → pointe vers le CTA.
+  - Le stepper reste visible jusqu'au détail (plus masqué aux résultats).
+- ✅ **Mobile** : 6 pastilles + **seul le libellé de l'étape courante** affiché (media `≤580px`) → aucun débordement/scroll.
+- 🧪 **Validation E2E navigateur (prod) :** liste → « Cas d'usage » current / « Parcours » upcoming ; détail →
+  « Cas d'usage » done / « Parcours » current + bouton présent. Mobile 390×844 : 6 pastilles, label « Parcours » seul, pas de débordement. 0 erreur console.
+- ✅ Déployé `avoulia-frontend--0000017`.
+
 ### Update 2026-08-27 — Axe 2.4 : indicateur de progression (stepper) — DÉPLOYÉ ✅
 - 🎯 Situer le dirigeant dans le questionnaire (éviter l'abandon) sans dénominateur trompeur.
 - ✅ `HomeView.vue` : **stepper compact** au-dessus du chat — `Domaine › Secteur › Objectif › Problème`.
