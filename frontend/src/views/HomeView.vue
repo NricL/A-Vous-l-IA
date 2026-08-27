@@ -72,6 +72,29 @@
                                     {{ msg.parcoursCtaLabel || DEFAULT_PARCOURS_CTA_LABEL }}
                                     <span class="parcours-cta-sub">Guide étape par étape · s'ouvre dans un nouvel onglet</span>
                                 </a>
+                                <div
+                                    v-if="msg.role !== 'user' && msg.parcoursUrl"
+                                    class="case-feedback"
+                                >
+                                    <template v-if="!msg.feedback">
+                                        <span class="case-feedback-q">Ce cas vous semble-t-il pertinent ?</span>
+                                        <button
+                                            type="button"
+                                            class="fb-btn"
+                                            aria-label="Ce cas est pertinent"
+                                            @click="onCaseFeedback(msg, true)"
+                                        >👍</button>
+                                        <button
+                                            type="button"
+                                            class="fb-btn"
+                                            aria-label="Ce cas est peu pertinent"
+                                            @click="onCaseFeedback(msg, false)"
+                                        >👎</button>
+                                    </template>
+                                    <span v-else class="case-feedback-thanks">
+                                        {{ msg.feedback === 'up' ? 'Merci pour votre retour 👍' : 'Merci, c\'est noté 👎' }}
+                                    </span>
+                                </div>
                             </div>
                         </template>
 
@@ -396,7 +419,7 @@
 
 <script setup>
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import { sendMessageStream, getWelcomeMessage, trackParcoursClick } from '@/api/chat'
+import { sendMessageStream, getWelcomeMessage, trackParcoursClick, sendCaseFeedback } from '@/api/chat'
 
 const DEFAULT_PARCOURS_CTA_LABEL = '🚀 Voir mon parcours personnalisé'
 
@@ -418,6 +441,21 @@ function resolveParcoursCta(payload) {
 function onParcoursClick(msg) {
     const m = (msg?.parcoursUrl || '').match(/action-([a-z0-9]+)\.html/i)
     trackParcoursClick(m ? m[1] : '')
+}
+
+/** Feedback 👍/👎 sur un cas : enregistre, puis marque le message comme voté (une seule fois). */
+function onCaseFeedback(msg, useful) {
+    if (!msg || msg.feedback) return
+    const m = (msg.parcoursUrl || '').match(/action-([a-z0-9]+)\.html/i)
+    sendCaseFeedback(useful, msg.caseLabel || '', m ? m[1] : '')
+    const idx = messages.value.indexOf(msg)
+    if (idx >= 0) {
+        messages.value = [
+            ...messages.value.slice(0, idx),
+            { ...msg, feedback: useful ? 'up' : 'down' },
+            ...messages.value.slice(idx + 1),
+        ]
+    }
 }
 
 /**
@@ -668,11 +706,17 @@ async function submit(forcedText = null) {
                     // Bouton "parcours" cliquable : attaché au dernier message assistant.
                     // Il n'apparaît que si le backend a désigné un parcours (cas sélectionné).
                     const { url: parcoursUrl, ctaLabel: parcoursCtaLabel } = resolveParcoursCta(payload)
+                    // Libellé du cas sélectionné (verbatim de la base) — pour le feedback 👍/👎.
+                    let caseLabel = ''
+                    if (parcoursUrl && Array.isArray(payload.suggested_cases)) {
+                        const sel = payload.suggested_cases.find((c) => c && c.parcours_url === parcoursUrl)
+                        caseLabel = sel ? String(sel.cas_utilisation || sel.content || '') : ''
+                    }
                     const idx = messages.value.length - 1
                     if (idx >= 0 && messages.value[idx]?.role === 'assistant') {
                         messages.value = [
                             ...messages.value.slice(0, idx),
-                            { ...messages.value[idx], parcoursUrl, parcoursCtaLabel },
+                            { ...messages.value[idx], parcoursUrl, parcoursCtaLabel, caseLabel },
                         ]
                     }
 
@@ -1085,6 +1129,46 @@ async function submit(forcedText = null) {
         font-size: 11px;
         font-weight: 400;
         opacity: 0.9;
+    }
+
+    .case-feedback {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    .case-feedback-q {
+        font-size: 12px;
+        color: var(--muted, #6b7280);
+    }
+
+    .fb-btn {
+        min-width: 40px;
+        min-height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        line-height: 1;
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        background: #fff;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background .15s, transform .15s, border-color .15s;
+    }
+
+    .fb-btn:hover {
+        background: #f1f5ff;
+        border-color: var(--blue);
+        transform: translateY(-1px);
+    }
+
+    .case-feedback-thanks {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--blue);
     }
 
     .chips {

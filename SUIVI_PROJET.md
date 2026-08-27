@@ -5,6 +5,22 @@
 **Tenant cible:** Production Azure (westeurope, tenant officiel)  
 **Repo:** `NricL/A-Vous-l-IA` (privé — source unique)
 
+### Update 2026-08-27 (5) — Axe 3.2 : feedback 👍/👎 sur les cas — DÉPLOYÉ ✅
+- 🎯 Mesurer la **qualité perçue** des cas recommandés (pas juste le volume), pour prioriser
+  l'amélioration de la base. Reste simple et intégré (C1), aucun produit externe.
+- ✅ **UI (`HomeView.vue`) :** sous la carte d'un cas, « Ce cas vous semble-t-il pertinent ? » +
+  boutons **👍/👎** (cibles tactiles 40px). Un clic → remerciement, boutons masqués, **un seul vote**
+  par cas.
+- ✅ **Backend :** endpoint `POST /api/v1/chat/feedback` → `stats.record("feedback_up"/"feedback_down")`
+  avec le **titre verbatim** du cas. `/stats` : KPI **taux de satisfaction** (`N👍/M👎`) + 2
+  classements (cas jugés utiles / peu pertinents).
+- ✅ **Libellé propre :** le frontend envoie `cas_utilisation` (exposé dans `suggested_cases`), pas le
+  `content` brut (rag_text à pipes). Validé : `/stats` affiche « Concevoir des modèles d'infographies… ».
+- 🧪 **Validation E2E navigateur (prod) :** 👍 sur un cas puis 👎 sur un autre → remerciement affiché,
+  `/stats` montre le taux + libellés propres. Backend compile, 14/14 tests, build front OK, smoke 7/7.
+- ✅ Déployé `avoulia-backend--0000038` (image `v2-fb-1787845376`) + `avoulia-frontend--0000021`
+  (`v2-fb2-1787846331`). Doc à jour : CHANGELOG §3.8, HANDOFF (section feedback).
+
 ### Update 2026-08-27 (4) — Axe 3.1 : statistiques d'usage intégrées — DÉPLOYÉ ✅
 - 🎯 Besoin d'Eneric : savoir **ce qui est le plus visité** (rôles/problématiques/cas) + les **clics
   bouton parcours**, **sans** ajouter de repo/produit/dashboard séparé (contrainte C1 : package simple

@@ -115,12 +115,23 @@ def aggregates(top_n: int = 15) -> dict[str, Any]:
     def top(t: str) -> list[tuple[str, int]]:
         return counters.get(t, Counter()).most_common(top_n)
 
+    fb_up = counters.get("feedback_up", Counter())
+    fb_down = counters.get("feedback_down", Counter())
+    n_up = sum(fb_up.values())
+    n_down = sum(fb_down.values())
+    n_fb = n_up + n_down
     return {
         "total_events": len(events),
         "top_domaines": top("domaine"),
         "top_cas": top("cas"),
         "top_problemes": top("probleme"),
         "parcours_clicks": sum(counters.get("parcours_click", Counter()).values()),
+        "feedback_up": n_up,
+        "feedback_down": n_down,
+        "feedback_total": n_fb,
+        "satisfaction_pct": round(100 * n_up / n_fb) if n_fb else None,
+        "top_cas_utiles": fb_up.most_common(top_n),
+        "top_cas_non_utiles": fb_down.most_common(top_n),
     }
 
 
@@ -143,6 +154,11 @@ def render_html() -> str:
         _render_list(_TYPE_LABELS["domaine"], a["top_domaines"])
         + _render_list(_TYPE_LABELS["cas"], a["top_cas"])
         + _render_list(_TYPE_LABELS["probleme"], a["top_problemes"])
+        + _render_list("Cas jugés utiles (👍)", a["top_cas_utiles"])
+        + _render_list("Cas jugés peu pertinents (👎)", a["top_cas_non_utiles"])
+    )
+    satisf = (
+        f"{a['satisfaction_pct']}%" if a["satisfaction_pct"] is not None else "—"
     )
     return f"""<!doctype html>
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -171,6 +187,7 @@ def render_html() -> str:
   <div class="sub">Éléments les plus visités. Actualisez la page pour rafraîchir.</div>
   <div class="kpis">
     <div class="kpi"><div class="n">{a['parcours_clicks']}</div><div class="l">Clics sur le bouton parcours</div></div>
+    <div class="kpi"><div class="n">{satisf}</div><div class="l">Cas jugés pertinents ({a['feedback_up']}👍 / {a['feedback_down']}👎)</div></div>
     <div class="kpi"><div class="n">{a['total_events']}</div><div class="l">Événements enregistrés</div></div>
   </div>
   {sections}

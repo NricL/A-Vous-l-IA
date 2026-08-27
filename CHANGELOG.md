@@ -133,6 +133,23 @@ puis corrige une série de bugs de fond découverts en production.
 - **Validé :** E2E navigateur (domaine → secteur → objectif → problème → cas → clic parcours),
   `/stats` affiche les 4 types ; storage branché sur `stavoulia97186` (durabilité).
 
+### 3.8 Feedback 👍/👎 sur les cas (Axe 3.2)
+- **Quoi :** sous la carte d'un cas (après le bouton parcours), deux boutons **👍 / 👎**
+  « Ce cas vous semble-t-il pertinent ? ». Un clic enregistre le retour, remplace les boutons par
+  un remerciement, et **une seule fois** par cas. La page `/stats` gagne un **taux de satisfaction**
+  (KPI `N👍 / M👎`) et deux classements : **cas jugés utiles** / **cas jugés peu pertinents**.
+- **Pourquoi :** mesurer la **qualité perçue** des recommandations (pas seulement le volume), pour
+  prioriser l'amélioration de la base — signal actionnable, toujours sans produit externe (C1).
+- **Comment :** endpoint `POST /api/v1/chat/feedback` (`{useful, case_label}`) → `stats.record`
+  `feedback_up`/`feedback_down` avec le **titre verbatim** du cas (`cas_utilisation`, déjà exposé
+  dans le payload `suggested_cases`). Frontend : `sendCaseFeedback` (fire-and-forget) câblé sur
+  `onCaseFeedback`.
+- **Où :** `backend/app/stats.py` (agrégats + KPI satisfaction + rendu), `backend/app/routes/chat.py`
+  (endpoint `feedback`), `frontend/src/api/chat.ts` (`sendCaseFeedback`, champ `cas_utilisation`),
+  `frontend/src/views/HomeView.vue` (boutons 👍/👎, remerciement, `onCaseFeedback`).
+- **Validé :** E2E navigateur — 👍 puis 👎 sur de vrais cas ; `/stats` affiche le taux + le libellé
+  **propre** du cas. Compilation OK, 14/14 tests, build front OK, smoke 7/7.
+
 ---
 
 ## 4. Bugs de fond corrigés — « pièges à connaître » ⚠️

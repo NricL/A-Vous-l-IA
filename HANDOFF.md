@@ -379,6 +379,17 @@ service (constraint C1). Answers "which roles/problems/cases are most visited?".
   `az storage blob delete --account-name stavoulia97186 --account-key "$KEY" --container-name stats --name events.jsonl`.
 - **Compatible with the future single-container packaging** (no new infra; FastAPI serves `/stats`).
 
+### Case feedback 👍/👎 (Axe 3.2)
+- Below each case card, two buttons ask "Ce cas vous semble-t-il pertinent ?". A click posts to
+  **`POST /api/v1/chat/feedback`** (`{useful: bool, case_label}`) which records `feedback_up` /
+  `feedback_down` with the case's **verbatim title** (`cas_utilisation`). One vote per card, then a
+  thank-you replaces the buttons.
+- The `/stats` page shows a **satisfaction KPI** (`N👍 / M👎`) plus two rankings: cases rated useful
+  and cases rated not-relevant — a quality signal to prioritise improving the use-case base.
+- Frontend: `chat.ts::sendCaseFeedback` (fire-and-forget), wired in `HomeView.vue::onCaseFeedback`.
+  The clean label comes from `suggested_cases[].cas_utilisation` (already in the SSE payload), NOT
+  the raw `content` (which is the pipe-delimited rag_text).
+
 ---
 
 ## 🐛 Troubleshooting

@@ -14,6 +14,20 @@ export function trackParcoursClick(caseHash?: string): void {
   }
 }
 
+/** Stat "fire-and-forget" : l'utilisateur juge un cas pertinent (👍) ou non (👎). */
+export function sendCaseFeedback(useful: boolean, caseLabel?: string, caseHash?: string): void {
+  try {
+    fetch(`${API_BASE}/chat/feedback`, {
+      method: 'POST',
+      keepalive: true,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ useful, case_label: caseLabel ?? '', case_hash: caseHash ?? '' }),
+    }).catch(() => {})
+  } catch {
+    /* ignore : le feedback ne doit jamais bloquer l'UI */
+  }
+}
+
 /** Message d'accueil affiché au chargement du chat (fallback si l'API échoue). */
 export const WELCOME_MESSAGE_FALLBACK =
   "Bonjour, je vais vous aider à identifier des cas d'usage concrets de l'IA adaptés à votre organisation. Pour commencer, je vais vous poser quelques questions simples afin de cibler précisément votre priorité."
@@ -46,6 +60,8 @@ export interface SuggestedCase {
   parcours_url?: string
   parcours_cta_label?: string
   case_hash?: string
+  /** Titre verbatim du cas (base) — sert de libellé propre pour le feedback 👍/👎. */
+  cas_utilisation?: string
 }
 
 export interface ChatRequest {

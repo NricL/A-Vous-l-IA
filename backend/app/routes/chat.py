@@ -87,6 +87,17 @@ def parcours_click(payload: dict | None = None):
     return {"ok": True}
 
 
+@router.post("/feedback")
+def case_feedback(payload: dict | None = None):
+    """Stat : l'utilisateur juge un cas pertinent (👍) ou peu pertinent (👎). Appelé par le frontend."""
+    if not isinstance(payload, dict):
+        return {"ok": False}
+    useful = bool(payload.get("useful"))
+    label = str(payload.get("case_label") or payload.get("case_hash") or "").strip() or "cas"
+    stats.record("feedback_up" if useful else "feedback_down", label[:200])
+    return {"ok": True}
+
+
 def _sse_line(obj: dict) -> str:
     return f"data: {json.dumps(obj, ensure_ascii=False)}\n\n"
 
