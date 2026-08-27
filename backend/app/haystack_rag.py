@@ -21,6 +21,7 @@ from haystack_integrations.components.retrievers.chroma import ChromaEmbeddingRe
 
 from app.config import get_settings
 from app.parcours_util import build_parcours_info, get_parcours_pitch, PARCOURS_PITCH_SENTINEL
+from app import stats
 from app.rag_constants import (
     CASE_EXTRA_FIELD_ALIASES,
     CASE_EXTRA_KEYS,
@@ -1489,6 +1490,8 @@ def _build_niveau2_detail_payload(
     if len(content) < 20:
         return None
     answer = build_niveau2_block(case_row)
+    # Stat : cas d'usage réellement consulté (verbatim depuis la base).
+    stats.record("cas", _strip_use_case_codes((case_row.get("cas_utilisation") or "").strip()))
     # Le détail est une réponse terminale : aucun choix de format ne doit suivre.
     answer = re.split(
         r"\n\s*(?:Souhaitez[- ]vous maintenant|Souhaitez[- ]vous ensuite|Répondez\s+1\s+ou\s+2)\s*:?",
@@ -2790,6 +2793,7 @@ def query_rag_haystack(
             idx = choice - 1
             case_row = _enrich_case_from_document_store(last_suggested_cases[idx])
             answer = build_niveau2_block(case_row)
+            stats.record("cas", _strip_use_case_codes((case_row.get("cas_utilisation") or "").strip()))
             parcours_info = build_parcours_info(str(case_row.get("id") or ""))
             parcours_url = str(parcours_info.get("parcours_url") or "").strip()
             if parcours_url and parcours_url not in answer:

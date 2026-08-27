@@ -1,5 +1,19 @@
 const API_BASE = import.meta.env.VITE_API_URL ?? '/api/v1'
 
+/** Stat "fire-and-forget" : signale au backend un clic sur le bouton parcours (conversion clé). */
+export function trackParcoursClick(caseHash?: string): void {
+  try {
+    fetch(`${API_BASE}/chat/parcours-click`, {
+      method: 'POST',
+      keepalive: true,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ case_hash: caseHash ?? '' }),
+    }).catch(() => {})
+  } catch {
+    /* ignore : le suivi ne doit jamais gêner la navigation */
+  }
+}
+
 /** Message d'accueil affiché au chargement du chat (fallback si l'API échoue). */
 export const WELCOME_MESSAGE_FALLBACK =
   "Bonjour, je vais vous aider à identifier des cas d'usage concrets de l'IA adaptés à votre organisation. Pour commencer, je vais vous poser quelques questions simples afin de cibler précisément votre priorité."

@@ -5,6 +5,28 @@
 **Tenant cible:** Production Azure (westeurope, tenant officiel)  
 **Repo:** `NricL/A-Vous-l-IA` (privé — source unique)
 
+### Update 2026-08-27 (4) — Axe 3.1 : statistiques d'usage intégrées — DÉPLOYÉ ✅
+- 🎯 Besoin d'Eneric : savoir **ce qui est le plus visité** (rôles/problématiques/cas) + les **clics
+  bouton parcours**, **sans** ajouter de repo/produit/dashboard séparé (contrainte C1 : package simple
+  pour Simplon).
+- 💡 **Choix (validé) :** #1 « stats intégrées » maintenant ; le mono-conteneur (#2) au moment du
+  packaging Simplon.
+- ✅ **Backend :** nouveau module `stats.py` — **append blob Azure** (`stats/events.jsonl`) si
+  `STORAGE_ACCOUNT_NAME/KEY` configurés, sinon **repli mémoire**. Page **`/stats`** (HTML server-rendered)
+  + **`/api/v1/stats.json`** ajoutées dans `main.py` **avant** le mount statique catch-all. Endpoint
+  `POST /api/v1/chat/parcours-click` dans `routes/chat.py`.
+- ✅ **Enregistrement branché :** domaine (à la sélection) + problème (texte libre Q3) via
+  `_record_usage_stats` ; cas (ouverture carte verbatim) via `stats.record("cas", …)` dans
+  `haystack_rag.py` ; clic parcours via `trackParcoursClick` (`chat.ts`) câblé sur `onParcoursClick`
+  (`HomeView.vue`), fire-and-forget (n'empêche jamais l'ouverture de l'onglet).
+- ✅ **Storage branché** sur `stavoulia97186` (env vars sur `avoulia-backend`) → stats **durables**.
+- 🧪 **Validation E2E navigateur (prod) :** parcours réel domaine → secteur → objectif → problème →
+  cas → clic parcours ; `/stats` affiche les **4 types** (domaine « Marketing & visibilité », cas
+  « Créer des infographies… », problème saisi, 2 clics). Compilation backend OK, 14/14 tests, build
+  frontend OK, smoke test 7/7. Blob de test **purgé** (état propre).
+- ✅ Déployé `avoulia-backend--0000037` (image `v2-stats-1787843585`) + `avoulia-frontend--0000019`.
+- 📄 Doc mise à jour : `CHANGELOG.md` (§3.7), `HANDOFF.md` (section « Usage Stats » + troubleshooting).
+
 ### Update 2026-08-27 (3) — Axe 2.3 : retour arrière / correction — DÉPLOYÉ ✅ (clôt l'Axe 2)
 - 🎯 Permettre de corriger un choix (domaine/secteur/objectif…) **sans tout recommencer**.
 - 💡 **Choix UX (validé avec Eneric) :** stepper cliquable plutôt que « Étape N/4 » chiffré, AVEC de vrais

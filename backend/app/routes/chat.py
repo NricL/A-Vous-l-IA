@@ -9,10 +9,38 @@ from app.models import ChatRequest, ChatResponse, SuggestedCase
 from app.rag import chat_simple, chat_simple_stream, stream_prompt
 from app.haystack_rag import query_rag_haystack, get_rag_prompt_and_sources, WELCOME_MESSAGE
 from app.parcours_util import build_parcours_info, get_parcours_pitch, PARCOURS_PITCH_SENTINEL
+from app.rag_constants import Q1_DOMAINS_LIST, CHOIX_Q1_TO_DOMAINE_CODE
 from app.telemetry import track_backend_chat_event
+from app import stats
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 _UC_CODE_RE = re.compile(r"\bUC-\d{3,5}\b", re.IGNORECASE)
+
+# Mapping code domaine -> libellé Q1 lisible (pour les stats d'usage).
+_DOMAINE_CODE_TO_LABEL = {
+    code: Q1_DOMAINS_LIST[n - 1]
+    for n, code in CHOIX_Q1_TO_DOMAINE_CODE.items()
+    if 1 <= n <= len(Q1_DOMAINS_LIST)
+}
+
+
+def _domaine_label(code: str | None) -> str:
+    code = (code or "").strip()
+    return _DOMAINE_CODE_TO_LABEL.get(code, code)
+
+
+def _record_usage_stats(request: ChatRequest, selected_domain_code, suggested_cases, niveau2_prebuilt) -> None:
+    """Stats d'usage simples (Axe 3.1). Non bloquant : toute erreur est avalée."""
+    try:
+        # Domaine : enregistré au moment où il est choisi (transition : pas encore fixé côté requête).
+        if not (request.selected_domain_code or "").strip() and (selected_domain_code or "").strip():
+            stats.record("domaine", _domaine_label(selected_domain_code))
+        # Problématique (Q3) : message libre qui produit la liste de cas (pas un numéro, pas un détail).
+        msg = (request.message or "").strip()
+        if suggested_cases and not niveau2_prebuilt and not msg.isdigit() and len(msg) >= 4:
+            stats.record("probleme", msg)
+    except Exception:
+        pass
 
 # Le RAG_PROMPT demande au LLM de RÉAFFICHER le message d'accueil au début de CHAQUE réponse.
 # Or il est déjà affiché une seule fois au chargement du chat (GET /chat/welcome). On retire donc
@@ -47,6 +75,16 @@ def _strip_repeated_welcome(text: str) -> str:
 def chat_welcome():
     """Retourne le premier message que l'agent affiche au chargement du chat."""
     return {"message": WELCOME_MESSAGE}
+
+
+@router.post("/parcours-click")
+def parcours_click(payload: dict | None = None):
+    """Stat : l'utilisateur a cliqué sur le bouton parcours (conversion clé). Appelé par le frontend."""
+    value = ""
+    if isinstance(payload, dict):
+        value = str(payload.get("case_id") or payload.get("case_hash") or "").strip()
+    stats.record("parcours_click", value or "clic")
+    return {"ok": True}
 
 
 def _sse_line(obj: dict) -> str:
@@ -338,6 +376,7 @@ def _stream_chat(request: ChatRequest, session_id: str | None):
                 selected_intention=request.selected_intention,
             )
             suggested_cases = _build_suggested_cases(suggested_case_ids, full_contents, case_extras)
+            _record_usage_stats(request, selected_domain_code, suggested_cases, niveau2_prebuilt)
             niveau2_prebuilt = _append_parcours_links_to_answer(
                 niveau2_prebuilt,
                 suggested_cases,

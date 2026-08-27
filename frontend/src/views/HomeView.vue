@@ -67,6 +67,7 @@
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     class="parcours-cta"
+                                    @click="onParcoursClick(msg)"
                                 >
                                     {{ msg.parcoursCtaLabel || DEFAULT_PARCOURS_CTA_LABEL }}
                                     <span class="parcours-cta-sub">Guide étape par étape · s'ouvre dans un nouvel onglet</span>
@@ -395,7 +396,7 @@
 
 <script setup>
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import { sendMessageStream, getWelcomeMessage } from '@/api/chat'
+import { sendMessageStream, getWelcomeMessage, trackParcoursClick } from '@/api/chat'
 
 const DEFAULT_PARCOURS_CTA_LABEL = '🚀 Voir mon parcours personnalisé'
 
@@ -411,6 +412,12 @@ function resolveParcoursCta(payload) {
         return { url: payload.parcours_url, ctaLabel: payload.parcours_cta_label ?? null }
     }
     return { url: null, ctaLabel: null }
+}
+
+/** Clic sur le bouton parcours : on trace la conversion (fire-and-forget), sans gêner l'ouverture. */
+function onParcoursClick(msg) {
+    const m = (msg?.parcoursUrl || '').match(/action-([a-z0-9]+)\.html/i)
+    trackParcoursClick(m ? m[1] : '')
 }
 
 /**

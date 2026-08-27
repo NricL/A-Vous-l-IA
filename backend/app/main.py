@@ -7,6 +7,7 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.config import get_settings
@@ -76,6 +77,21 @@ def log_config():
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/stats", response_class=HTMLResponse)
+def stats_page():
+    """Page de statistiques d'usage intégrée (Axe 3.1) : domaines/problèmes/cas les plus visités."""
+    from app import stats
+
+    return HTMLResponse(content=stats.render_html())
+
+
+@app.get("/api/v1/stats.json")
+def stats_json():
+    from app import stats
+
+    return stats.aggregates()
 
 
 parcours_static_dir = Path(__file__).resolve().parent / "static" / "parcours"

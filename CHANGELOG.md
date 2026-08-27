@@ -104,6 +104,35 @@ puis corrige une série de bugs de fond découverts en production.
   `backend/app/models.py`, `frontend/src/views/HomeView.vue`.
 - **Commits :** `955b574`, `3bd7d85`, `6a6a7fa`, `eb198c1`.
 
+### 3.6 UX guidée v2 (chips, stepper, retour arrière) & carte cas verbatim
+- **Quoi :** message d'accueil non répété ; **chips cliquables** à chaque étape (Q1/secteur/objectif,
+  puis « Cas 1…5 ») ; **stepper de progression** 6 étapes (Domaine → Secteur → Objectif →
+  Problème → Cas d'usage → Parcours) avec **retour arrière** cliquable ; carte de cas
+  **100 % verbatim** de la base (titre, badges effort/mode/données, description, déclencheurs) —
+  **plus aucun texte de pertinence généré par le LLM** (règle D1).
+- **Pourquoi :** parcours plus lisible et « cliquable » ; conformité stricte à la restitution
+  verbatim ; mobile-friendly (cibles tactiles ≥ 40 px).
+- **Où :** `frontend/src/views/HomeView.vue` (LE composant chat), `backend/app/haystack_rag.py`
+  (`build_niveau2_block`), `backend/app/routes/chat.py`, `frontend/nginx.conf`, `smoke-test.mjs`.
+
+### 3.7 Statistiques d'usage intégrées (Axe 3.1) — page `/stats`
+- **Quoi :** suivi **simple et intégré** (aucune infra ni dashboard externe) des éléments les
+  plus visités — **domaines (rôles)**, **problématiques (Q3)**, **cas d'usage consultés** — plus
+  les **clics sur le bouton parcours** (conversion clé). Consultable sur la page `/stats` servie
+  par le backend ; endpoint JSON `/api/v1/stats.json`.
+- **Pourquoi :** répondre au besoin « savoir ce qui est le plus visité » **sans** ajouter de
+  repo/produit/complexité pour Simplon (C1). Compatible avec le futur mono-conteneur.
+- **Comment :** un module `stats.py` écrit un **append blob** Azure (`STORAGE_ACCOUNT_NAME/KEY`),
+  avec **repli en mémoire** si le stockage n'est pas configuré. Enregistrement branché dans le
+  flux chat (domaine à sa sélection, problème sur texte libre Q3, cas à l'ouverture de la carte)
+  et un endpoint `POST /api/v1/chat/parcours-click` appelé par le frontend au clic du bouton.
+- **Où :** `backend/app/stats.py` (nouveau), `backend/app/main.py` (routes `/stats`,
+  `/api/v1/stats.json`), `backend/app/routes/chat.py` (`_record_usage_stats`, `parcours-click`),
+  `backend/app/haystack_rag.py` (`stats.record("cas", …)`), `frontend/src/api/chat.ts`
+  (`trackParcoursClick`), `frontend/src/views/HomeView.vue` (`onParcoursClick`).
+- **Validé :** E2E navigateur (domaine → secteur → objectif → problème → cas → clic parcours),
+  `/stats` affiche les 4 types ; storage branché sur `stavoulia97186` (durabilité).
+
 ---
 
 ## 4. Bugs de fond corrigés — « pièges à connaître » ⚠️

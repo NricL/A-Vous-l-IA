@@ -351,6 +351,36 @@ Calling `.strip()` directly on a reply crashes with
 
 ---
 
+## 📊 Usage Stats — Integrated `/stats` Page (2026-08-27)
+
+Simple, **self-contained** usage tracking — no external product, no separate repo, no dashboard
+service (constraint C1). Answers "which roles/problems/cases are most visited?".
+
+- **Where to look:** open **`/stats`** on the backend (e.g.
+  `https://<backend-host>/stats`) — server-rendered HTML listing top **domaines (roles)**,
+  **problématiques (Q3)**, **cas d'usage consultés**, and total **clics bouton parcours**
+  (the key conversion). JSON at **`/api/v1/stats.json`**.
+- **How it records:** `backend/app/stats.py`. Each event is appended to an **Azure append blob**
+  (`stats/events.jsonl`) when `STORAGE_ACCOUNT_NAME` / `STORAGE_ACCOUNT_KEY` are set; otherwise it
+  falls back to **in-memory** (resets on restart). The append blob is created on first event.
+- **Wiring (already done in dev):**
+  ```bash
+  KEY=$(az storage account keys list -n stavoulia97186 -g rg-avoulia-fr-dev --query "[0].value" -o tsv)
+  az containerapp update -n avoulia-backend -g rg-avoulia-fr-dev \
+    --set-env-vars STORAGE_ACCOUNT_NAME=stavoulia97186 STORAGE_ACCOUNT_KEY="$KEY"
+  ```
+  Without these env vars the app still works (memory fallback); with them stats survive restarts.
+- **Recording points:** domaine (at selection) + problème (free-text Q3 that yields the case list)
+  in `routes/chat.py::_record_usage_stats`; cas (when the verbatim card opens) in
+  `haystack_rag.py::stats.record("cas", …)`; parcours_click via `POST /api/v1/chat/parcours-click`
+  called fire-and-forget by the frontend (`chat.ts::trackParcoursClick`, wired in
+  `HomeView.vue::onParcoursClick`).
+- **Reset:** delete the blob to start clean —
+  `az storage blob delete --account-name stavoulia97186 --account-key "$KEY" --container-name stats --name events.jsonl`.
+- **Compatible with the future single-container packaging** (no new infra; FastAPI serves `/stats`).
+
+---
+
 ## 🐛 Troubleshooting
 
 | Issue | Solution |
@@ -368,6 +398,7 @@ Calling `.strip()` directly on a reply crashes with
 | The deployed `.py` ITSELF is stale (grep in the container shows old source, though the local file is up to date) | **Cached `COPY` layer in the ACR build.** `backend/Dockerfile` has `ARG CACHEBUST` before `COPY app`; always build with `--build-arg CACHEBUST=$(date +%s)` (or the image tag / git commit) so the code copy is redone from scratch |
 | A frontend change doesn't appear in the built bundle (same JS hash every build) | The edited component may be **dead code** (not imported anywhere) and tree-shaken out. The live chat UI is **`frontend/src/views/HomeView.vue`**, NOT `ChatView.vue` (deleted). Verify with `grep -r ComponentName src/`. Edit `HomeView.vue` for chat/CTA changes |
 | Users don't see a new deployment (old JS keeps loading) | `index.html` must be served `no-cache` so browsers re-fetch it and pick up the new content-hashed assets. See `frontend/nginx.conf` (`location = /index.html`) |
+| `/stats` is empty or resets on restart | The stats append blob isn't configured — set `STORAGE_ACCOUNT_NAME` / `STORAGE_ACCOUNT_KEY` env vars on the backend container app (see "Usage Stats" section). Without them, stats use an in-memory fallback that resets on each restart |
 
 
 ---
