@@ -520,9 +520,6 @@ const error = ref(null)
 const messagesBox = ref(null)
 const chatInputRef = ref(null)
 
-const initialChips = ['RH', 'Finance', 'Ventes', 'IT', 'Opérations', 'Marketing']
-const showInitialChips = computed(() => messages.value.length === 1 && !loading.value)
-
 // Index du dernier message assistant : seul lui reçoit des chips de choix cliquables
 // (on ne rend pas actionnables les questions déjà passées).
 const lastAssistantIndex = computed(() => {
