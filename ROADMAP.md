@@ -109,9 +109,9 @@ composant mort `ChatView.vue`, cache navigateur). Manque de garde-fous industrie
 
 | # | Amélioration | Détail | Impact | Effort |
 |---|---|---|---|---|
-| 4.1 | **CI/CD GitHub Actions** | Build + tests + lint + déploiement automatisés. Aujourd'hui tout est manuel (`az acr build`). **Clé pour C1 : Simplon déploie sans savoir-faire dev.** | ⭐⭐⭐⭐ | ⭐⭐⭐ |
-| 4.2 | **Smoke test post-déploiement** | Script Playwright rejouant « sélection d'un cas → bouton présent → page 200 » à chaque release (fait à la main aujourd'hui). | ⭐⭐⭐⭐ | ⭐⭐ |
-| 4.3 | **Détection de code mort (lint)** | Ne plus jamais éditer un fichier non importé (cf. `ChatView.vue`). | ⭐⭐⭐ | ⭐ |
+| 4.1 | **CI/CD GitHub Actions** | Build + tests + lint + déploiement automatisés. Aujourd'hui tout est manuel (`az acr build`). **Clé pour C1 : Simplon déploie sans savoir-faire dev.** | ⭐⭐⭐⭐ | ⭐⭐⭐ | ✅ CI faite (build+tests+code mort, sans secret) ; CD documenté |
+| 4.2 | **Smoke test post-déploiement** | Script Playwright rejouant « sélection d'un cas → bouton présent → page 200 » à chaque release (fait à la main aujourd'hui). | ⭐⭐⭐⭐ | ⭐⭐ | ✅ `smoke-test.mjs` |
+| 4.3 | **Détection de code mort (lint)** | Ne plus jamais éditer un fichier non importé (cf. `ChatView.vue`). | ⭐⭐⭐ | ⭐ | ✅ `check-dead-code.mjs` en CI |
 | 4.4 | **Alerting** | Erreurs backend (ex. crash `ChatMessage`), latence, taux d'erreur remontés proactivement. | ⭐⭐⭐ | ⭐⭐ |
 | 4.5 | **Découpler l'URL backend codée en dur** | Backend en dur dans `nginx.conf` et `parcours_util.py` → variable d'environnement/config unique. **Facilite la reprise Simplon (C1/C2).** | ⭐⭐⭐ | ⭐⭐ |
 
@@ -164,3 +164,4 @@ C'est le **levier de pertinence n°1**, mais c'est un chantier éditorial lourd 
 |---|---|
 | 2026-08-26 | Création de la roadmap. Axes retenus : 2, 3, 4, 1. Axes 5 et 6 écartés. Ordre : 2/3/4 d'abord, 1 en dernier. Contraintes de livraison Simplon (C1 simplicité, C2 traçabilité v1→v2) posées comme transverses. |
 | 2026-08-26 | **J1 livré** : ✅ 4.2 smoke test (`smoke-test.mjs`) · ✅ 2.1 message d'accueil non répété · ✅ 2.2 chips de choix cliquables (Q1/Q1.5/Q2). Validés E2E navigateur en prod. Détails dans `SUIVI_PROJET.md` (entrée « J1 : UX (accueil + chips) & smoke test »). |
+| 2026-08-31 | **Axe 3 + 4 avancés** : ✅ 3.1 stats d'usage intégrées (page `/stats`) · ✅ 3.2 feedback 👍/👎 (taux de satisfaction) · ✅ 4.1 CI GitHub Actions (build+tests+code mort, sans secret, ne déploie rien) · ✅ 4.3 détection de code mort (`check-dead-code.mjs`) + suppression du scaffolding Vite mort. CD auto documenté mais non branché (identifiants tenant Simplon). Détails dans `CHANGELOG.md` §3.7–3.9 et `SUIVI_PROJET.md`. |

@@ -150,6 +150,22 @@ puis corrige une série de bugs de fond découverts en production.
 - **Validé :** E2E navigateur — 👍 puis 👎 sur de vrais cas ; `/stats` affiche le taux + le libellé
   **propre** du cas. Compilation OK, 14/14 tests, build front OK, smoke 7/7.
 
+### 3.9 CI GitHub Actions + détection de code mort (Axe 4.1 / 4.3)
+- **Quoi :** un workflow **`.github/workflows/ci.yml`** tourne à chaque push/PR sur `main` :
+  (1) **backend** — install `requirements.txt`, `compileall`, `unittest` (14 tests) ;
+  (2) **frontend** — `type-check`, **détection de composants Vue morts**, `build`, lint (informatif).
+  Nettoyage au passage : suppression du **code mort de scaffolding Vite** (HelloWorld, TheWelcome,
+  WelcomeItem, `icons/*`).
+- **Pourquoi :** garde-fou industriel = **C1** (Simplon peut livrer sans expertise dev : une
+  régression casse la CI, visible avant déploiement) et **C2** (traçabilité : chaque PR est vérifiée).
+  La détection de code mort empêche de rééditer un fichier fantôme (cf. bug `ChatView.vue`).
+- **Comment :** `frontend/scripts/check-dead-code.mjs` (zéro dépendance) échoue si un `.vue` de `src/`
+  n'est importé nulle part (exception : `App.vue`). Exposé via `npm run check:dead`. La CI ne
+  **déploie rien** et ne requiert **aucun secret**.
+- **Où :** `.github/workflows/ci.yml`, `frontend/scripts/check-dead-code.mjs`, `frontend/package.json`
+  (script `check:dead`), suppression de `frontend/src/components/{HelloWorld,TheWelcome,WelcomeItem}.vue`
+  et `frontend/src/components/icons/`.
+
 ---
 
 ## 4. Bugs de fond corrigés — « pièges à connaître » ⚠️

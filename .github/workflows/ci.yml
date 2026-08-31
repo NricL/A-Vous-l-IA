@@ -1,0 +1,68 @@
+name: CI — build, tests & garde-fous
+
+# Garde-fous automatiques à chaque push/PR (Axe 4.1 / 4.3). Ne déploie RIEN :
+# la CI valide seulement que le code compile, que les tests passent et qu'aucun
+# composant Vue n'est mort. C'est le filet de sécurité pour C1 (Simplon peut
+# livrer sans expertise dev) et C2 (traçabilité : une régression casse la CI).
+#
+# Aucun secret requis. Le déploiement reste piloté par ailleurs (voir HANDOFF.md,
+# section « CI/CD & déploiement »).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend — compile & tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11' # aligne avec backend/Dockerfile (python:3.11-slim)
+          cache: pip
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Compile (py_compile)
+        run: python -m compileall -q app
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+
+  frontend:
+    name: Frontend — type-check, code mort & build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Type-check
+        run: npm run type-check
+      - name: Détection de composants morts
+        run: npm run check:dead
+      - name: Build
+        run: npm run build-only
+      - name: Lint (informatif — n'échoue pas la CI)
+        continue-on-error: true
+        run: |
+          npx oxlint .
+          npx eslint .

@@ -392,6 +392,43 @@ service (constraint C1). Answers "which roles/problems/cases are most visited?".
 
 ---
 
+## ⚙️ CI/CD & déploiement (2026-08-31)
+
+**CI (automatique, sans secret) —** `.github/workflows/ci.yml` tourne à chaque push/PR sur `main` :
+- **backend** : `pip install -r requirements.txt` → `python -m compileall app` → `python -m unittest`.
+- **frontend** : `npm ci` → `npm run type-check` → `npm run check:dead` → `npm run build-only`
+  (+ lint informatif, `continue-on-error`).
+
+Cette CI **ne déploie rien** — c'est un garde-fou : si le code ne compile pas, qu'un test casse ou
+qu'un composant Vue est mort, la CI passe au rouge **avant** tout déploiement.
+
+**Détection de code mort —** `frontend/scripts/check-dead-code.mjs` (`npm run check:dead`) échoue si
+un `.vue` de `src/` n'est importé nulle part (exception : `App.vue`). Objectif : ne plus jamais
+rééditer un fichier fantôme (le bug `ChatView.vue` a coûté cher). Le scaffolding Vite mort
+(HelloWorld / TheWelcome / WelcomeItem / `icons/*`) a été supprimé.
+
+**Déploiement (aujourd'hui, manuel) —** build ACR + update Container App :
+```bash
+# Backend (toujours avec CACHEBUST pour éviter la couche COPY en cache)
+az acr build --registry acravoulia97186 --image avoulia-backend:<tag> \
+  --build-arg CACHEBUST=$(date +%s) backend/
+az containerapp update -n avoulia-backend -g rg-avoulia-fr-dev \
+  --image acravoulia97186.azurecr.io/avoulia-backend:<tag>
+# Frontend (idem sans CACHEBUST)
+az acr build --registry acravoulia97186 --image avoulia-frontend:<tag> frontend/
+az containerapp update -n avoulia-frontend -g rg-avoulia-fr-dev \
+  --image acravoulia97186.azurecr.io/avoulia-frontend:<tag>
+```
+**Pour ajouter le CD (déploiement auto) plus tard :** créer un service principal / OIDC côté tenant
+Simplon, stocker les identifiants en **secrets GitHub**, et ajouter un job `deploy` (needs: [backend,
+frontend]) qui rejoue les commandes ci-dessus puis `node smoke-test.mjs`. Volontairement **non
+branché ici** car les identifiants sont spécifiques au tenant d'hébergement (Simplon).
+
+**GitHub Pages —** `.github/workflows/pages.yml` publie le frontend statique sur Pages (vitrine) ;
+distinct du déploiement applicatif sur Container Apps.
+
+---
+
 ## 🐛 Troubleshooting
 
 | Issue | Solution |

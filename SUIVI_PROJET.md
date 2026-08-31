@@ -5,6 +5,21 @@
 **Tenant cible:** Production Azure (westeurope, tenant officiel)  
 **Repo:** `NricL/A-Vous-l-IA` (privé — source unique)
 
+### Update 2026-08-31 (1) — Axe 4.1 + 4.3 : CI GitHub Actions & détection de code mort — POUSSÉ ✅
+- 🎯 Garde-fous industriels pour C1 (Simplon livre sans expertise dev) et C2 (traçabilité) : plus
+  aucune régression silencieuse ne part en prod.
+- ✅ **CI (`.github/workflows/ci.yml`)** sur push/PR `main`, **sans secret**, **ne déploie rien** :
+  backend (`compileall` + 14 tests) · frontend (`type-check` + `check:dead` + `build` + lint informatif).
+- ✅ **Détection de code mort (4.3, `frontend/scripts/check-dead-code.mjs`)** : échoue si un `.vue` de
+  `src/` n'est importé nulle part (garde-fou anti-`ChatView.vue`). Exposé via `npm run check:dead`.
+- ✅ **Nettoyage :** suppression du scaffolding Vite mort (HelloWorld, TheWelcome, WelcomeItem,
+  `icons/*`) — 8 fichiers. Build front OK après suppression, `check:dead` vert (5 composants réels).
+- 🧪 Validé localement (compileall OK, 14/14 tests, type-check + build OK, check:dead OK) puis
+  **CI GitHub Actions vérifiée au vert** après push.
+- 📄 Doc : CHANGELOG §3.9, HANDOFF (section « CI/CD & déploiement » + chemin pour brancher le CD).
+- ⏭️ CD auto volontairement non branché (identifiants spécifiques au tenant Simplon) — procédure
+  documentée dans HANDOFF.
+
 ### Update 2026-08-27 (5) — Axe 3.2 : feedback 👍/👎 sur les cas — DÉPLOYÉ ✅
 - 🎯 Mesurer la **qualité perçue** des cas recommandés (pas juste le volume), pour prioriser
   l'amélioration de la base. Reste simple et intégré (C1), aucun produit externe.
