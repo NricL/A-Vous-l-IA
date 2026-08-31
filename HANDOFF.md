@@ -392,6 +392,24 @@ service (constraint C1). Answers "which roles/problems/cases are most visited?".
 
 ---
 
+## 🔁 Lien "Retour à Avoulia" sur les pages parcours (Axe 3.4, 2026-08-31)
+
+Chaque page parcours (`backend/app/static/parcours/action-*.html`, servie par le backend, ouverte
+dans un nouvel onglet) contient un lien **« ← Retour à Avoulia »** (en tête + rappel en pied) vers
+l'app chat, pour relancer l'exploration au lieu de laisser l'utilisateur dans un cul-de-sac.
+
+**⚠️ Important :** ces liens sont **injectés** dans les fichiers statiques par
+`backend/scripts/add_backlink_parcours.py`, PAS par le générateur. Raison : les pages servies
+utilisent un template abouti dont le générateur canonique n'est pas `generate_parcours_pages.py`
+(ce dernier produit un template plus ancien — **ne pas l'utiliser pour régénérer**, cela écraserait
+le design actuel). Le script est **idempotent** (marqueur `id="avoulia-back"`).
+
+**Si les pages sont un jour régénérées** (nouveau lot depuis l'Excel) : relancer
+`python scripts/add_backlink_parcours.py` (depuis `backend/`) pour réinjecter les liens. L'URL de
+l'app vient de `AVOULIA_APP_URL` (défaut = front Container App) — cohérent avec l'Axe 4.5.
+
+---
+
 ## 🔧 URL backend = variable unique (Axe 4.5, 2026-08-31)
 
 Pour héberger ailleurs (reprise Simplon), **une seule variable par composant** suffit — plus aucune

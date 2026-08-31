@@ -92,10 +92,10 @@ est déjà branché — reste à exploiter les events.
 
 | # | Amélioration | Détail | Impact | Effort |
 |---|---|---|---|---|
-| 3.1 | **Funnel instrumenté + dashboard** | Exploiter les events App Insights : % arrivant à une fiche, % clics parcours, % étape 1 complétée. Dashboard lisible par le PO. | ⭐⭐⭐⭐⭐ | ⭐⭐ |
-| 3.2 | **Feedback ↑/↓** | Pouce haut/bas sur chaque cas et sur le parcours → signal de pertinence, alimente l'Axe 1. | ⭐⭐⭐⭐ | ⭐⭐ |
-| 3.3 | **A/B testing du CTA & du pitch** | On a itéré « au feeling » ; tester wording du bouton et du pitch avec des données. | ⭐⭐⭐ | ⭐⭐⭐ |
-| 3.4 | **Expérience de sortie parcours** | Le parcours s'ouvre dans un nouvel onglet backend — vérifier le meilleur flux (retour au chat ? relance ?). | ⭐⭐⭐ | ⭐⭐ |
+| 3.1 | **Funnel instrumenté + dashboard** | Exploiter les events App Insights : % arrivant à une fiche, % clics parcours, % étape 1 complétée. Dashboard lisible par le PO. | ⭐⭐⭐⭐⭐ | ⭐⭐ | ✅ Stats intégrées (`/stats`) |
+| 3.2 | **Feedback ↑/↓** | Pouce haut/bas sur chaque cas et sur le parcours → signal de pertinence, alimente l'Axe 1. | ⭐⭐⭐⭐ | ⭐⭐ | ✅ Feedback 👍/👎 |
+| 3.3 | **A/B testing du CTA & du pitch** | On a itéré « au feeling » ; tester wording du bouton et du pitch avec des données. | ⭐⭐⭐ | ⭐⭐⭐ | ❌ Abandonné (décision Eneric 2026-08-31) |
+| 3.4 | **Expérience de sortie parcours** | Le parcours s'ouvre dans un nouvel onglet backend — vérifier le meilleur flux (retour au chat ? relance ?). | ⭐⭐⭐ | ⭐⭐ | ✅ Lien « Retour à Avoulia » (haut + pied) + relance via stepper |
 
 **Quick wins :** 3.1 (funnel/dashboard) et 3.2 (feedback). *Sans mesure, on pilote à l'aveugle.*
 
@@ -166,3 +166,4 @@ C'est le **levier de pertinence n°1**, mais c'est un chantier éditorial lourd 
 | 2026-08-26 | **J1 livré** : ✅ 4.2 smoke test (`smoke-test.mjs`) · ✅ 2.1 message d'accueil non répété · ✅ 2.2 chips de choix cliquables (Q1/Q1.5/Q2). Validés E2E navigateur en prod. Détails dans `SUIVI_PROJET.md` (entrée « J1 : UX (accueil + chips) & smoke test »). |
 | 2026-08-31 | **Axe 3 + 4 avancés** : ✅ 3.1 stats d'usage intégrées (page `/stats`) · ✅ 3.2 feedback 👍/👎 (taux de satisfaction) · ✅ 4.1 CI GitHub Actions (build+tests+code mort, sans secret, ne déploie rien) · ✅ 4.3 détection de code mort (`check-dead-code.mjs`) + suppression du scaffolding Vite mort. CD auto documenté mais non branché (identifiants tenant Simplon). Détails dans `CHANGELOG.md` §3.7–3.9 et `SUIVI_PROJET.md`. |
 | 2026-08-31 | **Axe 4.5 livré** : ✅ URL backend = variable de config unique (`PARCOURS_BASE_URL` côté backend via `config.py` ; `BACKEND_ORIGIN` côté frontend via `nginx.conf.template` + envsubst). Reprise Simplon = changer une variable, sans éditer le code. Validé E2E (proxy `/api/` + SSE). Détails `CHANGELOG.md` §3.10. |
+| 2026-08-31 | **Axe 3.4 livré + 3.3 abandonné** : ✅ 3.4 lien « Retour à Avoulia » (haut + pied) sur les 1025 pages parcours via script idempotent `add_backlink_parcours.py` (relance au lieu du cul-de-sac ; relance chat déjà assurée par le stepper cliquable). ❌ 3.3 (A/B testing CTA/pitch) **abandonné définitivement** (décision Eneric). Détails `CHANGELOG.md` §3.11. |

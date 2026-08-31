@@ -182,6 +182,22 @@ puis corrige une série de bugs de fond découverts en production.
 - **Validé :** défaut + override `PARCOURS_BASE_URL` testés ; frontend redéployé **Healthy**,
   proxy `/api/` OK (welcome + **streaming SSE** à travers nginx), smoke 7/7.
 
+### 3.11 Expérience de sortie du parcours (Axe 3.4)
+- **Quoi :** chaque page parcours (ouverte dans un nouvel onglet) gagne un **lien « ← Retour à
+  Avoulia »** en tête ET un rappel en pied (« ← Revenir à Avoulia pour explorer d'autres cas
+  d'usage »), pointant vers l'app chat. Fini le cul-de-sac : l'utilisateur peut relancer une
+  exploration. Côté chat, la relance existait déjà (le **stepper cliquable** « Cas d'usage » ramène
+  à la liste des cas).
+- **Pourquoi :** transformer la fin de parcours en **relance** (re-engagement) plutôt qu'en impasse.
+- **Comment (sans régression) :** les 1025 pages servies utilisent un template abouti dont le
+  générateur canonique n'est pas `generate_parcours_pages.py`. Plutôt que de régénérer (risque de
+  régression visuelle), un script **idempotent** `add_backlink_parcours.py` **injecte** les deux
+  liens dans les fichiers existants (marqueur `id="avoulia-back"` → ré-exécutable sans doublon).
+  URL de l'app via `AVOULIA_APP_URL` (défaut = front Container App), cohérent Axe 4.5.
+- **Où :** `backend/scripts/add_backlink_parcours.py` (nouveau), `backend/app/static/parcours/action-*.html`
+  (1025 pages, 2 lignes ajoutées chacune).
+- **Validé :** page prod affiche les 2 liens, clic → atterrit sur l'app ; template intact ; smoke 7/7.
+
 ---
 
 ## 4. Bugs de fond corrigés — « pièges à connaître » ⚠️

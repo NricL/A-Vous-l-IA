@@ -5,6 +5,22 @@
 **Tenant cible:** Production Azure (westeurope, tenant officiel)  
 **Repo:** `NricL/A-Vous-l-IA` (privé — source unique)
 
+### Update 2026-08-31 (3) — Axe 3.4 : sortie de parcours (lien Retour) — DÉPLOYÉ ✅ · 3.3 abandonné
+- 🎯 Ne plus laisser l'utilisateur dans un cul-de-sac quand le parcours s'ouvre dans un nouvel onglet.
+- ✅ **Pages parcours :** lien **« ← Retour à Avoulia »** en tête + rappel en pied (« Revenir à Avoulia
+  pour explorer d'autres cas d'usage ») pointant vers l'app chat, sur les **1025 pages**.
+- ✅ **Sans régression :** au lieu de régénérer (le générateur `generate_parcours_pages.py` produit un
+  template ANCIEN, à ne pas utiliser), un script **idempotent** `add_backlink_parcours.py` injecte 2
+  lignes par page (marqueur `id="avoulia-back"`). URL app via `AVOULIA_APP_URL` (défaut front,
+  cohérent Axe 4.5).
+- ✅ **Relance côté chat :** déjà couverte par le **stepper cliquable** (« Cas d'usage » → retour à la
+  liste) — pas de doublon ajouté (C1).
+- 🧪 **Validé (prod) :** page parcours affiche les 2 liens ; clic → atterrit sur l'app ; template
+  intact (aucune régression visuelle) ; smoke 7/7.
+- ✅ Déployé `avoulia-backend--0000040` (`v2-backlink-1788170089`).
+- ❌ **3.3 (A/B testing CTA/pitch) abandonné définitivement** (décision Eneric).
+- 📄 Doc : CHANGELOG §3.11, HANDOFF (section « Lien Retour à Avoulia »), ROADMAP (3.4 ✅ / 3.3 ❌).
+
 ### Update 2026-08-31 (2) — Axe 4.5 : URL backend = variable de config unique — DÉPLOYÉ ✅
 - 🎯 Faciliter la reprise Simplon (C1/C2) : héberger ailleurs = changer **une variable**, sans éditer
   le code. Les URL backend étaient codées en dur à ~6 endroits.
