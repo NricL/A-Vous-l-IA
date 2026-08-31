@@ -24,10 +24,15 @@ server {
     }
 
     location /api/ {
-        proxy_pass https://avoulia-backend.purpleocean-980317d1.francecentral.azurecontainerapps.io;
+        # URL du backend = source UNIQUE via la variable d'env BACKEND_ORIGIN (Axe 4.5).
+        # Ce fichier est un TEMPLATE : l'entrypoint de l'image nginx substitue ${BACKEND_ORIGIN}
+        # au démarrage (envsubst). Les variables nginx ($uri, $scheme, $proxy_host…) sont
+        # préservées car elles ne sont pas définies dans l'environnement du conteneur.
+        proxy_pass ${BACKEND_ORIGIN};
         proxy_http_version 1.1;
         proxy_ssl_server_name on;
-        proxy_set_header Host avoulia-backend.purpleocean-980317d1.francecentral.azurecontainerapps.io;
+        # Host dérivé automatiquement de proxy_pass — pas besoin d'une 2e variable.
+        proxy_set_header Host $proxy_host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;

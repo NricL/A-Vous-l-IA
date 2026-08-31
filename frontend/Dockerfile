@@ -14,7 +14,12 @@ RUN npm run build-only
 FROM nginx:alpine
 
 COPY --from=builder /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# nginx.conf.template : l'entrypoint officiel de l'image nginx exécute envsubst sur
+# /etc/nginx/templates/*.template au démarrage → /etc/nginx/conf.d/. La seule variable
+# substituée est ${BACKEND_ORIGIN} (Axe 4.5 : URL backend = source unique, surchargée
+# par l'env du conteneur). Valeur par défaut = backend de dev ci-dessous.
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
+ENV BACKEND_ORIGIN=https://avoulia-backend.purpleocean-980317d1.francecentral.azurecontainerapps.io
 
 EXPOSE 80
 

@@ -392,6 +392,31 @@ service (constraint C1). Answers "which roles/problems/cases are most visited?".
 
 ---
 
+## 🔧 URL backend = variable unique (Axe 4.5, 2026-08-31)
+
+Pour héberger ailleurs (reprise Simplon), **une seule variable par composant** suffit — plus aucune
+URL codée en dur à traquer :
+
+| Composant | Variable | Où | Défaut |
+|---|---|---|---|
+| Backend (génère les liens parcours) | `PARCOURS_BASE_URL` | `config.py` → `parcours_base_url`, lue par `parcours_util._parcours_base_url()` | URL Container App backend |
+| Frontend (proxy nginx `/api/`) | `BACKEND_ORIGIN` | `nginx.conf.template` (`${BACKEND_ORIGIN}`), défaut dans `frontend/Dockerfile` | URL Container App backend |
+| Vitrine GitHub Pages (build Vite) | `BACKEND_ORIGIN` | `.github/workflows/pages.yml` (`env`) → `VITE_API_URL` | idem |
+| Smoke test | `SMOKE_BASE_URL` / `PARCOURS_BASE_URL` | `smoke-test.mjs` | idem |
+
+**Frontend — comment ça marche :** `nginx.conf.template` est monté dans `/etc/nginx/templates/` ;
+l'entrypoint officiel de l'image nginx exécute `envsubst` au démarrage et ne substitue que les
+variables **définies dans l'environnement** (donc `${BACKEND_ORIGIN}`), en préservant les variables
+nginx (`$uri`, `$scheme`, `$proxy_host`…). Le Host de l'upstream est dérivé via `$proxy_host` (pas de
+2ᵉ variable). Pour changer de backend : `az containerapp update -n avoulia-frontend -g rg-avoulia-fr-dev
+--set-env-vars BACKEND_ORIGIN=https://mon-backend...` (ou éditer le défaut du Dockerfile).
+
+**Backend — comment ça marche :** `PARCOURS_BASE_URL` (env) est lue via `get_settings().parcours_base_url`.
+Pour changer : `az containerapp update -n avoulia-backend -g rg-avoulia-fr-dev --set-env-vars
+PARCOURS_BASE_URL=https://mon-backend...`.
+
+---
+
 ## ⚙️ CI/CD & déploiement (2026-08-31)
 
 **CI (automatique, sans secret) —** `.github/workflows/ci.yml` tourne à chaque push/PR sur `main` :
@@ -445,7 +470,7 @@ distinct du déploiement applicatif sur Container Apps.
 | A code fix is in the deployed `.py` (confirmed by `grep` in the container) but prod still shows the OLD behavior | **Stale Python bytecode.** Old `__pycache__/*.pyc` (even from a different Python version, e.g. a dev machine's `cpython-314.pyc`) shipped in the image and ran instead of the up-to-date source. The `backend/Dockerfile` now purges `__pycache__` after `COPY app` and sets `PYTHONDONTWRITEBYTECODE=1`. Never copy/commit `__pycache__` into the build context |
 | The deployed `.py` ITSELF is stale (grep in the container shows old source, though the local file is up to date) | **Cached `COPY` layer in the ACR build.** `backend/Dockerfile` has `ARG CACHEBUST` before `COPY app`; always build with `--build-arg CACHEBUST=$(date +%s)` (or the image tag / git commit) so the code copy is redone from scratch |
 | A frontend change doesn't appear in the built bundle (same JS hash every build) | The edited component may be **dead code** (not imported anywhere) and tree-shaken out. The live chat UI is **`frontend/src/views/HomeView.vue`**, NOT `ChatView.vue` (deleted). Verify with `grep -r ComponentName src/`. Edit `HomeView.vue` for chat/CTA changes |
-| Users don't see a new deployment (old JS keeps loading) | `index.html` must be served `no-cache` so browsers re-fetch it and pick up the new content-hashed assets. See `frontend/nginx.conf` (`location = /index.html`) |
+| Users don't see a new deployment (old JS keeps loading) | `index.html` must be served `no-cache` so browsers re-fetch it and pick up the new content-hashed assets. See `frontend/nginx.conf.template` (`location = /index.html`) |
 | `/stats` is empty or resets on restart | The stats append blob isn't configured — set `STORAGE_ACCOUNT_NAME` / `STORAGE_ACCOUNT_KEY` env vars on the backend container app (see "Usage Stats" section). Without them, stats use an in-memory fallback that resets on each restart |
 
 

@@ -5,6 +5,22 @@
 **Tenant cible:** Production Azure (westeurope, tenant officiel)  
 **Repo:** `NricL/A-Vous-l-IA` (privé — source unique)
 
+### Update 2026-08-31 (2) — Axe 4.5 : URL backend = variable de config unique — DÉPLOYÉ ✅
+- 🎯 Faciliter la reprise Simplon (C1/C2) : héberger ailleurs = changer **une variable**, sans éditer
+  le code. Les URL backend étaient codées en dur à ~6 endroits.
+- ✅ **Backend :** `parcours_util.py` lit `config.parcours_base_url` (env `PARCOURS_BASE_URL`, un seul
+  défaut) via `_parcours_base_url()` — suppression des 2 URL codées en dur.
+- ✅ **Frontend :** `nginx.conf` → **`nginx.conf.template`** avec `${BACKEND_ORIGIN}` (envsubst natif de
+  l'image nginx au démarrage) ; Host dérivé via `$proxy_host` (une seule variable). Défaut posé dans
+  `frontend/Dockerfile` (`ENV BACKEND_ORIGIN`).
+- ✅ **CI Pages + smoke test :** déclaration unique (`env.BACKEND_ORIGIN`, `SMOKE_BASE_URL`/`PARCOURS_BASE_URL`).
+- ✅ **docker-compose :** hint commenté pour proxifier le backend local.
+- 🧪 **Validé (prod) :** défaut + override `PARCOURS_BASE_URL` (→ `https://example.test/...`) ; frontend
+  redéployé **Healthy** ; proxy `/api/` OK (welcome **et streaming SSE** à travers nginx) ; smoke 7/7 ;
+  14/14 tests backend.
+- ✅ Déployé `avoulia-backend--0000039` (`v2-cfg-1788165180`) + `avoulia-frontend--0000022` (`v2-cfg-1788165520`).
+- 📄 Doc : CHANGELOG §3.10, HANDOFF (section « URL backend = variable unique »), ROADMAP (4.5 ✅).
+
 ### Update 2026-08-31 (1) — Axe 4.1 + 4.3 : CI GitHub Actions & détection de code mort — POUSSÉ ✅
 - 🎯 Garde-fous industriels pour C1 (Simplon livre sans expertise dev) et C2 (traçabilité) : plus
   aucune régression silencieuse ne part en prod.

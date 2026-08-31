@@ -128,12 +128,21 @@ def _resolve_case_hash(case_id: str, salt: Optional[str] = None) -> str:
     return generate_case_hash(normalized, salt)
 
 
+def _parcours_base_url() -> str:
+    """Source UNIQUE de l'URL de base des parcours (Axe 4.5).
+
+    Lue depuis la config (`parcours_base_url`, variable d'env `PARCOURS_BASE_URL`) : un seul
+    endroit à changer pour rebrander/relocaliser le backend (reprise Simplon, C1/C2).
+    Import différé pour éviter tout cycle d'import au chargement du module.
+    """
+    from app.config import get_settings
+
+    return (get_settings().parcours_base_url or "").rstrip("/")
+
+
 def build_parcours_url(case_id: str, salt: Optional[str] = None) -> str:
     """Build complete parcours URL for a case."""
-    base_url = os.getenv(
-        "PARCOURS_BASE_URL",
-        "https://avoulia-backend.purpleocean-980317d1.francecentral.azurecontainerapps.io",
-    ).rstrip("/")
+    base_url = _parcours_base_url()
     case_hash = _resolve_case_hash(case_id, salt)
     return f"{base_url}/action-{case_hash}.html"
 
@@ -188,9 +197,6 @@ def get_parcours_pitch() -> dict:
 def build_parcours_info(case_id: str, salt: Optional[str] = None) -> dict:
     """Build dictionary with case_hash, parcours_url and the parcours pitch (cta_label, message_suffix)."""
     case_hash = _resolve_case_hash(case_id, salt)
-    base_url = os.getenv(
-        "PARCOURS_BASE_URL",
-        "https://avoulia-backend.purpleocean-980317d1.francecentral.azurecontainerapps.io",
-    ).rstrip("/")
+    base_url = _parcours_base_url()
     parcours_url = f"{base_url}/action-{case_hash}.html"
     return {"case_hash": case_hash, "parcours_url": parcours_url, **get_parcours_pitch()}

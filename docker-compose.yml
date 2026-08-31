@@ -27,6 +27,10 @@ services:
       - "8080:80"
     depends_on:
       - backend
+    # URL du backend proxifié par nginx (Axe 4.5). Par défaut l'image pointe vers le backend
+    # de dev distant ; décommentez pour proxifier le backend local de ce compose :
+    # environment:
+    #   - BACKEND_ORIGIN=http://backend:8000
     restart: unless-stopped
 
 volumes:

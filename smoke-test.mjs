@@ -24,7 +24,12 @@
  */
 
 const DEFAULT_BASE = 'https://avoulia-backend.purpleocean-980317d1.francecentral.azurecontainerapps.io';
-const BASE = (process.argv[2] || process.env.SMOKE_BASE_URL || DEFAULT_BASE).replace(/\/+$/, '');
+const BASE = (
+  process.argv[2] ||
+  process.env.SMOKE_BASE_URL ||
+  process.env.PARCOURS_BASE_URL ||
+  DEFAULT_BASE
+).replace(/\/+$/, '');
 const API = `${BASE}/api/v1`;
 
 let passed = 0;

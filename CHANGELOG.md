@@ -166,6 +166,22 @@ puis corrige une série de bugs de fond découverts en production.
   (script `check:dead`), suppression de `frontend/src/components/{HelloWorld,TheWelcome,WelcomeItem}.vue`
   et `frontend/src/components/icons/`.
 
+### 3.10 URL backend = source de configuration unique (Axe 4.5)
+- **Quoi :** l'URL du backend n'est plus codée en dur à plusieurs endroits. **Backend :**
+  `parcours_util.py` lit désormais `config.parcours_base_url` (variable d'env `PARCOURS_BASE_URL`,
+  un seul défaut). **Frontend :** `nginx.conf` devient `nginx.conf.template` avec `${BACKEND_ORIGIN}`
+  substitué au démarrage (envsubst natif de l'image nginx) ; le Host est dérivé via `$proxy_host`
+  (pas de 2ᵉ variable). **CI Pages** et **smoke test** pointent aussi vers une déclaration unique.
+- **Pourquoi :** **reprise Simplon (C1/C2)** — pour héberger ailleurs (autre tenant/URL), il suffit de
+  changer **une variable** (`PARCOURS_BASE_URL` côté backend, `BACKEND_ORIGIN` côté frontend), sans
+  éditer le code. Évite les URL éparpillées et désynchronisées.
+- **Où :** `backend/app/parcours_util.py` (`_parcours_base_url()`), `backend/app/config.py`
+  (`parcours_base_url`, défaut unique), `frontend/nginx.conf.template` (+ `frontend/Dockerfile`
+  `ENV BACKEND_ORIGIN`), `frontend/docker-compose` (hint), `.github/workflows/pages.yml`
+  (`env.BACKEND_ORIGIN`), `smoke-test.mjs`.
+- **Validé :** défaut + override `PARCOURS_BASE_URL` testés ; frontend redéployé **Healthy**,
+  proxy `/api/` OK (welcome + **streaming SSE** à travers nginx), smoke 7/7.
+
 ---
 
 ## 4. Bugs de fond corrigés — « pièges à connaître » ⚠️
