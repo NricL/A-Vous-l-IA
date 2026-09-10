@@ -7,7 +7,10 @@ from fastapi.responses import StreamingResponse
 from app.config import get_settings
 from app.models import ChatRequest, ChatResponse, SuggestedCase
 from app.rag import chat_simple, chat_simple_stream, stream_prompt
-from app.haystack_rag import query_rag_haystack, get_rag_prompt_and_sources, WELCOME_MESSAGE
+from app.haystack_rag import (
+    query_rag_haystack, get_rag_prompt_and_sources, WELCOME_MESSAGE,
+    _reconcile_generated_case_list,
+)
 from app.parcours_util import build_parcours_info, get_parcours_pitch, PARCOURS_PITCH_SENTINEL
 from app.rag_constants import Q1_DOMAINS_LIST, CHOIX_Q1_TO_DOMAINE_CODE
 from app.telemetry import track_backend_chat_event
@@ -387,6 +390,7 @@ def _stream_chat(request: ChatRequest, session_id: str | None):
                 selected_intention=request.selected_intention,
             )
             suggested_cases = _build_suggested_cases(suggested_case_ids, full_contents, case_extras)
+            has_prebuilt_cases = bool(niveau2_prebuilt and suggested_cases)
             _record_usage_stats(request, selected_domain_code, suggested_cases, niveau2_prebuilt)
             niveau2_prebuilt = _append_parcours_links_to_answer(
                 niveau2_prebuilt,
@@ -408,9 +412,13 @@ def _stream_chat(request: ChatRequest, session_id: str | None):
                         pending_use_case_id=request.pending_use_case_id,
                         pending_case_index=None,
                     )
-                streamed_answer = _align_level1_list_with_selectable_cases(
-                    streamed_answer, len(suggested_cases or [])
-                )
+                if suggested_cases:
+                    streamed_answer, retained = _reconcile_generated_case_list(
+                        streamed_answer, [case.model_dump() for case in suggested_cases]
+                    )
+                    sources = [sources[i] for i in retained]
+                    suggested_case_ids = [suggested_case_ids[i] for i in retained]
+                    suggested_cases = [suggested_cases[i] for i in retained]
                 if streamed_answer:
                     yield _sse_line({"t": streamed_answer})
             done_payload = {
@@ -423,8 +431,8 @@ def _stream_chat(request: ChatRequest, session_id: str | None):
                 "selected_intention": selected_intention,
                 # Preserve the request selection so the frontend can attach the
                 # parcours CTA to the exact case on detail responses.
-                "pending_action": request.pending_action,
-                "pending_use_case_id": request.pending_use_case_id,
+                "pending_action": request.pending_action if has_prebuilt_cases else None,
+                "pending_use_case_id": request.pending_use_case_id if has_prebuilt_cases else None,
                 "pending_case_index": None,
                 # Bouton parcours AUTORITATIF : dès qu'un cas est réellement sélectionné
                 # (réponse détail), le backend fournit l'URL + le libellé exacts. Le frontend

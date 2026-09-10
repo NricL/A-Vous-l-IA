@@ -1,8 +1,68 @@
 # Avoulia V2 — Implementation Handover Guide for Simplon
 
+## Canal de livraison Eneric — confirmé le 10 septembre 2026
+
+Référence de code et suivi : `NricL/A-Vous-l-IA`. Référence de test utilisateur : https://nricl.github.io/A-Vous-l-IA/. Chaque livraison comprend code + `SUIVI_PROJET.md`, `ROADMAP.md`, `CHANGELOG.md` et ce guide lorsque pertinent.
+
+Le workflow `.github/workflows/pages.yml` publie le frontend sous `/A-Vous-l-IA/` avec `VITE_API_URL` ciblant le backend Azure. Un push de changements frontend sur `main` déclenche Pages ; un changement backend/documentation seul ne le déclenche pas (déclenchement manuel disponible). Ce workflow ne met pas à jour le backend Azure. Après une livraison, distinguer version backend, version Pages et état des pages parcours ; contrôler le site GitHub Pages lui-même, pas seulement le frontend Container Apps.
+
+Le rattrapage du frontend Pages est encore à publier à l'inscription de cette règle. Le package Simplon demeure différé.
+
 **Status:** Ready for Handover (2026-07-10)  
 **Target:** Deploy Avoulia V2 with Parcours Pages + App Insights Telemetry to Production Azure  
 **Audience:** Simplon DevOps / Backend Team
+
+## Addendum du 9 septembre 2026 — préparation locale, pas encore une livraison
+
+### Livraison limitée DEV du 10 septembre — pas un package Simplon
+
+Eneric a autorisé le déploiement sur les ressources de développement existantes. Backend final0045, frontend0023 ; images et preuves dans `SUIVI_PROJET.md`. Les notes de préparation locale précédentes ne doivent pas être interprétées comme l'état actuel du chatbot dev.
+
+Pour préserver exactement la base et les pages alors déployées, la recette `backend/Dockerfile.dev-code-only` hérite d'une image existante **par digest** et copie seulement deux fichiers Python. Le contexte de build utilisé contenait uniquement cette recette (nommée Dockerfile), `app/haystack_rag.py` et `app/routes/chat.py`. Aucun Excel, secret ou mapping n'y a été ajouté. La base immuable utilisée est :
+
+```text
+acravoulia97186.azurecr.io/avoulia-backend@sha256:9d885637d00ded89af891807e0173e1772dc513d9ec1ee6a0a82b87ae6894b8a
+```
+
+Exemple de commande de build, depuis ce contexte minimal, après validation et confirmation de la cible :
+
+```powershell
+az acr build --registry acravoulia97186 --subscription "<abonnement-dev>" --image avoulia-backend:<nouveau-tag> --build-arg "BASE_IMAGE=acravoulia97186.azurecr.io/avoulia-backend@sha256:9d885637d00ded89af891807e0173e1772dc513d9ec1ee6a0a82b87ae6894b8a" --file Dockerfile --no-logs .
+```
+
+Le frontend a été construit avec son Dockerfile existant, et les applications mises à jour par `az containerapp update --image`, sans modification de leurs variables/secrets. Pour une future mise à jour, ne pas appliquer cette recette aveuglément : comparer dépendances, modules importés et modifications déjà en ligne, vérifier la base de départ et relever les images de rollback. Cette recette de dev **n'est pas la procédure finale Simplon**.
+
+Rollback du lot : réaffecter l'image backend `v2-parcoursfix3-1788183296` et/ou frontend `v2-cfg-1788165520` sur les mêmes ressources, puis vérifier santé et trafic. Ne pas supprimer les ressources ni tourner le sel. Les modifications de gabarits CHAT-04/05/06 ne sont pas livrées : leur future intégration reste soumise au rapprochement des sources et mappings indiqué ci-dessous.
+
+### Évaluation de pertinence ajoutée le 10 septembre (outil indépendant du packaging)
+
+Depuis `backend`, exécuter `python scripts\evaluate_chat_relevance.py` pour préparer les scénarios sans réseau. La suite `python -B -m unittest discover -s tests -q` couvre aussi le banc ; elle n'appelle pas Azure.
+
+Pour une évaluation réelle explicitement autorisée, utiliser un chemin JSON privé nouveau et une cible explicite :
+
+```powershell
+python scripts\evaluate_chat_relevance.py --live --subscription "<abonnement>" --resource-group "<groupe>" --container-app "<application>" --scenario zero-match --scenario synonyms-zero-keyword-overlap --repeats 2 --max-completion-tokens 6000 --interval-seconds 90 --output "<chemin-prive-nouveau.json>"
+```
+
+Cela consomme des tokens sur la ressource existante ; maximum 16 tentatives par campagne (4 pour la commande ci-dessus), aucune modification de ressource ou déploiement. L'authentification par jeton CLI est utilisée par défaut, sans bascule silencieuse vers une clé. Le plafond inclut raisonnement ET sortie ; le plafond initial de 1 200 a tronqué plusieurs réponses et ne permettait pas de conclure. Ne pas confondre une réponse tronquée, une liste non reconnue et une erreur de pertinence.
+
+Les rapports bruts du 10 septembre sont privés et synthétiques, non des données de production. Le verdict strict n'est pas un taux de précision utilisateurs. Les questions de suivi numérotées peuvent déclencher le diagnostic strict de parsing ; lire la réponse brute avant de conclure. Ne pas changer les attentes d'un rapport déjà exécuté ni publier un résultat favorable en ignorant ses limites.
+
+**Report explicite à 15:41** : Eneric demande de ne pas préparer ni assembler le package Simplon à ce stade. Ce guide conserve les exigences et précautions pour une reprise ultérieure ; il ne constitue pas un ordre de packaging ou de déploiement. Les travaux courants reprennent sur les corrections restantes et leur documentation.
+
+**Contrat de liste à préserver lors de la future reprise** : niveau 1 peut omettre des candidats périphériques. Le rapprochement serveur (`_reconcile_generated_case_list`, utilisé par les chemins HTTP/SSE) doit rester actif : mêmes cas, même ordre, mêmes IDs et sources entre texte affiché et sélection. Les numéros Markdown en gras, blocs inconnus, doublons et titres ambigus sont couverts par `backend/tests/test_chat_relevance.py`. Ne pas remplacer cette vérification d'identité par un simple compte des éléments. Ce contrôle ne mesure pas la pertinence sémantique ; le détail verbatim conserve son chemin distinct.
+
+Les instructions et statuts historiques ci-dessous ne valent pas validation de la future livraison de septembre. Le périmètre est limité aux corrections du chatbot et aux colonnes Excel existantes, sans pivot.
+
+**Sources de génération à distinguer impérativement :**
+- Le gabarit des six étapes actuellement observées est `templates/page.html.j2` du dépôt `avoulia-parcours`, généré par son `pipeline/genere.py`.
+- Le script `backend/scripts/generate_parcours_pages.py` embarque un ancien gabarit ; ne pas l'exécuter pour publier les corrections UX de septembre.
+- Le générateur parcours produit `dist/action/<hash>/index.html`, alors que le backend observé sert `app/static/parcours/action-<hash>.html`. Les contrats de mapping, de sel et de liens de retour doivent être rapprochés avant toute régénération destinée au backend. Ne pas copier aveuglément un dossier `dist` sur les pages servies ; ne pas modifier celles-ci manuellement.
+- Préserver le classeur source et les mappings ; les corrections Excel nécessitent un nouveau fichier versionné et une validation d'Eneric. Ne pas régénérer depuis une vieille v453 par défaut.
+
+**Contrôles locaux disponibles :** depuis `backend`, lancer `python -m unittest discover -s tests`. Les tests de gabarit `test_parcours_ux.py` utilisent des cas fictifs, sans lecture de classeur ; définir `PARCOURS_SOURCE_ROOT` vers le dépôt parcours si nécessaire (sinon cette classe de tests est explicitement ignorée). Vérifier que les tests de gabarit ne sont pas ignorés avant de conclure sur la cohérence des deux sources.
+
+**Avant livraison** : aligner sources et correctifs précédemment déployés, régénérer avec le mapping approuvé, conserver les liens de retour/configuration d'environnement, contrôler ID → cas → URL → bonne page et l'ordre des six étapes, puis seulement préparer la publication et le retour arrière. Aucun de ces changements locaux n'est encore en ligne.
 
 > **Documents de référence (onboarding v1 → v2) :**
 > [`CHANGELOG.md`](./CHANGELOG.md) (**synthèse v1 → v2 — commencer ici**) ·

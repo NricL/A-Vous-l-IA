@@ -19,12 +19,16 @@
                     <div v-if="showStepper" class="stepper" aria-label="Progression">
                         <template v-for="(step, si) in steps" :key="step.label">
                             <div
-                                :class="['stepper-item', `is-${step.state}`, { 'is-clickable': step.state === 'done' }]"
-                                :role="step.state === 'done' ? 'button' : null"
-                                :tabindex="step.state === 'done' ? 0 : null"
+                                :class="['stepper-item', `is-${step.state}`, { 'is-clickable': step.state === 'done' && !loading }]"
+                                :role="step.state === 'done' ? 'button' : 'group'"
+                                :tabindex="step.state === 'done' && !loading ? 0 : null"
+                                :aria-disabled="step.state === 'done' ? loading : null"
                                 :title="step.state === 'done' ? `Modifier : ${step.label}` : null"
+                                :aria-label="step.state === 'done' ? `Modifier : ${step.label}` : step.label"
+                                :aria-current="step.state === 'current' ? 'step' : null"
                                 @click="step.state === 'done' ? goBackToStep(si) : null"
                                 @keydown.enter="step.state === 'done' ? goBackToStep(si) : null"
+                                @keydown.space.prevent="step.state === 'done' ? goBackToStep(si) : null"
                             >
                                 <span class="stepper-dot">
                                     <span v-if="step.state === 'done'">✓</span>
@@ -110,11 +114,12 @@
                             v-model="input"
                             class="chat-input"
                             type="text"
+                            aria-label="Votre réponse"
                             placeholder="Sélectionnez ou écrivez votre réponse…"
                             :disabled="loading"
                         >
-                        <button class="chat-send" type="submit" :disabled="loading || !input.trim()">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <button class="chat-send" type="submit" aria-label="Envoyer la réponse" :disabled="loading || !input.trim()">
+                            <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                 <line x1="22" y1="2" x2="11" y2="13" />
                                 <polygon points="22 2 15 22 11 13 2 9 22 2" />
                             </svg>
@@ -539,6 +544,7 @@ function detectPhase(text) {
     if (/dans quel domaine/.test(t)) return 0
     if (/quel secteur/.test(t)) return 1
     if (/objectif principal/.test(t)) return 2
+    if (/pas de cas suffisamment pertinent.*choix actuels/.test(t)) return 3
     if (/probl[èe]me concret|décrire le probl/.test(t)) return 3
     // Fiche détail d'un cas (la carte + le pitch parcours) => étape "Parcours"
     if (/passez à l'action|ce que ça vous apporte/.test(t)) return 5
@@ -581,6 +587,7 @@ const steps = computed(() => {
  * la prochaine réponse relance le flux normal. Seules les étapes « faites » sont cliquables.
  */
 function goBackToStep(stepIndex) {
+    if (loading.value) return
     let qIdx = -1
     for (let k = 0; k < messages.value.length; k++) {
         const m = messages.value[k]
@@ -644,6 +651,7 @@ async function submit(forcedText = null) {
     const text = String(forcedText ?? input.value).trim()
     if (!text || loading.value) return
 
+    loading.value = true
     input.value = ''
     error.value = null
 
@@ -653,8 +661,6 @@ async function submit(forcedText = null) {
 
     await nextTick()
     scrollToBottom()
-
-    loading.value = true
 
     try {
         await sendMessageStream(
@@ -683,19 +689,17 @@ async function submit(forcedText = null) {
                 onDone(payload) {
                     lastSuggestedCases.value = payload.suggested_cases ?? null
 
-                    const previousDomain = selectedDomainCode.value
-                    const previousSector = selectedSector.value
-
+                    // Reset stale dependents before applying authoritative fields from this response.
+                    if (payload.selected_domain_code !== undefined && payload.selected_domain_code !== selectedDomainCode.value) {
+                        selectedSector.value = null
+                        selectedIntention.value = null
+                    }
+                    if (payload.selected_sector !== undefined && payload.selected_sector !== selectedSector.value) {
+                        selectedIntention.value = null
+                    }
                     if (payload.selected_domain_code !== undefined) selectedDomainCode.value = payload.selected_domain_code
                     if (payload.selected_sector !== undefined) selectedSector.value = payload.selected_sector
                     if (payload.selected_intention !== undefined) selectedIntention.value = payload.selected_intention
-
-                    if (selectedDomainCode.value !== previousDomain) {
-                        selectedSector.value = null
-                        selectedIntention.value = null
-                    } else if (selectedSector.value !== previousSector) {
-                        selectedIntention.value = null
-                    }
 
                     if (payload.pending_action !== undefined) pendingAction.value = payload.pending_action
                     if (payload.pending_use_case_id !== undefined) pendingUseCaseId.value = payload.pending_use_case_id
@@ -818,6 +822,7 @@ async function submit(forcedText = null) {
     }
 
     .hero-left {
+        min-width: 0;
         padding: 3rem 2.5rem 3rem 4rem;
         display: flex;
         flex-direction: column;
@@ -952,6 +957,7 @@ async function submit(forcedText = null) {
 
     /* ══════ CHAT WINDOW ══════ */
     .hero-right {
+        min-width: 0;
         padding: 3rem 3rem 3rem 2rem;
         display: flex;
         flex-direction: column;
@@ -963,6 +969,7 @@ async function submit(forcedText = null) {
     }
 
     .chat-window {
+        min-width: 0;
         width: 100%;
         max-width: 100%;
         background: rgba(255, 255, 255, 0.10);
@@ -1048,6 +1055,8 @@ async function submit(forcedText = null) {
     }
 
     .chat-messages {
+        min-width: 0;
+        min-height: 0;
         flex: 1;
         overflow-y: auto;
         padding: 1.25rem 1.25rem 0.75rem;
@@ -1068,6 +1077,7 @@ async function submit(forcedText = null) {
     }
 
     .msg {
+        min-width: 0;
         max-width: 84%;
         padding: 9px 13px;
         border-radius: 14px;
@@ -1075,6 +1085,7 @@ async function submit(forcedText = null) {
         line-height: 1.55;
         white-space: pre-wrap;
         word-break: break-word;
+        overflow-wrap: anywhere;
     }
 
     .msg-bot {
@@ -1099,6 +1110,8 @@ async function submit(forcedText = null) {
     }
 
     .parcours-cta {
+        min-width: 0;
+        max-width: 100%;
         display: inline-flex;
         flex-direction: column;
         align-items: flex-start;
@@ -1176,6 +1189,10 @@ async function submit(forcedText = null) {
     }
 
     .chip {
+        min-width: 0;
+        max-width: 100%;
+        white-space: normal;
+        overflow-wrap: anywhere;
         background: rgba(0, 96, 223, 0.15);
         border: 1px solid rgba(0, 96, 223, 0.35);
         color: rgba(180, 210, 255, 0.9);
@@ -1196,6 +1213,8 @@ async function submit(forcedText = null) {
 
     /* Chips de choix cliquables sous une question guidée (Q1/Q1.5/Q2) */
     .choice-chips {
+        min-width: 0;
+        max-width: 100%;
         display: flex;
         flex-wrap: wrap;
         gap: 6px;
@@ -1205,6 +1224,8 @@ async function submit(forcedText = null) {
 
     /* Indicateur de progression (stepper) au-dessus des messages */
     .stepper {
+        min-width: 0;
+        flex-shrink: 0;
         display: flex;
         align-items: center;
         gap: 4px;
@@ -1353,6 +1374,7 @@ async function submit(forcedText = null) {
     }
 
     .chat-input-bar {
+        min-width: 0;
         padding: .85rem 1.25rem;
         border-top: 1px solid rgba(255, 255, 255, 0.07);
         display: flex;
@@ -1363,6 +1385,7 @@ async function submit(forcedText = null) {
     }
 
     .chat-input {
+        min-width: 0;
         flex: 1;
         background: rgba(255, 255, 255, 0.06);
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1400,6 +1423,16 @@ async function submit(forcedText = null) {
 
     .chat-send:hover {
         background: var(--blue-dark);
+    }
+
+    .chat-input:focus-visible,
+    .chat-send:focus-visible,
+    .choice-chip:focus-visible,
+    .parcours-cta:focus-visible,
+    .fb-btn:focus-visible,
+    .stepper-item.is-clickable:focus-visible {
+        outline: 2px solid #b4d2ff;
+        outline-offset: 2px;
     }
 
     .chat-send svg {
@@ -1810,7 +1843,7 @@ async function submit(forcedText = null) {
     /* ══════ RESPONSIVE ══════ */
     @media (max-width: 960px) {
         .hero {
-            grid-template-columns: 1fr;
+            grid-template-columns: minmax(0, 1fr);
             min-height: auto;
             padding-bottom: 3rem;
         }
@@ -1901,6 +1934,10 @@ async function submit(forcedText = null) {
 
         .choice-chips {
             gap: 8px;
+        }
+
+        .chat-input {
+            font-size: 16px;
         }
 
         /* Stepper mobile : on masque uniquement les libellés des étapes À VENIR (les étapes

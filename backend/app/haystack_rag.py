@@ -40,6 +40,10 @@ from app.rag_constants import (
 
 logger = logging.getLogger(__name__)
 _USE_CASE_CODE_RE = re.compile(r"\bUC-\d{3,5}\b", re.IGNORECASE)
+NO_MATCH_MESSAGE = (
+    "Je n'ai pas de cas suffisamment pertinent à vous proposer avec les choix actuels. "
+    "Vous pouvez préciser votre besoin ou revenir à une étape précédente pour modifier vos choix."
+)
 
 
 def _extract_use_case_code(text: str) -> str:
@@ -290,8 +294,8 @@ def _build_metadata_or_filter(meta_keys: tuple[str, ...], values: list[str | Non
     """Construit un filtre OR multi-champs pour les metadata Chroma."""
     normalized_values: list[str] = []
     for value in values:
-        candidate = (value or "").strip()
-        if candidate and candidate not in normalized_values:
+        candidate = value or ""
+        if candidate.strip() and candidate not in normalized_values:
             normalized_values.append(candidate)
 
     if not normalized_values:
@@ -335,22 +339,23 @@ def _doc_matches_sector(doc, selected_sector: str, *, include_multisector: bool 
     """True si le document correspond au secteur choisi (ou multi-sectoriel autorisé)."""
     if not selected_sector:
         return False
-    expected = _normalize_metadata_value(selected_sector)
     meta = getattr(doc, "meta", None) or {}
     for key in SECTEUR_META_KEYS:
-        raw = str(meta.get(key) or "").strip()
-        if not raw:
-            continue
-        normalized = _normalize_metadata_value(raw)
-        if normalized == expected:
-            return True
-        # Tolère des valeurs concaténées (ex: "BTP / Industrie").
-        tokens = [_normalize_metadata_value(t) for t in re.split(r"[,;/|]", raw)]
-        if expected in tokens:
-            return True
-        if include_multisector and _is_multisector_label(raw):
+        if _sector_value_matches(str(meta.get(key) or ""), selected_sector, include_multisector):
             return True
     return False
+
+
+def _sector_value_matches(raw: str, selected_sector: str, include_multisector: bool) -> bool:
+    expected = _normalize_metadata_value(selected_sector)
+    normalized = _normalize_metadata_value(raw)
+    if not expected or not normalized:
+        return False
+    return (
+        normalized == expected
+        or expected in [_normalize_metadata_value(t) for t in re.split(r"[,;/|]", raw)]
+        or (include_multisector and _is_multisector_label(raw))
+    )
 
 
 def _build_retrieval_filters(
@@ -379,6 +384,15 @@ def _build_retrieval_filters(
     sector_values: list[str | None] = [selected_sector]
     if include_multisector:
         sector_values.extend(MULTI_SECTOR_VALUES)
+    if selected_sector and domaine_code:
+        # Chroma compare les chaînes exactement. Résoudre les variantes depuis les
+        # métadonnées AVANT le retrieval, avec les mêmes règles que la liste Q2.
+        for doc in _fetch_documents_for_domaine(domaine_code, metadata_only=True):
+            meta = getattr(doc, "meta", None) or {}
+            for key in SECTEUR_META_KEYS:
+                raw = str(meta.get(key) or "")
+                if _sector_value_matches(raw, selected_sector, include_multisector):
+                    sector_values.append(raw)
     sector_filter = _build_metadata_or_filter(SECTEUR_META_KEYS, sector_values)
     if sector_filter:
         conditions.append(sector_filter)
@@ -390,7 +404,9 @@ def _build_retrieval_filters(
     return {"operator": "AND", "conditions": conditions}
 
 
-def _fetch_documents_for_domaine(domaine_code: str, *, top_k_fallback: int = 150) -> list:
+def _fetch_documents_for_domaine(
+    domaine_code: str, *, top_k_fallback: int = 150, metadata_only: bool = False
+) -> list:
     """
     Documents Chroma dont les métadonnées correspondent au domaine (libellé Q1 ou code interne).
     Stratégie : filter_documents sur plusieurs champs meta, puis fallback retrieval + filtre Python.
@@ -415,7 +431,7 @@ def _fetch_documents_for_domaine(domaine_code: str, *, top_k_fallback: int = 150
                     break
             except Exception:
                 continue
-        if not docs and (label or domaine_code):
+        if not docs and (label or domaine_code) and not metadata_only:
             query = label or domaine_code.replace("_", " ")
             try:
                 all_candidates = _retrieve_docs(query, top_k=top_k_fallback)
@@ -724,7 +740,8 @@ une réponse à CHAQUE étape dans cet ordre :
 ÉTAPE 3 — Q2 (intention) → obligatoire, FORMAT LISTE
 ÉTAPE 4 — Q2.5 → si déclenché
 ÉTAPE 5 — Q3 (problème) → obligatoire
-Tu ne présentes JAMAIS de cas avant 5 étapes complètes.
+Tu ne présentes JAMAIS de cas avant validation de ces informations.
+Une information déjà explicitement donnée est acquise, même si elle précède sa question.
 
 -------------------------------------
 INTRODUCTION
@@ -923,6 +940,7 @@ Puis tu ajoutes :
 
 Règles :
 - L'utilisateur répond TOUJOURS en texte libre.
+- Si un problème libre a déjà été fourni, réutilise-le sans reposer Q3.
 - Les exemples sont une aide à la formulation, pas des
   choix à sélectionner.
 - Les exemples sont limités à 6 exemples.
@@ -970,7 +988,9 @@ Les cas fournis sont déjà :
 Tu ne modifies jamais cet ordre.
 Tu ne reclasses jamais.
 Tu ne scores rien.
-Tu ne supprimes rien sauf si plus de 5 cas sont fournis.
+Tu retiens uniquement les cas qui répondent directement au besoin exprimé.
+Un secteur commun ne suffit pas à justifier un cas. Tu peux ne retenir aucun cas.
+Ne force jamais une justification pour un cas périphérique.
 
 RÈGLE ABSOLUE — INTERDICTION D'INVENTER DES CAS :
 Tu ne présentes JAMAIS plus de cas que ceux réellement fournis en entrée.
@@ -979,7 +999,7 @@ S'il y a moins de 3 cas fournis, tu présentes uniquement ces cas
 les sources ne doit jamais apparaître, même partiellement plausible.
 
 Tu présentes :
-- Autant de cas que fournis, dans la limite de 5 (jamais plus)
+- Seulement les cas directement pertinents, dans la limite de 5, sans minimum
 - Un seul use_case_id par bloc
 - Aucun mélange
 - Aucun cas inventé ou complété au-delà des sources fournies
@@ -998,7 +1018,7 @@ Les cas fournis sont déjà :
 Tu ne modifies jamais cet ordre.
 Tu ne reclasses jamais.
 Tu ne scores rien.
-Tu ne supprimes rien sauf si plus de 5 cas sont fournis.
+Tu ne complètes jamais la liste avec des cas périphériques.
 
 Tu présentes :
 - continue a détailler les cas si demandé par l'utilisateur
@@ -1012,7 +1032,7 @@ Tu présentes :
 
 FORMAT OBLIGATOIRE POUR CHAQUE CAS — NIVEAU 1 (APERÇU)
 (présentation initiale, jusqu'à 5 cas parmi ceux réellement fournis)
- [Numéro]. Nom du cas
+ [Numéro source]. Nom EXACT du cas fourni (sans reformulation)
 Pourquoi c’est pertinent pour vous :
 (1 à 2 phrases contextualisées par rapport au problème Q3.)
 Ce que cela permet concrètement :
@@ -1022,6 +1042,8 @@ Après les cas, tu ajoutes EXACTEMENT :
 « Souhaitez-vous approfondir l’un de ces cas ?
 Indiquez son numéro pour obtenir le détail complet. »
 Règles Niveau 1 :
+- Conserve le numéro source et le titre exact de chaque cas retenu, même si
+  certains numéros sont omis. Le backend aligne ensuite la liste sélectionnable.
 - Tu ne montres PAS l’effort, les prérequis, la première
 étape, les guardrails, ni les questions de qualification.
 - Tu gardes chaque cas court (5–6 lignes max).
@@ -1053,7 +1075,7 @@ Tu ne :
 - expliques jamais le mécanisme de filtrage
 - mentionnes jamais les exemples de situations comme provenant
   d'une base
-- modifies jamais la sélection fournie
+- ajoutes jamais un cas absent des candidats fournis
 - ajoutes jamais un sixième cas
 - inventes jamais un cas
 - interprètes jamais la taxonomie
@@ -1082,7 +1104,7 @@ Résumé des choix utilisateur :
 
 {% endif %}
 {% if identified_cases_summary %}
-Cas identifiés (3 à 5) :
+Cas candidats (jusqu'à 5, sans minimum) :
 {{ identified_cases_summary }}
 
 {% endif %}
@@ -1164,17 +1186,36 @@ def _build_rag_prompt_from_docs(
     docs = documents or []
     history_list = history or []
     phase_hint = hint or ""
+    probleme_q3 = _user_probleme_q3_text(
+        history_list, selected_state=(selected_domain_code, selected_sector, selected_intention)
+    )
+    domaine_code = selected_domain_code or _get_domaine_code_from_history(history_list)
+    q1_5_choices = get_q15_choices(domaine_code) if domaine_code else None
 
-    if not docs:
+    if docs:
+        phase_hint += (
+            "\nPrésente uniquement les cas fournis directement pertinents, sans compléter la liste ; "
+            "ne repose aucune question déjà résolue."
+        )
+    elif _should_inject_rag_documents(domaine_code, selected_sector, selected_intention) and probleme_q3:
+        phase_hint += (
+            "\nAucun cas ne correspond aux filtres validés. Dis-le sans inventer de cas "
+            "et sans redemander le domaine, le secteur, l'objectif ou le problème déjà connus. "
+            "L'utilisateur peut préciser son besoin ou corriger explicitement un choix."
+        )
+    else:
+        next_step = (
+            "Q1" if not domaine_code else
+            "Q1.5" if q1_5_choices and not selected_sector else
+            "Q2" if not selected_intention else "Q3"
+        )
         phase_hint = (phase_hint + "\n\n" if phase_hint else "") + (
             "Aucun extrait de cas fourni pour l'instant : tu es en phase questionnement guidé. "
-            "Pose UNIQUEMENT la prochaine question selon l'étape (Q1, Q1.5 si liste fournie, Q2, Q3). "
+            f"Pose UNIQUEMENT la prochaine question non résolue : {next_step}. "
             "Ne présente aucun cas, ne propose aucune liste de cas."
         )
 
     # Injecter les listes fournies par le backend pour Q1.5, Q2 et Q3
-    domaine_code = selected_domain_code or _get_domaine_code_from_history(history_list)
-    q1_5_choices = get_q15_choices(domaine_code) if domaine_code else None
 
     if domaine_code and q1_5_choices and not selected_sector and secteur_choices_affichage:
         phase_hint = (phase_hint + "\n\n" if phase_hint else "") + (
@@ -1191,19 +1232,22 @@ def _build_rag_prompt_from_docs(
                 + intention_choices_affichage
             )
     # Q3 triggers : seulement quand domaine + intention sont validés
-    if domaine_code and selected_intention and q3_triggers_affichage:
+    if domaine_code and selected_intention and q3_triggers_affichage and not probleme_q3:
         phase_hint = (phase_hint + "\n\n" if phase_hint else "") + (
             "exemples fournis par le backend :\n"
             + q3_triggers_affichage
         )
 
     domain_label = _get_domaine_label(domaine_code) if domaine_code else "non sélectionné"
-    intention_label = _get_intention_label_from_code(domaine_code, selected_intention) if domaine_code else None
+    intention_label = _get_intention_label_from_code(
+        domaine_code, selected_intention, secteur_choisi=selected_sector
+    ) if domaine_code else None
     user_choices_summary = "\n".join(
         [
             f"- Domaine: {domain_label}",
             f"- Secteur: {selected_sector or 'non sélectionné'}",
             f"- Intention: {intention_label or 'non sélectionnée'}",
+            f"- Problème déjà exprimé (texte utilisateur): {probleme_q3 or 'non précisé'}",
         ]
     )
     
@@ -1216,10 +1260,10 @@ def _build_rag_prompt_from_docs(
     if displayed_cases:
         lines = []
         for i, d in enumerate(displayed_cases, start=1):
-            content = (getattr(d, "content", "") or "").strip()
-            short = content[:240] + "..." if len(content) > 240 else content
-            short = _strip_use_case_codes(short)
-            lines.append(f"{i}. {short}")
+            case = _doc_to_case_dict(d, i - 1)
+            title = _case_display_title(case)
+            description = str(case.get("description_cas_utilisation") or case.get("content") or "").strip()
+            lines.append(f"{i}. {title}\nDescription source : {description}")
         identified_cases_summary = "\n".join(lines)
     
     cases_extra_context = ""
@@ -1250,6 +1294,19 @@ def _build_rag_prompt_from_docs(
     )
 
 
+def _is_detail_noun_request(message: str) -> bool:
+    normalized = re.sub(
+        r"\s+(?:merci|svp|s il vous plait|s il te plait)$", "", _normalize_query_text(message)
+    )
+    return bool(re.fullmatch(
+        r"(?:(?:(?:peux tu|pouvez vous|pourrais tu|pourriez vous) "
+        r"(?:me |nous )?(?:donner|fournir)|(?:donne|donnez)(?: moi| nous)?|"
+        r"(?:je voudrais|je veux|je souhaite|j aimerais)(?: avoir| obtenir)?) )?"
+        r"(?:(?:le|les|plus de|davantage de) )?details?(?: (?:du|de|sur) .+)?",
+        normalized,
+    ))
+
+
 def _is_detail_request(message: str) -> bool:
     """
     Détecte si le message demande à détailler UN point précis de la liste déjà proposée.
@@ -1260,7 +1317,7 @@ def _is_detail_request(message: str) -> bool:
     msg = message.strip().lower()
     # Verbes / formulations qui indiquent « détaille ce point » ou « donne le détail de »
     detail_verbs = [
-        "détaille", "détailler", "detaille", "détaillant", "détails", "detail",
+        "détaille", "détailler", "detaille", "détaillant",
         "développe", "developpe", "précise", "precise",
         "plus d'info", "plus d info", "en savoir plus",
         "parle-moi du", "parle moi du", "explique le", "explique la",
@@ -1291,7 +1348,20 @@ def _is_detail_request(message: str) -> bool:
         return False
     if re.search(r"(?:veux|voudrais|donne|avoir)\s+[1-5]\s", msg):
         return False
-    return has_verb or has_rank or bool(verb_then_num)
+    return has_verb or has_rank or bool(verb_then_num) or _is_detail_noun_request(message)
+
+
+def _is_explicit_detail_command(message: str) -> bool:
+    """Sans liste de cas, exiger une demande, pas un mot descriptif dans Q3."""
+    return _is_detail_noun_request(message) or (bool(re.match(
+        r"^(?:(?:peux tu|pouvez vous|pourrais tu|pourriez vous|merci de|je veux|"
+        r"je voudrais|je souhaite|j aimerais|est ce que tu peux)\s+)?"
+        r"(?:(?:me|nous)\s+)?"
+        r"(?:detaill(?:e|er)|developp(?:e|er)|precis(?:e|er)|expliqu(?:e|er)|"
+        r"decri(?:s|re)|donne(?: moi)?|dis moi|parle moi|en savoir plus|"
+        r"plus d info|le detail|les details|details?)\b",
+        _normalize_query_text(message),
+    )) and _is_detail_request(message))
 
 
 def _has_explicit_point_number(message: str) -> bool:
@@ -1369,43 +1439,75 @@ def _is_affirmation(message: str) -> bool:
     """Détecte si le message est une affirmation courte (ok, vas-y, oui, etc.) pour exécuter l'action en attente."""
     if not message or len(message.strip()) > 80:
         return False
-    msg = message.strip().lower()
+    msg = _normalize_query_text(message)
     affirmations = [
         "ok", "okay", "vas-y", "vas y", "oui", "ouais", "d'accord", "d accord",
         "go", "allez", "oui vas-y", "ok vas-y", "c'est parti", "oui s'il te plaît",
         "je veux le détail", "oui je veux", "je le souhaite", "oui allez-y",
     ]
-    if msg in ("ok", "oui", "go", "vas-y", "vas y", "ouais", "d'accord", "allez"):
-        return True
-    return any(a in msg for a in affirmations)
+    msg = re.sub(r"\s+(?:merci|svp|s il vous plait|s il te plait)$", "", msg)
+    return msg in {_normalize_query_text(a) for a in affirmations}
 
 
-def _user_probleme_q3_text(history: list[dict], current_question: str | None = None) -> str:
-    """Dernière formulation libre du besoin (Q3), hors sélection de cas / affirmation courante."""
-    user_msgs: list[str] = []
-    for m in history or []:
-        if (m.get("role") or "").strip().lower() != "user":
-            continue
+def _user_probleme_q3_text(
+    history: list[dict],
+    current_question: str | None = None,
+    *,
+    selected_state: tuple[str | None, str | None, str | None] | None = None,
+) -> str:
+    """Réutilise un besoin libre, même antérieur à Q1, sans confondre les choix avec Q3."""
+    state = (None, None, None)
+    expected_step = None
+    problem = ""
+    messages = list(history or [])
+    if current_question and messages and messages[-1].get("role") == "user":
+        if str(messages[-1].get("content") or "").strip() == current_question.strip():
+            messages.pop()
+    last_user_index = next(
+        (i for i in range(len(messages) - 1, -1, -1)
+         if (messages[i].get("role") or "").strip().lower() == "user"),
+        -1,
+    )
+    for index, m in enumerate(messages):
+        role = (m.get("role") or "").strip().lower()
         t = str(m.get("content") or "").strip()
-        if t:
-            user_msgs.append(t)
-    if current_question:
-        cq = current_question.strip()
-        if user_msgs and user_msgs[-1].strip().lower() == cq.lower():
-            user_msgs = user_msgs[:-1]
-    for t in reversed(user_msgs):
+        if role == "assistant":
+            expected_step = _detect_expected_step_from_assistant(t)
+            continue
+        if role != "user" or not t:
+            continue
+        if selected_state and index == last_user_index:
+            state = _selection_state_from_history_and_client(messages[:index], *selected_state)
+        previous_state = state
+        state = _selection_state_after_message(messages, index, state, expected_step)
+        was_problem_step = expected_step == "problem"
+        expected_step = None
+        if state != previous_state or _parse_domaine_from_message(t) or _choice_text(t).isdigit():
+            continue
+        if state[0]:
+            if any(
+                _parse_choice_from_message(t, choices, allow_number=False)
+                for choices in (
+                    get_q15_choices(state[0]) or [],
+                    _get_q2_choices_list(state[0], secteur_choisi=state[1]),
+                )
+            ):
+                continue
         if _is_affirmation(t):
             continue
-        if _is_detail_request(t) or _has_explicit_point_number(t):
+        if _is_explicit_detail_command(t) or _has_explicit_point_number(t):
             continue
-        if re.fullmatch(r"[1-5]", t.strip()):
+        normalized = _normalize_query_text(t)
+        if normalized in ("je ne sais pas", "aucune idee", "je ne sais pas encore"):
             continue
-        if _parse_domaine_from_message(t):
-            continue
-        if len(t.strip()) < 12:
-            continue
-        return t.strip()
-    return ""
+        # Hors Q3, rester conservateur : un métier seul n'est pas un problème explicite.
+        ready_for_problem = _should_inject_rag_documents(*previous_state)
+        if was_problem_step or (ready_for_problem and len(normalized.split()) >= 3) or re.search(
+            r"\b(?:besoin|probleme|difficultes?|perds|perdons|trop|chronophage|"
+            r"automatiser|rediger|synthetiser|manuellement)\b", normalized
+        ):
+            problem = t
+    return problem
 
 
 def _enrich_case_from_document_store(case: dict) -> dict:
@@ -1487,7 +1589,14 @@ def _build_niveau2_detail_payload(
         return None
     case_row = _enrich_case_from_document_store(cases[case_index])
     content = (case_row.get("content") or "").strip()
-    if len(content) < 20:
+    has_structured_detail = bool(
+        str(case_row.get("cas_utilisation") or "").strip()
+        and (
+            str(case_row.get("description_cas_utilisation") or "").strip()
+            or str(case_row.get("declencheurs_typiques") or "").strip()
+        )
+    )
+    if len(content) < 20 and not has_structured_detail:
         return None
     answer = build_niveau2_block(case_row)
     # Stat : cas d'usage réellement consulté (verbatim depuis la base).
@@ -1522,6 +1631,21 @@ def _get_last_assistant_message(history: list[dict]) -> str | None:
             if content.strip():
                 return content.strip()
     return None
+
+
+def _theme_detail_query(
+    question: str,
+    history: list[dict],
+    selected_state: tuple[str | None, str | None, str | None] | None = None,
+) -> str:
+    last_assistant = _get_last_assistant_message(history)
+    if (
+        not _is_explicit_detail_command(question)
+        or not last_assistant
+        or _detect_expected_step_from_assistant(last_assistant) is not None
+    ):
+        return ""
+    return _user_probleme_q3_text(history, selected_state=selected_state)
 
 
 def _parse_offer_detail_from_text(text: str) -> int | None:
@@ -1769,135 +1893,51 @@ def _format_conversation_history(history: list[dict], max_messages: int = 20) ->
 
 
 def _parse_domaine_from_message(content: str | int | None) -> str | None:
-    """
-    Extrait un code domaine depuis un message utilisateur (réponse Q1).
-    Utilise CHOIX_Q1_TO_DOMAINE_CODE : nombre 1-14 (entier ou dans le texte) ou libellé Q1_DOMAINS_LIST.
-    """
-    if content is None:
-        return None
-    text = str(content).strip()
-    if not text:
-        return None
-    text_norm = " ".join(text.lower().split())
-    # 0) Chaîne = un seul entier 1-14 (ex. "3" ou front envoie 3)
-    try:
-        n = int(text)
-        if 1 <= n <= 14:
-            return CHOIX_Q1_TO_DOMAINE_CODE.get(n)
-    except (ValueError, TypeError):
-        pass
-    # 1) Nombre 1-14 en début (ex. "3", "3.", " 12 ")
-    num_match = re.match(r"^\s*(\d{1,2})\s*([\.\)\s,]|$)", text)
-    if num_match:
-        try:
-            choix = int(num_match.group(1))
-            if 1 <= choix <= 14:
-                return CHOIX_Q1_TO_DOMAINE_CODE.get(choix)
-        except (ValueError, TypeError):
-            pass
-    # 2) Nombre 1-14 ailleurs dans le message (ex. "je choisis 3")
-    any_num = re.search(r"\b(1[0-4]|[1-9])\b", text)
-    if any_num:
-        try:
-            choix = int(any_num.group(1))
-            if 1 <= choix <= 14:
-                return CHOIX_Q1_TO_DOMAINE_CODE.get(choix)
-        except (ValueError, TypeError):
-            pass
-    # 3) Libellé Q1 (Q1_DOMAINS_LIST)
-    text_lower = text.lower()
-    for choix in range(1, 15):
-        label = Q1_DOMAINS_LIST[choix - 1]
-        if not label:
-            continue
-        label_norm = " ".join(label.lower().split())
-        if text_lower == label.lower() or label.lower() in text_lower:
-            return CHOIX_Q1_TO_DOMAINE_CODE.get(choix)
-        # Tolérance pour saisies partielles (ex. "btp" -> "Construction ... BTP")
-        # On évite les très petites chaînes pour limiter les faux positifs.
-        if len(text_norm) >= 3 and text_norm in label_norm:
-            return CHOIX_Q1_TO_DOMAINE_CODE.get(choix)
+    """Reconnaît un choix explicite, jamais un métier ou un nombre dans un récit."""
+    label = _parse_choice_from_message(str(content or ""), Q1_DOMAINS_LIST)
+    if label:
+        return CHOIX_Q1_TO_DOMAINE_CODE.get(Q1_DOMAINS_LIST.index(label) + 1)
     return None
 
 
 def _get_domaine_code_from_history(history: list[dict]) -> str | None:
-    """
-    Retourne le code domaine choisi par l'utilisateur (réponse Q1).
-    Utilise la DERNIÈRE réponse utilisateur qui indique un domaine (nombre 1-14 ou libellé),
-    pour prendre en compte une correction ou un clic sur un libellé (ex. "Ressources humaines & recrutement").
-    """
-    last_domaine = None
-    for m in history:
-        if (m.get("role") or "").strip().lower() != "user":
-            continue
-        raw = m.get("content")
-        content = str(raw).strip() if raw is not None else ""
-        code = _parse_domaine_from_message(content)
-        if code:
-            last_domaine = code
-    return last_domaine
+    return _derive_selection_state_from_history(history)[0]
+
+
+def _choice_text(text: str) -> str:
+    normalized = _normalize_query_text(text)
+    return re.sub(
+        r"^(?:(?:finalement|plutot)\s+)?"
+        r"(?:(?:je choisis|je prefere|je selectionne)\s+)?"
+        r"(?:(?:le\s+)?(?:domaine|secteur|objectif|intention|choix|numero)\s+)?",
+        "",
+        normalized,
+    ).strip()
+
+
+def _parse_choice_from_message(
+    text: str, choices: list[str], *, allow_number: bool = True
+) -> str | None:
+    if not choices:
+        return None
+    normalized = _choice_text(text)
+    matches = [
+        choice for i, choice in enumerate(choices, 1)
+        if normalized in (_normalize_query_text(choice), f"{i} {_normalize_query_text(choice)}")
+    ]
+    if len(matches) == 1:
+        return matches[0]
+    if allow_number and normalized.isdigit() and 1 <= int(normalized) <= len(choices):
+        return choices[int(normalized) - 1]
+    return None
 
 
 def _parse_sector_from_message(text: str, choices: list[str]) -> str | None:
-    """Si text correspond à un choix secteur (numéro 1..N ou libellé), retourne le libellé du secteur, sinon None."""
-    if not choices:
-        return None
-    text = (text or "").strip()
-    if not text:
-        return None
-    # Numéro 1..N
-    try:
-        n = int(text)
-        if 1 <= n <= len(choices):
-            return choices[n - 1]
-    except (ValueError, TypeError):
-        pass
-    num_match = re.match(r"^\s*(\d+)\s*([\.\)\s,]|$)", text)
-    if num_match:
-        try:
-            n = int(num_match.group(1))
-            if 1 <= n <= len(choices):
-                return choices[n - 1]
-        except (ValueError, TypeError):
-            pass
-    # Libellé du secteur : égalité ou contenu (insensible à la casse, espaces normalisés)
-    text_norm = " ".join(text.lower().split())
-    for s in choices:
-        if not s:
-            continue
-        s_norm = " ".join(s.lower().split())
-        if text_norm == s_norm or s_norm in text_norm or text_norm in s_norm:
-            return s
-    return None
+    return _parse_choice_from_message(text, choices)
 
 
 def _parse_intention_from_message(text: str, choices: list[str]) -> str | None:
-    """Si text correspond à un choix d'intention (numéro 1..N ou libellé), retourne le libellé, sinon None."""
-    if not choices or not (text or "").strip():
-        return None
-    text = (text or "").strip()
-    try:
-        n = int(text)
-        if 1 <= n <= len(choices):
-            return choices[n - 1]
-    except (ValueError, TypeError):
-        pass
-    num_match = re.match(r"^\s*(\d+)\s*([\.\)\s,]|$)", text)
-    if num_match:
-        try:
-            n = int(num_match.group(1))
-            if 1 <= n <= len(choices):
-                return choices[n - 1]
-        except (ValueError, TypeError):
-            pass
-    text_norm = " ".join(text.lower().split())
-    for c in choices:
-        if not c:
-            continue
-        c_norm = " ".join(c.lower().split())
-        if text_norm == c_norm or c_norm in text_norm or text_norm in c_norm:
-            return c
-    return None
+    return _parse_choice_from_message(text, choices)
 
 
 def _parse_intention_code_from_message(text: str, choices: list[str]) -> str | None:
@@ -1934,45 +1974,110 @@ def _resolve_selection_state(
     selected_domain_code: str | None,
     selected_sector: str | None,
     selected_intention: str | None,
+    expected_step: str | None = None,
 ) -> tuple[str | None, str | None, str | None]:
-    """
-    Met à jour domaine/secteur/intention à partir du message courant et de l'état client.
-    Règles:
-    - changement de domaine -> reset secteur + intention
-    - changement de secteur -> reset intention
-    - intention stockée en code (string 1..N)
-    """
-    current_domain = selected_domain_code
-    current_sector = selected_sector
-    current_intention = selected_intention
+    """Consomme un tour une seule fois ; un numéro appartient à la question posée."""
+    state = selected_domain_code, selected_sector, selected_intention
+    explicit_step = re.match(
+        r"^(?:(?:finalement|plutot)\s+)?(?:(?:je choisis|je prefere|je selectionne)\s+)?"
+        r"(?:le\s+)?(domaine|secteur|objectif|intention)\s+\d+$",
+        _normalize_query_text(question),
+    )
+    if explicit_step:
+        expected_step = {
+            "domaine": "domain", "secteur": "sector", "objectif": "intention", "intention": "intention"
+        }[explicit_step.group(1)]
+    domain_label = _parse_choice_from_message(
+        question, Q1_DOMAINS_LIST, allow_number=expected_step == "domain"
+    )
+    if domain_label:
+        domain = CHOIX_Q1_TO_DOMAINE_CODE[Q1_DOMAINS_LIST.index(domain_label) + 1]
+        return (domain, None, None) if domain != selected_domain_code else state
+    if not selected_domain_code or expected_step == "domain":
+        return state
 
-    question_text = (question or "").strip()
-    parsed_domain = _parse_domaine_from_message(question)
-    # Eviter de changer de domaine sur un nombre ambigu (ex. "2" en Q2).
-    # On accepte le changement si aucun domaine n'est encore sélectionné, ou si le message
-    # est explicite (non-numérique) et correspond à un domaine.
-    is_plain_integer = bool(re.fullmatch(r"\d+", question_text))
-    if parsed_domain and parsed_domain != current_domain:
-        if current_domain is None or not is_plain_integer:
-            return parsed_domain, None, None
+    sectors = get_q15_choices(selected_domain_code) or []
+    sector = _parse_choice_from_message(question, sectors, allow_number=expected_step == "sector")
+    if sector:
+        return (selected_domain_code, sector, None) if sector != selected_sector else state
+    if expected_step == "sector" or (sectors and not selected_sector):
+        return state
 
-    if not current_domain:
-        return current_domain, current_sector, current_intention
+    intentions = _get_q2_choices_list(selected_domain_code, secteur_choisi=selected_sector)
+    intention = _parse_choice_from_message(
+        question, intentions, allow_number=expected_step == "intention"
+    )
+    if intention:
+        return selected_domain_code, selected_sector, str(intentions.index(intention) + 1)
+    return state
 
-    sector_choices = get_q15_choices(current_domain)
-    # Le secteur ne doit être détecté que tant qu'il n'est pas déjà choisi.
-    if sector_choices and not current_sector:
-        parsed_sector = _parse_sector_from_message(question, sector_choices)
-        if parsed_sector and parsed_sector != current_sector:
-            return current_domain, parsed_sector, None
 
-    intention_choices = _get_q2_choices_list(current_domain, secteur_choisi=current_sector)
-    if intention_choices:
-        parsed_intention_code = _parse_intention_code_from_message(question, intention_choices)
-        if parsed_intention_code:
-            current_intention = parsed_intention_code
+def _detect_expected_step_from_assistant(text: str) -> str | None:
+    t = _normalize_query_text(text)
+    # Les mots « secteur » ou « objectif » dans un récapitulatif ne sont pas une question.
+    if re.search(r"\b(?:q2 5|pour affiner quel aspect)\b", t):
+        return "topic"
+    if re.search(r"\b(?:q3|quel probleme|decrire le probleme|decrivez votre situation)\b", t):
+        return "problem"
+    if re.search(r"\b(?:q1 5|dans quel secteur|quel est votre secteur)\b", t):
+        return "sector"
+    if re.search(r"\b(?:q2|quel est votre objectif principal|choisissez une intention)\b", t):
+        return "intention"
+    if re.search(r"\b(?:q1|dans quel domaine|domaine souhaitez vous)\b", t):
+        return "domain"
+    return None
 
-    return current_domain, current_sector, current_intention
+
+def _explicit_sector_from_history(history: list[dict], domaine_code: str) -> str | None:
+    """Reconnaît un secteur nommé avant Q1, sans en déduire un domaine."""
+    choices = get_q15_choices(domaine_code) or []
+    for msg in reversed(history):
+        if (msg.get("role") or "").strip().lower() != "user":
+            continue
+        text = str(msg.get("content") or "")
+        exact = _parse_choice_from_message(text, choices, allow_number=False)
+        if exact:
+            return exact
+        normalized = _normalize_query_text(text)
+        mentioned = [
+            choice for choice in choices
+            if re.search(rf"\b{re.escape(_normalize_query_text(choice))}\b", normalized)
+        ]
+        if len(mentioned) > 1:
+            return None
+        if mentioned and re.search(
+            rf"\b(?:dans le|dans l|secteur|secteur du|secteur de|entreprise de|entreprise du)\s+"
+            rf"{re.escape(_normalize_query_text(mentioned[0]))}\b",
+            normalized,
+        ) and not re.search(r"\b(?:pas|ni|hors|sauf)\b", normalized):
+            return mentioned[0]
+    return None
+
+
+def _selection_state_after_message(
+    history: list[dict],
+    index: int,
+    state: tuple[str | None, str | None, str | None],
+    expected_step: str | None,
+) -> tuple[str | None, str | None, str | None]:
+    content = str(history[index].get("content") or "").strip()
+    if expected_step is None and not any(state):
+        prior_turns = [
+            msg for msg in history[:index]
+            if (msg.get("role") or "").strip().lower() in ("user", "assistant")
+            and str(msg.get("content") or "").strip()
+        ]
+        # Le message d'accueil ne pose pas Q1, mais le premier numéro peut déjà la choisir.
+        if all(
+            (msg.get("role") or "").strip().lower() == "assistant"
+            and _normalize_query_text(str(msg.get("content") or "")) == _normalize_query_text(WELCOME_MESSAGE)
+            for msg in prior_turns
+        ):
+            expected_step = "domain"
+    domain, sector, intention = _resolve_selection_state(content, *state, expected_step=expected_step)
+    if domain and not state[0]:
+        sector = _explicit_sector_from_history(history[:index], domain)
+    return domain, sector, intention
 
 
 def _derive_selection_state_from_history(
@@ -1980,86 +2085,43 @@ def _derive_selection_state_from_history(
     selected_domain_code: str | None = None,
     selected_sector: str | None = None,
     selected_intention: str | None = None,
+    *,
+    invalidated_fields: set[str] | None = None,
 ) -> tuple[str | None, str | None, str | None]:
     """
     Rejoue l'identification domaine/secteur/intention sur tous les messages,
     en se basant sur le type de question posé par l'assistant (Q1/Q1.5/Q2),
     sans dépendre du nombre de tours.
     """
-    def _detect_expected_step_from_assistant(text: str) -> str | None:
-        t = " ".join((text or "").lower().split())
-        if not t:
-            return None
-        if "dans quel domaine" in t or "domaine souhaitez-vous" in t:
-            return "domain"
-        if "q1.5" in t or "secteur" in t:
-            return "sector"
-        if "q2" in t or "objectif principal" in t or "intentions" in t:
-            return "intention"
-        return None
-
     current_domain = selected_domain_code
     current_sector = selected_sector
     current_intention = selected_intention
     expected_step: str | None = None
-    for msg in history:
+    for index, msg in enumerate(history):
         role = (msg.get("role") or "").strip().lower()
         content = str(msg.get("content") or "").strip()
         if not content:
             continue
         if role == "assistant":
-            detected = _detect_expected_step_from_assistant(content)
-            if detected:
-                expected_step = detected
+            expected_step = _detect_expected_step_from_assistant(content)
             continue
         if role != "user":
             continue
 
-        # Domaine explicite : toujours prioritaire. Evite de relire ce message comme secteur/intention.
-        parsed_domain = _parse_domaine_from_message(content)
-        is_plain_integer = bool(re.fullmatch(r"\d+", content))
-        if parsed_domain and parsed_domain != current_domain:
-            if current_domain is None or not is_plain_integer or expected_step == "domain":
-                current_domain = parsed_domain
-                current_sector = None
-                current_intention = None
-                expected_step = "sector" if get_q15_choices(current_domain) else "intention"
-                continue
-
-        if not current_domain:
-            # Tant qu'aucun domaine n'est validé, on ignore secteur/intention.
-            continue
-
-        if expected_step == "sector":
-            sector_choices = get_q15_choices(current_domain)
-            parsed_sector = _parse_sector_from_message(content, sector_choices) if sector_choices else None
-            if parsed_sector:
-                if parsed_sector != current_sector:
-                    current_sector = parsed_sector
-                    current_intention = None
-                expected_step = "intention"
-            continue
-
-        if expected_step == "intention":
-            intention_choices = _get_q2_choices_list(current_domain, secteur_choisi=current_sector)
-            parsed_intention_code = _parse_intention_code_from_message(content, intention_choices) if intention_choices else None
-            if parsed_intention_code:
-                current_intention = parsed_intention_code
-                expected_step = None
-            continue
-
-        # Fallback défensif (si aucun step détecté dans les messages assistant)
-        if not current_sector:
-            sector_choices = get_q15_choices(current_domain)
-            parsed_sector = _parse_sector_from_message(content, sector_choices) if sector_choices else None
-            if parsed_sector:
-                current_sector = parsed_sector
-                current_intention = None
-                continue
-        intention_choices = _get_q2_choices_list(current_domain, secteur_choisi=current_sector)
-        parsed_intention_code = _parse_intention_code_from_message(content, intention_choices) if intention_choices else None
-        if parsed_intention_code:
-            current_intention = parsed_intention_code
+        previous_domain, previous_sector = current_domain, current_sector
+        current_domain, current_sector, current_intention = _selection_state_after_message(
+            history, index, (current_domain, current_sector, current_intention), expected_step
+        )
+        if invalidated_fields is not None:
+            if previous_domain and previous_domain != current_domain:
+                invalidated_fields.update(("sector", "intention"))
+            elif previous_sector and previous_sector != current_sector:
+                invalidated_fields.add("intention")
+            if current_sector:
+                invalidated_fields.discard("sector")
+            if current_intention:
+                invalidated_fields.discard("intention")
+        expected_step = None
     return current_domain, current_sector, current_intention
 
 
@@ -2102,7 +2164,7 @@ def _get_intention_from_history(
         selected_sector=None,
         selected_intention=None,
     )
-    return _get_intention_label_from_code(selected_domain_code, intention_code)
+    return _get_intention_label_from_code(selected_domain_code, intention_code, secteur_choisi=sector)
 
 
 def _get_sector_from_history(history: list[dict], current_message: str | None = None) -> str | None:
@@ -2188,41 +2250,13 @@ def _get_q3_triggers_affichage(
 
 
 def _get_rag_hint(history: list[dict]) -> str:
-    if len(history) >= 4:
-        return "Important : c'est au moins la 3e demande de l'utilisateur. Tente de répondre avec les extraits et les informations déjà fournies ; ne pose plus de questions de clarification."
-    # Après bienvenue + première réponse : obligatoirement Q1 (14 domaines fixes)
-    if len(history) == 2 and not _get_domaine_code_from_history(history):
-        domains_line = " ; ".join(f"{i}. {d}" for i, d in enumerate(Q1_DOMAINS_LIST, start=1))
-        return (
-            "C'est la première question après le message de bienvenue. Tu DOIS poser UNIQUEMENT la question Q1 (domaine) : "
-            "« Dans quel domaine souhaitez-vous agir en priorité ? » "
-            "Puis afficher EXACTEMENT les 14 choix suivants (numérotés 1 à 14) : "
-            f"{domains_line}. "
-            "Ne demande jamais les priorités, l'objectif ou le secteur avant le domaine. "
-            "Ne pose pas Q1.5 (secteur) ni Q2 (objectif) tant que l'utilisateur n'a pas choisi un domaine (un nombre entre 1 et 14)."
-        )
-    # Q1.5 ou Q2 : rappel dans le hint (les listes sont dans le prompt)
-    if len(history) >= 2:
-        if _get_secteur_choices_affichage(history):
-            return (
-                "Si tu poses la question Q1.5 (secteur), tu DOIS afficher dans ta réponse "
-                "la liste des secteurs fournie ci-dessous. "
-                "Ne dis jamais « choisissez parmi la liste » sans afficher la liste."
-            )
-        intention_affichage = _get_intention_choices_affichage(history)
-        if intention_affichage:
-            return (
-                "Si tu poses la question Q2 (objectif principal), tu DOIS afficher dans ta réponse "
-                "la liste des intentions fournie ci-dessous. "
-                "Ne dis jamais « choisissez parmi la liste » ou « intentions proposées » sans afficher la liste."
-            )
-        if _get_domaine_code_from_history(history):
-            return (
-                "Si tu poses Q2 (objectif principal) et qu'aucune liste d'intentions n'est fournie ci-dessous : "
-                "demande à l'utilisateur de décrire son objectif en une phrase. "
-                "Ne dis jamais « la liste va s'afficher » ou « veuillez patienter »."
-            )
-    return ""
+    return (
+        "Respecte les choix validés dans le résumé ; ne les redemande pas. "
+        "Ne déduis jamais silencieusement un domaine du métier ou du secteur. "
+        "Un choix inconnu ou ambigu doit être clarifié, quel que soit le nombre de tours. "
+        "Réutilise le problème déjà exprimé, même avant Q1, sans le redemander. "
+        "Affiche intégralement la liste backend de la prochaine question non résolue."
+    )
 
 
 def _should_inject_rag_documents(
@@ -2245,6 +2279,31 @@ def _should_inject_rag_documents(
     return True
 
 
+def _selection_state_from_history_and_client(
+    history: list[dict],
+    selected_domain_code: str | None,
+    selected_sector: str | None,
+    selected_intention: str | None,
+) -> tuple[str | None, str | None, str | None]:
+    """Complète un historique partiel sans annuler les corrections explicites."""
+    invalidated_fields: set[str] = set()
+    state = _derive_selection_state_from_history(history, invalidated_fields=invalidated_fields)
+    if not state[0]:
+        # Historique tronqué : l'état client sert de point de départ, pas de fallback après reset.
+        state = _derive_selection_state_from_history(
+            history, selected_domain_code, selected_sector, selected_intention
+        )
+    elif state[0] == selected_domain_code:
+        sector = state[1]
+        if not sector and "sector" not in invalidated_fields:
+            sector = selected_sector
+        intention = state[2]
+        if not intention and "intention" not in invalidated_fields and sector == selected_sector:
+            intention = selected_intention
+        state = state[0], sector, intention
+    return state
+
+
 def _resolve_current_selection_state(
     history: list[dict],
     question: str,
@@ -2252,17 +2311,22 @@ def _resolve_current_selection_state(
     selected_sector: str | None,
     selected_intention: str | None,
 ) -> tuple[list[dict], str | None, str | None, str | None]:
-    """Résout domaine/secteur/intention courants en priorisant ce qui est détecté dans l'historique."""
+    """Rejoue le passé, puis applique le message courant une seule fois."""
     history_with_current = history + [{"role": "user", "content": question}]
-    derived_domain, derived_sector, derived_intention = _derive_selection_state_from_history(
-        history_with_current,
-        selected_domain_code=None,
-        selected_sector=None,
-        selected_intention=None,
+    state = _selection_state_from_history_and_client(
+        history, selected_domain_code, selected_sector, selected_intention
     )
-    current_domain = derived_domain or selected_domain_code
-    current_sector = derived_sector or selected_sector
-    current_intention = derived_intention or selected_intention
+    last_turn = next(
+        (msg for msg in reversed(history) if (msg.get("role") or "").strip().lower() in ("user", "assistant")),
+        {},
+    )
+    expected_step = (
+        _detect_expected_step_from_assistant(str(last_turn.get("content") or ""))
+        if (last_turn.get("role") or "").strip().lower() == "assistant" else None
+    )
+    current_domain, current_sector, current_intention = _selection_state_after_message(
+        history_with_current, len(history), state, expected_step
+    )
     return history_with_current, current_domain, current_sector, current_intention
 
 
@@ -2273,6 +2337,13 @@ def _retrieve_docs_for_question(
     selected_sector: str | None = None,
 ) -> list:
     """Récupère les documents pertinents via fallback progressif des filtres."""
+    if selected_intention and (
+        not selected_domain_code
+        or not _get_intention_label_from_code(
+            selected_domain_code, selected_intention, secteur_choisi=selected_sector
+        )
+    ):
+        return []
 
     def _run_retrieval(filters: dict | None) -> list:
         retrieval_pipeline = build_rag_retrieval_only_pipeline(filters=filters)
@@ -2317,21 +2388,8 @@ def _retrieve_docs_for_question(
     if docs:
         return _rank_docs_by_query_overlap(question, docs)
 
-    # Étape 3: domaine + intention sans filtre secteur, puis post-filtrage Python sur secteur.
-    broad_docs = _run_retrieval(
-        _build_retrieval_filters(
-            domaine_code=selected_domain_code,
-            intention_code=selected_intention,
-        )
-    )
-    post_filtered = [
-        doc for doc in broad_docs if _doc_matches_sector(doc, selected_sector, include_multisector=True)
-    ]
-    # Si le post-filtrage secteur ne retient rien, on garde quand même les
-    # documents de la bonne intention (domaine+intention) plutôt que de les
-    # écarter : mieux vaut un secteur imparfait qu'une intention différente.
-    ranked = post_filtered or broad_docs
-    return _rank_docs_by_query_overlap(question, ranked)
+    # Ne pas compléter la liste avec d'autres secteurs après un résultat vide.
+    return []
 
 
 def _docs_to_payload(docs: list) -> tuple[list[str], list[str], list[str], list[dict[str, str | None]]]:
@@ -2348,6 +2406,55 @@ def _docs_to_payload(docs: list) -> tuple[list[str], list[str], list[str], list[
     full_contents = [c["content"] for c in case_dicts]
     case_extras = [_case_extras_from_case_dict(c) for c in case_dicts]
     return sources, suggested_case_ids, full_contents, case_extras
+
+
+def _case_display_title(case: dict) -> str:
+    title = str(case.get("cas_utilisation") or "").strip()
+    if not title:
+        title = str(case.get("content") or "").strip().split("\n", 1)[0]
+    return _strip_use_case_codes(title)
+
+
+def _reconcile_generated_case_list(answer: str, cases: list[dict]) -> tuple[str, list[int]]:
+    """Aligne les titres réellement affichés avec les IDs, sans décider de leur pertinence."""
+    closing = re.search(r"(?i)(?:«\s*)?souhaitez[- ]vous approfondir l.?un de ces cas", answer or "")
+    text = (answer or "")[:closing.start()] if closing else (answer or "")
+    # Délimiter TOUS les candidats avant de valider leur titre, y compris un
+    # titre vide ou inconnu : leur corps ne doit pas fuir dans le cas précédent.
+    headings = list(re.finditer(
+        r"(?m)^[ \t]*(?:#{1,6}[ \t]+)?(?:[-+*][ \t]+)?"
+        r"[*_`]{0,3}(?P<number>\d+)(?P<number_emphasis>[*_`]{1,3})?"
+        r"(?(number_emphasis)[.):]?|[.):])[*_`]{0,3}[ \t]*(?P<title>[^\n]*)",
+        text,
+    ))
+    titles = [_case_display_title(case) for case in cases]
+    normalized_titles = [_normalize_query_text(title) for title in titles]
+    ids = [str(case.get("id") or "") for case in cases]
+    blocks: dict[int, str] = {}
+    for pos, heading in enumerate(headings):
+        model_title = _normalize_query_text(_strip_use_case_codes(heading.group("title").strip("*_` ")))
+        matches = [i for i, title in enumerate(normalized_titles) if title and title == model_title]
+        if len(matches) != 1:
+            # Des titres identiques ne permettent pas d'attribuer un bloc à un ID sans ambiguïté.
+            continue
+        index = matches[0]
+        if index in blocks or not ids[index] or ids.count(ids[index]) != 1:
+            continue
+        end = headings[pos + 1].start() if pos + 1 < len(headings) else len(text)
+        blocks[index] = text[heading.end():end].strip().rstrip("- \n")
+    indices = sorted(blocks)
+    if not indices:
+        return NO_MATCH_MESSAGE, []
+    rendered = [
+        f"{number}. {titles[index]}\n{blocks[index]}".rstrip()
+        for number, index in enumerate(indices, 1)
+    ]
+    return (
+        "\n\n".join(rendered)
+        + "\n\nSouhaitez-vous approfondir l’un de ces cas ?\n"
+        "Indiquez son numéro pour obtenir le détail complet.",
+        indices,
+    )
 
 
 def _normalize_query_text(text: str) -> str:
@@ -2406,17 +2513,19 @@ def _rank_docs_by_query_overlap(question: str, docs: list) -> list:
     ranked: list[tuple[int, int, object]] = []
     for idx, doc in enumerate(docs):
         blob = _doc_search_blob(doc)
-        blob_tokens = blob.split()
+        blob_tokens = set(blob.split())
         score = 0
         for kw in keywords:
+            best_match = 0
             for token in blob_tokens:
                 if kw == token:
-                    score += 6
+                    best_match = max(best_match, 6)
                 elif kw in token or token in kw:
                     if len(kw) >= 5 and len(token) >= 5:
-                        score += 3
+                        best_match = max(best_match, 3)
                 elif len(kw) >= 5 and len(token) >= 5 and SequenceMatcher(None, kw, token).ratio() >= 0.82:
-                    score += 1
+                    best_match = max(best_match, 1)
+            score += best_match
         ranked.append((score, idx, doc))
 
     ranked.sort(key=lambda item: (-item[0], item[1]))
@@ -2460,7 +2569,7 @@ def get_rag_prompt_and_sources(
         selected_parcours_cta_label,
     ).
     Si `niveau2_prebuilt_answer` est renseigné, le client ne doit pas streamer le prompt :
-    c'est la réponse Niveau 2 complète (pertinence LLM + bloc verbatim). Dans ce cas,
+    c'est une réponse déterministe (détail Niveau 2 ou absence de cas). Pour un détail,
     `selected_parcours_url` / `selected_parcours_cta_label` pointent vers le parcours du cas
     réellement sélectionné, pour un bouton fiable côté frontend (sans devinette par index).
     """
@@ -2530,11 +2639,13 @@ def get_rag_prompt_and_sources(
                     return _ret_niveau2(p, selected_id=str(sel.get("id") or ""))
 
     # Demande de détail sans liste fiable : fallback par thème (pas de « point 2 » seul)
-    if _is_detail_request(question) and not last_suggested_cases:
+    if _is_explicit_detail_command(question) and not last_suggested_cases:
         if not _has_explicit_point_number(question):
-            previous = _get_previous_user_message(history)
+            previous = _theme_detail_query(
+                question, history, (selected_domain_code, selected_sector, selected_intention)
+            )
             if previous:
-                previous_domain, _, previous_intention = _derive_selection_state_from_history(
+                previous_domain, previous_sector, previous_intention = _derive_selection_state_from_history(
                     history,
                     selected_domain_code=None,
                     selected_sector=None,
@@ -2542,8 +2653,10 @@ def get_rag_prompt_and_sources(
                 )
                 docs = _retrieve_docs(
                     previous,
-                    filters=_build_retrieval_filters(previous_domain, previous_intention),
-                )
+                    filters=_build_retrieval_filters(
+                        previous_domain, previous_intention, selected_sector=previous_sector
+                    ),
+                ) if _should_inject_rag_documents(previous_domain, previous_sector, previous_intention) else []
                 if docs:
                     cases_from_docs = [_doc_to_case_dict(d, i) for i, d in enumerate(docs)]
                     idx = _resolve_detail_selection(question, cases_from_docs)
@@ -2563,16 +2676,24 @@ def get_rag_prompt_and_sources(
     hint = _get_rag_hint(history_with_current)
     conversation_history = _format_conversation_history(history)
     docs = []
-    if _should_inject_rag_documents(current_domain, current_sector, current_intention):
+    no_match_prebuilt = None
+    retrieval_question = _user_probleme_q3_text(
+        history_with_current, selected_state=(current_domain, current_sector, current_intention)
+    )
+    if retrieval_question and _should_inject_rag_documents(current_domain, current_sector, current_intention):
         docs = _retrieve_docs_for_question(
-            question,
+            retrieval_question,
             selected_domain_code=current_domain,
             selected_intention=current_intention,
             selected_sector=current_sector,
         )
+        if not docs:
+            no_match_prebuilt = NO_MATCH_MESSAGE
     sources, suggested_case_ids, full_contents, case_extras = _docs_to_payload(docs)
     secteur_affichage = _get_secteur_choices_affichage(history_with_current, domaine_code=current_domain)
-    intention_affichage = _get_intention_choices_affichage(history_with_current, domaine_code=current_domain)
+    intention_affichage = _get_intention_choices_affichage(
+        history_with_current, domaine_code=current_domain, secteur_choisi=current_sector
+    )
     q3_triggers_affichage = _get_q3_triggers_affichage(
         history_with_current,
         domaine_code=current_domain,
@@ -2609,7 +2730,7 @@ def get_rag_prompt_and_sources(
         current_domain,
         current_sector,
         current_intention,
-        None,
+        no_match_prebuilt,
         None,
         None,
     )
@@ -2619,6 +2740,7 @@ def _try_detail_flow(
     question: str,
     history: list[dict],
     last_suggested_cases: list[dict] | None,
+    selected_state: tuple[str | None, str | None, str | None] | None = None,
 ) -> tuple[str, list[str], list[str], list[str], list[dict[str, str | None]]] | None:
     """
     Si la question est une demande de détail et qu'on peut déterminer quel cas (avec
@@ -2626,7 +2748,7 @@ def _try_detail_flow(
     retourne (answer, sources, suggested_case_ids, full_contents, case_extras). Sinon None.
     """
     if not (
-        _is_detail_request(question)
+        (_is_detail_request(question) if last_suggested_cases else _is_explicit_detail_command(question))
         or _has_explicit_point_number(question)
         or _bare_digit_message_selects_suggested_row(question, last_suggested_cases)
     ):
@@ -2646,18 +2768,22 @@ def _try_detail_flow(
         return None
 
     # 3) Fallback uniquement pour demande par thème (ex. « détaille celui sur la synthèse »)
-    previous = _get_previous_user_message(history)
+    previous = _theme_detail_query(question, history, selected_state)
     if not previous:
         return None
-    current_domain, _, current_intention = _derive_selection_state_from_history(
+    current_domain, current_sector, current_intention = _derive_selection_state_from_history(
         history,
         selected_domain_code=None,
         selected_sector=None,
         selected_intention=None,
     )
+    if not _should_inject_rag_documents(current_domain, current_sector, current_intention):
+        return None
     docs = _retrieve_docs(
         previous,
-        filters=_build_retrieval_filters(current_domain, current_intention),
+        filters=_build_retrieval_filters(
+            current_domain, current_intention, selected_sector=current_sector
+        ),
     )
     if not docs:
         return None
@@ -2780,7 +2906,10 @@ def query_rag_haystack(
                     )
 
     # 3) Demande explicite de détail (« détaille le 2 »)
-    detail_result = _try_detail_flow(question, history, last_suggested_cases)
+    detail_result = _try_detail_flow(
+        question, history, last_suggested_cases,
+        (selected_domain_code, selected_sector, selected_intention),
+    )
     if detail_result is not None:
         a, s, i, f, x = detail_result
         return a, s, i, f, x, None, None, None, selected_domain_code, selected_sector, selected_intention
@@ -2824,16 +2953,26 @@ def query_rag_haystack(
     hint = _get_rag_hint(history_with_current)
     conversation_history = _format_conversation_history(history)
     docs = []
-    if _should_inject_rag_documents(current_domain, current_sector, current_intention):
+    retrieval_question = _user_probleme_q3_text(
+        history_with_current, selected_state=(current_domain, current_sector, current_intention)
+    )
+    if retrieval_question and _should_inject_rag_documents(current_domain, current_sector, current_intention):
         docs = _retrieve_docs_for_question(
-            question,
+            retrieval_question,
             selected_domain_code=current_domain,
             selected_intention=current_intention,
             selected_sector=current_sector,
         )
+        if not docs:
+            return (
+                NO_MATCH_MESSAGE, [], [], [], [], None, None, None,
+                current_domain, current_sector, current_intention,
+            )
     sources, suggested_case_ids, full_contents, case_extras = _docs_to_payload(docs)
     secteur_affichage = _get_secteur_choices_affichage(history_with_current, domaine_code=current_domain)
-    intention_affichage = _get_intention_choices_affichage(history_with_current, domaine_code=current_domain)
+    intention_affichage = _get_intention_choices_affichage(
+        history_with_current, domaine_code=current_domain, secteur_choisi=current_sector
+    )
     q3_triggers_affichage = _get_q3_triggers_affichage(
         history_with_current,
         domaine_code=current_domain,
@@ -2861,6 +3000,13 @@ def query_rag_haystack(
     gen_result = generator.run(messages=[ChatMessage.from_user(prompt_text)])
     replies = gen_result.get("replies", [])
     answer = _reply_to_text(replies[0]) if replies else "Aucune réponse générée."
+    if docs:
+        cases = [_doc_to_case_dict(doc, i) for i, doc in enumerate(docs[:5])]
+        answer, retained = _reconcile_generated_case_list(answer, cases)
+        sources = [sources[i] for i in retained]
+        suggested_case_ids = [suggested_case_ids[i] for i in retained]
+        full_contents = [full_contents[i] for i in retained]
+        case_extras = [case_extras[i] for i in retained]
 
     pending_case_index = _parse_offer_detail_from_text(answer)
     if pending_case_index is not None and 1 <= pending_case_index <= len(suggested_case_ids):

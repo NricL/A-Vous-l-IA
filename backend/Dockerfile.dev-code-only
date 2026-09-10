@@ -1,0 +1,10 @@
+# Development code-only update: inherit the deployed data, static pages and dependencies.
+# Supply the existing backend image by immutable digest, never a floating tag.
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+WORKDIR /app
+COPY app/haystack_rag.py ./app/haystack_rag.py
+COPY app/routes/chat.py ./app/routes/chat.py
+RUN python -m py_compile app/haystack_rag.py app/routes/chat.py \
+    && find /app/app -name '__pycache__' -type d -prune -exec rm -rf {} +
+ENV PYTHONDONTWRITEBYTECODE=1

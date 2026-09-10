@@ -1,9 +1,85 @@
 # Avoulia V2 — Suivi Projet & Décisions
 
+### Synchronisation GitHub autorisée le 10 septembre à 11:34
+
+Eneric confirme la publication dans le dépôt **public** après nettoyage. Ce lot synchronise code, tests, workflows et documentation ; aucun Excel, rapport privé de modèle, lien SharePoint interne ou nouvel export de mapping n'est ajouté. L'identifiant d'abonnement a été retiré des fichiers publiables et doit être fourni explicitement au banc d'évaluation.
+
+Validation locale :106 tests backend avec le dépôt parcours associé,19 tests frontend, typecheck et build au chemin `/A-Vous-l-IA/`. Dans un checkout isolé, les tests de gabarits externes sont explicitement ignorés si le dépôt associé est absent ; cela ne valide pas une régénération de parcours. Les sources `parcours_util.py` anticipent les durées harmonisées mais le backend0045 conserve son module hérité : ne pas confondre code versionné et totalité du code déployé.
+
+Publication Pages déclenchée par le push frontend ; succès et contrôle du site seront consignés après exécution. Aucun package Simplon.
+
+### Règle de livraison confirmée le 10 septembre à 11:20
+
+Le dépôt `NricL/A-Vous-l-IA` et **https://nricl.github.io/A-Vous-l-IA/** sont les références d'Eneric. Chaque mise à jour doit synchroniser le code, les fichiers de suivi/roadmap/changelog/handoff et les éléments GitHub concernés, puis contrôler le résultat sur ce lien. Un déploiement Azure seul ne constitue pas une livraison complète.
+
+**Rattrapage courant : à publier.** Backend dev0045 et frontend Azure0023 sont actifs, mais le frontend GitHub Pages observé à 11:14 reste ancien. Les modifications locales ne sont pas encore committées/poussées. Les tests d'état frontend sont ajoutés aux workflows CI et Pages pour couvrir ce chemin de publication. Ne pas déclarer Pages à jour avant succès du workflow et contrôle du site. Package Simplon toujours différé ; aucune modification Excel.
+
+### État final du 10 septembre — correctifs chatbot déployés sur DEV uniquement
+
+**Livraison terminée sur l'environnement de développement confirmé par Eneric**, pas sur Simplon/avouslia.fr : `rg-avoulia-fr-dev`, `francecentral`. L'identifiant d'abonnement reste dans les relevés privés de déploiement.
+
+| Élément | Révision / image | État observé |
+|---|---|---|
+| Backend final | `avoulia-backend--0000045`, `v2-nomatch-20260910-r2`, digest `sha256:9408ae9a6d8ffc1275a6b6c03f5bba5bbfbb59120f14d4b20b87c44b06b414ea` | Healthy, trafic 100 % |
+| Frontend | `avoulia-frontend--0000023`, `v2-nomatch-20260910` | Healthy, trafic 100 % |
+| Builds ACR | `dd2a` (backend intermédiaire0044), `dd2b` (frontend), `dd2c` (backend final0045) | Succeeded |
+
+**Inclus** : mobile/état frontend, qualification et classement/listes précédemment préparés, réponse commune « Je n'ai pas de cas suffisamment pertinent… » (sans cas/CTA inventé), précision du besoin ou retour aux étapes antérieures. Le défaut initial « 13 » découvert sur0044 a été corrigé sur0045 (reconnaissance d'un premier choix numérique uniquement avant qualification, après accueil ou historique vide).
+
+**Non inclus** : gabarits CHAT-04/05/06 (durées harmonisées, accès au prompt, rôle neutre), toujours locaux et non régénérés. `parcours_util.py`, documents, pages statiques, mapping et dépendances sont hérités de0043 ; aucune v454 intégrée, v455 créée, modification Excel ou préparation de package Simplon.
+
+**Validation finale** : 106 tests backend et 19 tests frontend, build/typecheck réussis. Live sur0045/0023 : départ direct13 → BTP → objectif4 → problème fiscal hors contexte → message sans correspondance avec stepper disponible → précision vers compte rendu → liste alignée → détail du premier cas et URL UC-0725 correcte ; retour « Modifier : Objectif » opérationnel. API non-stream0045 : même no-match, zéro cas, état de sélection conservé. À390 px, saisie x45..290/envoi x298..330 ; desktop1240 px utilisable. Deux pages servies ont exactement les mêmes SHA-256 avant/après. Pas d'affirmation de test exhaustif du catalogue ni de précision métier globale.
+
+**Reprise / rollback** : recette code-only dans `backend/Dockerfile.dev-code-only`, digest de base et commandes dans `.azure/plan.md` et `HANDOFF.md`. Retour backend : image `acravoulia97186.azurecr.io/avoulia-backend:v2-parcoursfix3-1788183296` ; retour frontend : `acravoulia97186.azurecr.io/avoulia-frontend:v2-cfg-1788165520`. Code local non committé/non poussé ; les images ACR sont publiées sur le dev avec autorisation, pas un package Simplon.
+
+### Update 2026-09-10 — Déploiement développement autorisé, validation en cours
+
+Section chronologique intermédiaire ; état final ci-dessus fait foi.
+
+- **Autorisation** : Eneric a confirmé à 10:15 l'environnement dev uniquement : abonnement Visual Studio Enterprise, `rg-avoulia-fr-dev`, `francecentral`. Package Simplon toujours différé ; aucune modification de la base.
+- **Images initiales du lot** : ACR `dd2a` backend et `dd2b` frontend réussis, tags `v2-nomatch-20260910`. Révisions `avoulia-backend--0000044` et `avoulia-frontend--0000023`, Healthy et trafic 100 % observés.
+- **Préservation des données** : `backend/Dockerfile.dev-code-only` reprend l'image backend 0043 par digest immuable, superpose uniquement `app/haystack_rag.py` et `app/routes/chat.py`. Pas de classeur, page ou mapping dans le contexte source. `parcours_util.py` conservé : CHAT-04/05/06 ne sont PAS déployés dans ce lot.
+- **Contrôles live acquis** : saisie/envoi visibles à 390 px ; flux guidé via choix de domaine/secteur/objectif ; absence de correspondance sur demande fiscale en contexte chantier ; clarification suivante proposant deux cas de compte rendu ; détail du premier avec URL correcte. Endpoint non-stream : même message sans cas sélectionnable, état BTP/objectif4 conservé. Deux empreintes SHA-256 de pages parcours identiques avant/après.
+- **Régression repérée pendant la validation** : chiffre « 13 » fourni directement après le seul message d'accueil ne fixe pas le domaine ; la question secteur est alors répétée. Le flux avec question Q1 explicite fonctionne. Correctif source et révision complémentaire en cours, ne pas clôturer ce lot avant nouveau contrôle.
+- **Retour arrière disponible** : backend image `v2-parcoursfix3-1788183296` (0043) ; frontend `v2-cfg-1788165520` (0022). Aucun push/commit ou package Simplon.
+
+### Update 2026-09-10 — CHAT-03 : premier essai avec le modèle réel
+
+**Clôture du passage ciblé (pas du calibrage métier)** : quatre appels supplémentaires sur les mêmes modèle, prompt et raisonnement par défaut, avec plafond total de 6 000 tokens et espacement de 90 s. Quatre réponses complètes, aucune troncature. Les deux demandes sans correspondance rejettent tous les candidats ; l'une ajoute des questions numérotées que le diagnostic strict du banc classe comme liste non reconnue. Les deux demandes vagues par synonymes retiennent synthèse + actions plutôt que la seule synthèse attendue. Verdict automatisé inchangé : 1 concordance stricte / 4, 3 échecs (un de format, deux d'ensemble attendu). Ne pas interpréter ce chiffre comme une précision de production : les attentes sont des hypothèses techniques, et le suivi d'actions peut être une interprétation plausible du besoin vague.
+
+**Points restant ouverts** : arbitrer les alternatives acceptables sur demandes vagues ; distinguer questions numérotées et propositions de cas dans le diagnostic d'évaluation ; examiner le message utilisateur sans correspondance (le rapprochement serveur donne une réponse générique sans cas sélectionnable). Aucun seuil sémantique arbitraire ou modification de production ajouté à partir de ces seuls résultats.
+
+**Traçabilité finale** : `chat03-real-model-followup.json` conservé dans les artefacts privés de session, distinct du premier rapport. Consommation des quatre appels : 6 092 tokens de complétion dont 5 184 de raisonnement et 908 non-raisonnement ; un seul budget total, pas deux plafonds indépendants. Script paramétrable par scénario, répétitions, plafond et cible Azure explicite, reprise contrôlée par configuration/empreintes, aucune clé persistée. Suite globale locale : 95 tests réussis, dont 19 propres au banc d'évaluation (les 33 rapportés par l'agent incluaient également les 14 tests de pertinence existants).
+
+Évaluation locale du prompt courant et du rapprochement des listes, avec candidats fictifs, sur le déploiement Azure existant correspondant à la configuration streaming (`gpt-5-mini`). Aucun changement de production, donnée Excel, packaging ou déploiement.
+
+- Outil reproductible ajouté : `backend/scripts/evaluate_chat_relevance.py` (mode hors ligne par défaut, appels réels explicitement activés) ; tests isolés : `backend/tests/test_relevance_evaluation.py`.
+- Premier passage borné : 16 tentatives, 15 réponses et une limitation 429. Six concordances avec les attentes techniques, une divergence (requête par synonymes avec cas d'actions supplémentaire), huit réponses tronquées, dont les deux essais sans correspondance.
+- Limite du banc : plafond de 1 200 tokens de complétion incluant le raisonnement. Les réponses tronquées ne permettent pas de conclure sur la pertinence en production ; ne pas publier de taux global de précision.
+- Suite ciblée effectuée : quatre appels sur les scénarios sans correspondance et par synonymes, budget de réponse augmenté et paramètres consignés ; bilan ci-dessus. Pas de modification du modèle ni de ses paramètres de raisonnement.
+- Hors périmètre de cette mesure : recherche vectorielle, base réelle, parcours UI complet et validation des attentes par des utilisateurs. Rapport brut synthétique conservé dans les artefacts privés de session, pas dans les pages publiées.
+
 **Date de démarrage:** 2026-07-08  
 **Statut global:** Chantiers A/C/D/E ✅ Complétés — Prêt pour handover Simplon  
 **Tenant cible:** Production Azure (westeurope, tenant officiel)  
-**Repo:** `NricL/A-Vous-l-IA` (privé — source unique)
+**Repo:** `NricL/A-Vous-l-IA` (public — code et documentation ; données sources exclues)
+
+### Update 2026-09-09 — Améliorations ciblées engagées, non déployées
+
+**Suite CHAT-03 après report du package — lot local clôturé** : prompt imposant tous les candidats identifié et corrigé pour autoriser une sélection plus courte ; rapprochement des titres/IDs affichés avec les cas sélectionnables et rétablissement de leur ordre de classement. Modifications dans `backend/app/haystack_rag.py`, `backend/app/routes/chat.py` ; scénarios fictifs dans `backend/tests/test_chat_relevance.py`. Les limites de blocs Markdown sont détectées indépendamment de la validation du titre, y compris numéros en gras : un candidat inconnu ne peut pas être conservé dans le corps d'un cas reconnu. Total final : 76 tests backend/gabarits, dont 14 de pertinence ; contre-revue ciblée sans blocage connu (20 reproductions HTTP/SSE indépendantes). Ces scénarios ne mesurent pas la précision d'un modèle réel et ne constituent pas un calibrage humain de la pertinence. Aucun seuil arbitraire ajouté, aucun package ni déploiement.
+
+**Décision Eneric à 15:41** : ne pas préparer le package Simplon maintenant. Poursuivre les actions restantes, en commençant par CHAT-03 (pertinence), avec traçabilité dans les documents du dépôt. L'accès structuré nécessaire pour terminer l'audit Excel reste à résoudre. Pas de packaging, push ou déploiement engagé. La future reprise simple par Simplon reste une contrainte, pas le chantier courant.
+
+Le statut global ci-dessus est historique. La livraison locale de septembre n'est pas encore publiée ni prête à être déployée.
+
+- **Accord Eneric** : corriger les frictions du chatbot et améliorer les colonnes Excel existantes, sans pivot. La découverte reste destinée aux employés qui ne savent pas encore comment l'IA pourrait les aider. Six étapes, catalogue, pré-filtrage et verbatim conservés.
+- **Sources de travail** : copie récupérée à `8f2d673`. Le correctif de contenu court de la révision backend 0043 ne figure pas intégralement dans ce commit ; il doit être conservé et couvert par les tests avant livraison.
+- **CHAT-04/05/06 préparés** : durée 2h12 de travail actif estimé (somme des étapes, hors test terrain), accès au prompt existant sans déplacer les étapes, rôle générique à compléter. Backend : `app/parcours_util.py`. Dépôt parcours associé : `pipeline/genere.py`, `templates/page.html.j2`.
+- **CHAT-01/02** : corrections mobile et état interface/backend préparées localement ; revue ciblée clôturée sans blocage connu. **CHAT-03 partiel** : repli abandonnant le secteur supprimé, variantes multi-sectorielles/secteurs composés préservées et classement lexical corrigé ; exclusion des quasi-correspondances sémantiques non calibrée.
+- **Excel** : seule la référence désignée par Eneric doit être utilisée ; audit M365 en lecture seule, pas de copie locale historique employée comme source actuelle. Toute modification produira un nouveau fichier au même nom, `vXXX` incrémenté, source préservée. Aucun classeur modifié.
+- **Livraison** : pas de push, de commit ou de déploiement dans ce lot à ce stade. Les pages statiques déjà embarquées sont inchangées ; les gabarits seuls ne les mettent pas à jour.
+- **Traçabilité** : voir `ROADMAP.md`, `CHANGELOG.md` et l'addendum du `HANDOFF.md`. Les autres sujets restent à la main d'Eneric.
+- **Bilan local final** : 62 tests backend/gabarits et 18 régressions frontend passent ; build/typecheck passent. Contrôles de rendu isolé mobile/ordinateur rapportés dans le changelog. Ne pas assimiler ce bilan à une validation de toutes les données ou à une mise en ligne.
 
 ### Update 2026-08-31 (3) — Axe 3.4 : sortie de parcours (lien Retour) — DÉPLOYÉ ✅ · 3.3 abandonné
 - 🎯 Ne plus laisser l'utilisateur dans un cul-de-sac quand le parcours s'ouvre dans un nouvel onglet.

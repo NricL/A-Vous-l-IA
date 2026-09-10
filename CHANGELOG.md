@@ -1,5 +1,29 @@
 # Avoulia — Changelog v1 → v2 (synthèse d'onboarding)
 
+## 10 septembre — synchronisation publique du code et de la documentation
+
+Publication autorisée après nettoyage : correction de la mention de dépôt privé, identifiant d'abonnement retiré au profit d'un paramètre explicite, aucune donnée source ni rapport privé ajouté. Les workflows CI/Pages exécutent les régressions d'état frontend avant publication. Le build Pages utilise le sous-chemin du dépôt et appelle le backend dev0045. Résultat effectif du workflow à consigner dans le suivi.
+
+## 10 septembre à 11:20 — canal GitHub de référence
+
+**Décision** : toutes les mises à jour doivent synchroniser code et documentation dans `NricL/A-Vous-l-IA`, et être contrôlées sur https://nricl.github.io/A-Vous-l-IA/. Publication Pages de rattrapage non encore effectuée.
+
+**Changement GitHub préparé** : ajout du contrôle existant `npm run check:chat` dans CI et dans le build Pages, avec typecheck avant publication Pages. Aucun nouveau runner ou dépendance. Les workflows n'ont pas encore été exécutés sur GitHub pour ce lot.
+
+## 10 septembre — livraison dev sans modification des données (déployée)
+
+**Quoi** : message explicite lorsqu'aucun cas fiable ne peut être proposé, possibilité de préciser le besoin ou revenir via le stepper conservé ; aucun ID/source/CTA fictif. Diagnostic du banc corrigé pour distinguer questions numérotées de clarification et liste inconnue (rapports initiaux conservés).
+
+**Où** : `backend/app/haystack_rag.py`, `backend/app/routes/chat.py`, tests de pertinence ; `frontend/src/views/HomeView.vue`, contrôle Node d'état ; script/tests du banc d'évaluation. Les corrections qualification/mobiles/listes précédemment locales sont incluses.
+
+**Déploiement initial** : ACR dd2a/dd2b, backend0044/frontend0023 (tag `v2-nomatch-20260910`). Overlay backend code-only sur digest0043, sans remplacement des pages, du mapping ou de la base. Le pitch et les changements de gabarit CHAT-04/05/06 restent exclus pour éviter une livraison partiellement régénérée.
+
+**Réserve en cours** : test live révèle une sélection initiale numérique « 13 » ignorée après le seul accueil ; correction complémentaire requise avant clôture. Les contrôles live du flux guidé normal, no-match et clarification sont positifs. Détails des images et résultats dans `SUIVI_PROJET.md`.
+
+**Clôture** : la réserve initiale est levée par backend0045 (build ACR dd2c, tag `v2-nomatch-20260910-r2`, digest `9408ae9a6d8ffc1275a6b6c03f5bba5bbfbb59120f14d4b20b87c44b06b414ea`). Frontend0023 conservé. Parcours live complet recontrôlé à partir du premier13, puis absence de correspondance, clarification, liste/détail/lien et retour arrière. No-match non-stream confirmé sur0045 ;106 tests backend/19 frontend. Données et pages héritées de0043 inchangées, modifications de gabarits locales exclues, package Simplon toujours différé.
+
+**Diagnostic d'évaluation v2** : questions numérotées reconnues uniquement après un refus explicite et avec formulations de clarification bornées ; listes inconnues toujours rejetées/inconclusives. Relecture hors ligne du rapport existant : deux refus sans correspondance conformes, deux divergences aux hypothèses synonymes inchangées. Rapports initiaux préservés, aucun nouvel appel modèle pour cette relecture.
+
 **But de ce document :** permettre à un dev Simplon — **notamment celui qui a participé à la
 v1** — de comprendre **en une lecture** tout ce qui a changé entre la v1 publique et la v2
 livrée. C'est le point d'entrée « traçabilité » du projet (contrainte C2, cf.
@@ -11,6 +35,52 @@ livrée. C'est le point d'entrée « traçabilité » du projet (contrainte C2, 
 - **Historique exact :** `git log` (34 commits, `ab4b21a` → `d02ad1d` au 2026-08-26)
 
 > Convention : chaque entrée indique **Quoi / Pourquoi / Où (fichiers)** et le **commit**.
+
+## Travaux locaux du 9 septembre 2026 — non publiés, non déployés
+
+### Complément du 10 septembre — banc d'évaluation du modèle réel
+
+**Quoi / pourquoi** : ajout d'un script opt-in comparant les cas retenus par le modèle réel à des attentes techniques sur cas fictifs, en distinguant exclusion sémantique, échec de parsing, troncature et erreur de transport. Les tests précédents simulaient les réponses du modèle et ne mesuraient pas cette étape.
+
+**Où** : `backend/scripts/evaluate_chat_relevance.py`, `backend/tests/test_relevance_evaluation.py`. Premier rapport privé de session : `chat03-real-model-evaluation.json`. Le script n'est pas appelé par l'application ; aucun changement du code de production dans ce lot.
+
+**Premier résultat borné** : 16 tentatives sur le modèle configuré pour la route streaming, une 429, huit troncatures avec plafond de 1 200 tokens (raisonnement compris). Six attentes satisfaites et une divergence sur les réponses complètes évaluables ; pas de taux global ni de preuve sur tout le catalogue. Reprise ciblée de quatre appels maximum en cours, sans changer le modèle.
+
+**Résultat de la reprise du 10 septembre** : quatre réponses complètes sous plafond total de 6 000 tokens, même modèle/prompt, sans réglage de raisonnement supplémentaire. Deux rejets de tous les candidats hors sujet ; un diagnostic de format déclenché par des questions de suivi numérotées. Deux réponses par synonymes ajoutent le suivi d'actions à la synthèse : divergence aux attentes techniques, pas preuve d'irrélevance jugée par des utilisateurs. Résultat strict du banc conservé (1/4), sans réécrire les attentes pour faire passer les tests. Aucun correctif de production fondé sur ce seul petit échantillon.
+
+**Reproductibilité** : sélection de scénarios, répétitions bornées, plafond 1–6 000 tokens, cible Azure explicite pour les appels réels, arrêt/non-succès en cas de troncature ou problème de transport et contrôle des empreintes à la reprise. Suite globale 95 tests ; script hors ligne par défaut. Voir `HANDOFF.md` pour l'exécution sans packaging.
+
+**À 15:41 — périmètre confirmé** : package Simplon différé par Eneric avant toute création. Lectures de documentation seulement dans la phase envisagée ; reprise des corrections restantes, notamment CHAT-03. La procédure de reprise reste documentée sans assembler de livrable maintenant.
+
+**Périmètre** : corrections ciblées approuvées, pas de pivot produit. Sources récupérées depuis le dépôt à `8f2d673`. Les réalisations du 31 août présentes dans la copie de déploiement doivent être préservées avant une future livraison ; la branche distante n'est pas une preuve de parité avec l'image déployée.
+
+**CHAT-01 — mobile et accessibilité : changements source préparés.**
+- **Quoi / pourquoi** : contraintes minimales flex/grid corrigées pour que la saisie et l'envoi restent visibles à 390 px ; retour à la ligne des chips, textes et boutons ; noms accessibles et focus clavier.
+- **Où** : `frontend/src/views/HomeView.vue`.
+- **Contrôles** : 23 observations de rendu isolé Edge, 320 à 1440 px et six phases simulées, sans backend réel. À 390 px, saisie x45..290 et bouton x298..330, au lieu d'un envoi hors écran. Ces contrôles de rendu n'ont pas été ajoutés comme suite persistante.
+
+**CHAT-02 — qualification et état : changements source préparés, revue ciblée clôturée.**
+- **Quoi / pourquoi** : réponse numérique interprétée dans l'étape attendue, réutilisation prudente des informations explicites antérieures, dépendances réinitialisées lors d'une correction ; le frontend applique l'état complet du serveur sans effacer ensuite son secteur. Les champs absents et les champs explicitement nuls restent distincts.
+- **Où** : `backend/app/haystack_rag.py`, `frontend/src/views/HomeView.vue`, `frontend/src/api/chat.ts`.
+- **Fiabilité** : retour arrière désactivé pendant le streaming et verrouillage immédiat de l'envoi ; correction du détail à contenu court mais champs riches conservée depuis le précédent déploiement.
+- **Contrôles persistants** : `backend/tests/test_chat_regressions.py` et `frontend/scripts/check-chat-state.mjs` (`npm run check:chat`). Qualification en texte libre volontairement conservatrice : pas de compréhension sémantique universelle revendiquée.
+- **Correctifs issus de revue** : filtres cohérents avec les secteurs composés et variantes multi-sectorielles, rejeu partagé de l'état et du besoin, fusion prudente d'un historique partiel avec l'état client, acquiescements reconnus comme réponses entières. Une phrase Q3 contenant « détails » reste un problème ; les demandes explicites comme « Donne-moi plus de détails » restent des sélections de cas, et non de nouvelles recherches.
+
+**CHAT-03 — amélioration partielle uniquement.**
+- **Quoi / où** : maintien des filtres métadonnées, suppression du repli abandonnant le secteur et de la surpondération lexicale par répétition, dans `backend/app/haystack_rag.py`.
+- **Limite** : les quasi-correspondances sémantiques nécessitent une évaluation calibrée avant tout seuil d'exclusion ; pas de seuil arbitraire ajouté. Ce chantier reste partiellement ouvert.
+- **Suite après report du package** : le prompt demandait de présenter tous les candidats, même périphériques. Cette contrainte est retirée ; la réponse peut retenir un sous-ensemble. `_reconcile_generated_case_list` rapproche les titres des sources et leurs IDs, écarte les identités ambiguës/inconnues, puis aligne ordre affiché et sélectionnable dans les chemins HTTP/SSE.
+- **Où / preuve finale de ce lot** : `backend/app/haystack_rag.py`, `backend/app/routes/chat.py`, `backend/tests/test_chat_relevance.py`. Quatorze tests de pertinence sur données fictives, total backend/gabarits 76. Numéros Markdown en gras pris en charge ; frontières de candidats séparées de la validation du titre pour empêcher la fuite d'un bloc inconnu dans un cas valide. Contre-revue ciblée : 20 reproductions HTTP/SSE indépendantes, aucun blocage connu dans ce périmètre. Ne pas conclure à une précision sémantique réelle mesurée.
+
+**CHAT-04/05/06 — parcours : changements source préparés.**
+- **Quoi** : somme des durées d'étapes affichée comme 2h12 de travail actif estimé, hors test terrain ; lien « Tester rapidement » révélant et focalisant le prompt existant ; rôle à compléter au lieu de dirigeant imposé ; rappel d'utiliser un outil autorisé sans promesse universelle de gratuité.
+- **Pourquoi** : corriger l'écart chat/page (~2 h/~2,5 h), rendre le prompt accessible sans modifier les six étapes et permettre l'usage par un employé.
+- **Où** : `backend/app/parcours_util.py` ; dans le dépôt parcours associé, `pipeline/genere.py` et `templates/page.html.j2`. Les textes propres aux cas ne sont pas réécrits.
+- **Contrôles** : `backend/tests/test_parcours_ux.py`, rendu de cas fictifs, ordre des six étapes, échappement HTML et texte restitué, accès au prompt et contrats URL. Définir `PARCOURS_SOURCE_ROOT` si le dépôt parcours n'est pas au chemin relatif attendu.
+- **Limite de livraison** : ces changements de gabarit ne modifient pas les pages déjà embarquées. Régénération avec la source validée et les mappings existants nécessaire avant publication. Ne pas lancer le générateur historique du backend à la place du générateur parcours.
+- **Commit** : aucun ; modifications locales uniquement.
+
+**Bilan local final** : 62 tests backend/gabarits fictifs (40 CHAT, 14 baseline, 8 parcours) et 18 tests frontend passent ; build et typecheck frontend passent. Contre-revue ciblée : aucun blocage connu sur les scénarios examinés, pas une garantie d'absence de tout défaut. Avertissement de taille de bundle préexistant ; règle ESLint de langue du script HomeView déjà en échec avant intervention, non corrigée hors périmètre. Pas de validation exhaustive de la base, de parcours cloud réels ou de la production officielle.
 
 ---
 

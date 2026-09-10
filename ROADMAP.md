@@ -4,7 +4,29 @@
 Décisions prises en tant que Product Owner (Eneric) ; ce fichier est versionné dans le
 repo pour rester traçable côté Eneric **et** côté Simplon.
 
-**Dernière mise à jour :** 2026-08-26
+**Dernière mise à jour :** 2026-09-09
+
+## Décision active du 9 septembre — améliorer sans pivot
+
+**Référence de livraison confirmée le 10 septembre à 11:20** : code et documentation doivent être synchronisés dans `NricL/A-Vous-l-IA`, puis publiés et contrôlés sur https://nricl.github.io/A-Vous-l-IA/. Azure reste le backend d'exécution ; sa seule mise à jour ne suffit pas à clôturer une livraison. Rattrapage Pages courant en attente de publication.
+
+**Livraison dev du 10 septembre** : CHAT-01/02 et corrections techniques CHAT-03 (qualification, filtres, listes et récupération après absence de correspondance) déployés sur backend0045/frontend0023 après accord explicite. Contrôles live de la chaîne utilisateur et des endpoints effectués. Le calibrage sémantique global reste ouvert. CHAT-04/05/06 restent locaux : pages et pitch conservés pour ne pas régénérer depuis une base non validée. Excel v454 inchangé ; package Simplon toujours différé. Le statut « aucun changement en ligne » des notes antérieures est historique et remplacé par cet état.
+
+**Avancement du 10 septembre — CHAT-03** : premier passage réel sur candidats fictifs effectué avec le modèle streaming configuré. La reprise ciblée donne quatre réponses complètes, confirme deux rejets de candidats hors sujet et révèle deux alternatives sur une demande vague ainsi qu'une limite de diagnostic pour les questions numérotées. Le calibrage métier reste ouvert : attentes techniques non validées par utilisateurs, échantillon restreint, recherche vectorielle et base v454 non évaluées. Pas de seuil arbitraire, nouveau modèle ou changement en ligne.
+
+**Avancement complémentaire CHAT-03** : liste plus courte autorisée, identités/ordre/sources alignés avec les cas affichés, variantes Markdown courantes couvertes. Lot source relu et contrôlé (76 tests backend/gabarits). Le calibrage sémantique réel demeure ouvert : ces contrôles fictifs ne prouvent pas la pertinence de toutes les suggestions. Pas de changement en ligne.
+
+**Précision Eneric à 15:41 : package Simplon différé.** Ne pas préparer ni assembler ce package à ce stade. Continuer à documenter les corrections pour permettre une reprise simple ultérieure ; packaging et déploiement restent distincts et non engagés.
+
+Cette décision remplace le séquencement d'août ci-dessous, conservé comme historique. À Vous l'IA reste un outil de **découverte de pistes d'usage pour les employés de PME qui ne savent pas encore comment l'IA pourrait les aider**.
+
+Deux axes seulement sont engagés :
+1. **Chatbot** : mobile et accessibilité de la saisie (CHAT-01), qualification sans répétition et état cohérent (CHAT-02), classement sans remplissage hors sujet (CHAT-03), durées cohérentes (CHAT-04), accès visible au prompt existant (CHAT-05), rôle à compléter dans les gabarits génériques (CHAT-06).
+2. **Excel** : contrôler puis améliorer les colonnes existantes, uniquement sur les points faibles et après validation éditoriale d'Eneric. Toute modification doit produire un nouveau fichier au même nom avec `vXXX` incrémenté, sans écraser la source ni une version existante.
+
+Conserver la qualification guidée, le catalogue, les identifiants, le pré-filtrage métadonnées, le détail verbatim et l'ordre des six étapes. Pas de nouveau schéma métier, nouvelle entrée de découverte, assistant généraliste ou pilote remplaçant le catalogue. Eneric prend en charge les observations utilisateurs et les autres suites ; aucun chantier supplémentaire d'instrumentation n'est relancé.
+
+**État de réalisation** : CHAT-01/02 et CHAT-04/05/06 préparés dans les sources, revue ciblée clôturée ; CHAT-03 partiellement traité, calibrage sémantique restant. Aucun commit, push ou déploiement. Régénération/intégration des pages avec la source et le mapping approuvés nécessaire avant publication. Audit Excel M365 partiel seulement ; aucun classeur modifié ni nouvelle version créée. Les observations de développement ne prouvent pas l'état de la production officielle. Détail des livraisons et limites dans `SUIVI_PROJET.md` et `CHANGELOG.md`.
 
 ---
 

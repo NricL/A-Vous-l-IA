@@ -14,6 +14,11 @@ class FakeRetrievalPipeline:
 
 
 class HaystackRagRetrievalFilterTests(unittest.TestCase):
+    def setUp(self):
+        metadata = patch.object(haystack_rag, "_fetch_documents_for_domaine", return_value=[])
+        metadata.start()
+        self.addCleanup(metadata.stop)
+
     def test_build_pool_does_not_mix_triggers_when_intention_has_no_match(self):
         class _Doc:
             def __init__(self, intention, trigger):
