@@ -8,7 +8,9 @@ repo pour rester traçable côté Eneric **et** côté Simplon.
 
 ## Décision active du 9 septembre — améliorer sans pivot
 
-**Référence de livraison confirmée le 10 septembre à 11:20** : code et documentation doivent être synchronisés dans `NricL/A-Vous-l-IA`, puis publiés et contrôlés sur https://nricl.github.io/A-Vous-l-IA/. Azure reste le backend d'exécution ; sa seule mise à jour ne suffit pas à clôturer une livraison. Rattrapage Pages courant en attente de publication.
+**Synchronisation GitHub clôturée le 10 septembre** : commit `4033e8e` sur `main`, workflows Pages et CI réussis ; https://nricl.github.io/A-Vous-l-IA/ sert les corrections mobile, qualification et récupération sans correspondance. Documentation publique nettoyée et versionnée avec le code. Les changements de gabarits, l'audit Excel structuré et le calibrage métier restent distincts et non déclarés livrés ; package Simplon toujours différé.
+
+**Référence de livraison confirmée le 10 septembre à 11:20** : code et documentation doivent être synchronisés dans `NricL/A-Vous-l-IA`, puis publiés et contrôlés sur https://nricl.github.io/A-Vous-l-IA/. Azure reste le backend d'exécution ; sa seule mise à jour ne suffit pas à clôturer une livraison. Rattrapage Pages effectué, voir état ci-dessus.
 
 **Livraison dev du 10 septembre** : CHAT-01/02 et corrections techniques CHAT-03 (qualification, filtres, listes et récupération après absence de correspondance) déployés sur backend0045/frontend0023 après accord explicite. Contrôles live de la chaîne utilisateur et des endpoints effectués. Le calibrage sémantique global reste ouvert. CHAT-04/05/06 restent locaux : pages et pitch conservés pour ne pas régénérer depuis une base non validée. Excel v454 inchangé ; package Simplon toujours différé. Le statut « aucun changement en ligne » des notes antérieures est historique et remplacé par cet état.
 

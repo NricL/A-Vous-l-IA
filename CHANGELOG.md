@@ -1,5 +1,9 @@
 # Avoulia — Changelog v1 → v2 (synthèse d'onboarding)
 
+## Publication effective du 10 septembre
+
+**Commit** `4033e8e` : corrections chatbot et documentation publique synchronisées dans `main`. Workflow Pages34461697021 et CI34461697054 réussis ; contrôles sur https://nricl.github.io/A-Vous-l-IA/ : nouveau bundle, mobile390px, qualification et retour arrière après absence de correspondance. Le backend reste0045 ; ni les données ni les gabarits parcours n'ont été redéployés par Pages. Détails et limites de la CI dans `SUIVI_PROJET.md`.
+
 ## 10 septembre — synchronisation publique du code et de la documentation
 
 Publication autorisée après nettoyage : correction de la mention de dépôt privé, identifiant d'abonnement retiré au profit d'un paramètre explicite, aucune donnée source ni rapport privé ajouté. Les workflows CI/Pages exécutent les régressions d'état frontend avant publication. Le build Pages utilise le sous-chemin du dépôt et appelle le backend dev0045. Résultat effectif du workflow à consigner dans le suivi.

@@ -6,7 +6,7 @@ Référence de code et suivi : `NricL/A-Vous-l-IA`. Référence de test utilisat
 
 Le workflow `.github/workflows/pages.yml` publie le frontend sous `/A-Vous-l-IA/` avec `VITE_API_URL` ciblant le backend Azure. Un push de changements frontend sur `main` déclenche Pages ; un changement backend/documentation seul ne le déclenche pas (déclenchement manuel disponible). Ce workflow ne met pas à jour le backend Azure. Après une livraison, distinguer version backend, version Pages et état des pages parcours ; contrôler le site GitHub Pages lui-même, pas seulement le frontend Container Apps.
 
-Le rattrapage du frontend Pages est encore à publier à l'inscription de cette règle. Le package Simplon demeure différé.
+Le rattrapage Pages est publié par le commit `4033e8e` (workflow34461697021 réussi, CI34461697054 réussie). Les tests de gabarits nécessitant le dépôt parcours associé sont explicitement ignorés sur le checkout CI isolé : ce succès n'atteste pas une régénération de parcours. Le package Simplon demeure différé.
 
 **Status:** Ready for Handover (2026-07-10)  
 **Target:** Deploy Avoulia V2 with Parcours Pages + App Insights Telemetry to Production Azure  

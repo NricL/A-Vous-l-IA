@@ -1,5 +1,14 @@
 # Avoulia V2 — Suivi Projet & Décisions
 
+### Publication GitHub Pages clôturée le 10 septembre 2026
+
+- **Commit livré** : [`4033e8e`](https://github.com/NricL/A-Vous-l-IA/commit/4033e8e03a60346be855c3f6cac8c3d69bf02ce2), code, tests, workflows et documentation nettoyée, dans `main`.
+- **Lien de référence à jour** : https://nricl.github.io/A-Vous-l-IA/ ; bundle observé `index-CHHXhvYM.js`, backend dev0045 inchangé.
+- **Publication** : [Pages 34461697021](https://github.com/NricL/A-Vous-l-IA/actions/runs/34461697021) réussie ; [CI 34461697054](https://github.com/NricL/A-Vous-l-IA/actions/runs/34461697054) réussie. 101 tests backend en CI, une classe de gabarits ignorée faute du dépôt parcours associé, contre106 tests locaux avec ce dépôt ;19 tests frontend. Lint informatif avec défauts préexistants, non présenté comme propre ; avertissement de dépréciation des actions Node20.
+- **Contrôle sur Pages lui-même** : à390px saisie et envoi visibles, libellé accessible présent ; accueil →13 →BTP →objectif →demande fiscale hors contexte →message sans correspondance →retour objectif fonctionne. Aucun chiffre extrapolé à tout le catalogue.
+- **Périmètre** : aucun Excel, rapport privé, lien SharePoint interne ou nouvel export de mapping ajouté par ce commit. Le mapping historiquement suivi par Git n'a pas été modifié ; ce lot n'est pas un audit/réécriture de l'historique public.
+- **Écart volontaire maintenu** : changements de gabarits CHAT-04/05/06 non déployés, pages existantes et base inchangées. Package Simplon différé. Les mentions « à publier » ci-dessous décrivent les étapes précédentes.
+
 ### Synchronisation GitHub autorisée le 10 septembre à 11:34
 
 Eneric confirme la publication dans le dépôt **public** après nettoyage. Ce lot synchronise code, tests, workflows et documentation ; aucun Excel, rapport privé de modèle, lien SharePoint interne ou nouvel export de mapping n'est ajouté. L'identifiant d'abonnement a été retiré des fichiers publiables et doit être fourni explicitement au banc d'évaluation.
@@ -12,7 +21,7 @@ Publication Pages déclenchée par le push frontend ; succès et contrôle du si
 
 Le dépôt `NricL/A-Vous-l-IA` et **https://nricl.github.io/A-Vous-l-IA/** sont les références d'Eneric. Chaque mise à jour doit synchroniser le code, les fichiers de suivi/roadmap/changelog/handoff et les éléments GitHub concernés, puis contrôler le résultat sur ce lien. Un déploiement Azure seul ne constitue pas une livraison complète.
 
-**Rattrapage courant : à publier.** Backend dev0045 et frontend Azure0023 sont actifs, mais le frontend GitHub Pages observé à 11:14 reste ancien. Les modifications locales ne sont pas encore committées/poussées. Les tests d'état frontend sont ajoutés aux workflows CI et Pages pour couvrir ce chemin de publication. Ne pas déclarer Pages à jour avant succès du workflow et contrôle du site. Package Simplon toujours différé ; aucune modification Excel.
+**Rattrapage effectué** : frontend GitHub Pages publié par `4033e8e`, backend dev0045 et frontend Azure0023 inchangés. Les tests d'état frontend sont exécutés par CI et Pages. Le constat d'interface ancienne à11:14 est résolu par la publication documentée en tête. Package Simplon toujours différé ; aucune modification Excel.
 
 ### État final du 10 septembre — correctifs chatbot déployés sur DEV uniquement
 
