@@ -1,6 +1,8 @@
 # Avoulia V2 — Implementation Summary (2026-07-10)
 
-**Status:** ✅ OPTION 1 IMPLEMENTATION COMPLETE
+**Historical scope:** July implementation summary; not the current integration or deployment status.
+
+**Current status (2026-09-12):** the private catalogue consolidation is complete, but its application integration is not deployed. The next work is robust catalogue loading, metadata-aligned sector choices, explicit-source parcours generation and a coherent index/page/mapping release. See [`ROADMAP.md`](./ROADMAP.md), [`SUIVI_PROJET.md`](./SUIVI_PROJET.md) and [`HANDOFF.md`](./HANDOFF.md). The Simplon package remains deferred; the historical generation instructions below must not be used as the current release recipe.
 
 ---
 

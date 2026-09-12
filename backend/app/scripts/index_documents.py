@@ -11,8 +11,8 @@ from pathlib import Path
 # Permet d'importer app depuis la racine backend
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from app.haystack_rag import clear_all_documents
-from app.services.ingest import ingest_file
+from app.haystack_rag import clear_all_documents, get_document_store, index_documents_haystack
+from app.services.ingest import _lc_to_haystack_docs, load_and_split_documents
 
 SUPPORTED_SUFFIXES = (".pdf", ".txt", ".md", ".xlsx")
 
@@ -23,20 +23,19 @@ def collect_files(paths: list[str]) -> list[Path]:
     for p in paths:
         path = Path(p).resolve()
         if not path.exists():
-            print(f"[skip] N'existe pas : {path}")
-            continue
+            raise ValueError("Une source demandée n'existe pas.")
         if path.is_file():
             if path.suffix.lower() in SUPPORTED_SUFFIXES:
                 collected.append(path)
             else:
-                print(f"[skip] Type non supporté : {path}")
+                raise ValueError("Une source demandée a un type non supporté.")
         else:
             for ext in SUPPORTED_SUFFIXES:
                 collected.extend(path.rglob(f"*{ext}"))
     return sorted(set(collected))
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         description="Indexe des documents (PDF, TXT, MD, XLSX) dans Chroma (même base que l'API)."
     )
@@ -45,45 +44,51 @@ def main() -> None:
         nargs="+",
         help="Fichiers ou dossiers à indexer",
     )
-    parser.add_argument(
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument(
         "--clear",
         action="store_true",
-        help="Vider l'index Chroma avant d'indexer",
+        help="Vider l'index Chroma seulement après validation de toutes les sources",
     )
-    args = parser.parse_args()
-
-    if args.clear:
-        print("Vidage de l'index Chroma…")
-        try:
-            clear_all_documents()
-            print("Index vidé.")
-        except Exception as e:
-            print(f"Erreur lors du vidage : {e}", file=sys.stderr)
-            sys.exit(1)
+    mode.add_argument(
+        "--validate-only",
+        action="store_true",
+        help="Lire et valider les sources sans accès à Chroma ni appel embeddings",
+    )
+    mode.add_argument(
+        "--require-empty",
+        action="store_true",
+        help="Refuser l'écriture si la collection cible n'est pas vide (préparation isolée)",
+    )
+    args = parser.parse_args(argv)
 
     files = collect_files(args.paths)
     if not files:
-        print("Aucun fichier à indexer.")
+        raise ValueError("Aucun fichier pris en charge à indexer.")
+
+    prepared = []
+    for f in files:
+        docs = load_and_split_documents(str(f))
+        if not docs:
+            raise ValueError("Une source ne contient aucun document indexable.")
+        prepared.extend(_lc_to_haystack_docs(docs, str(f)))
+
+    print(f"Sources validées : {len(files)} fichier(s), {len(prepared)} document(s).")
+    if args.validate_only:
+        print("Aucune écriture d'index ni requête embeddings effectuée.")
         return
 
-    print(f"Indexation de {len(files)} fichier(s)…")
-    total_chunks = 0
-    errors: list[str] = []
-    for f in files:
-        try:
-            ids = ingest_file(str(f))
-            n = len(ids)
-            total_chunks += n
-            print(f"  OK {f.name} → {n} chunk(s)")
-        except Exception as e:
-            msg = f"{f}: {e}"
-            errors.append(msg)
-            print(f"  ERREUR {f.name}: {e}", file=sys.stderr)
+    if args.require_empty and get_document_store().count_documents() != 0:
+        raise ValueError("La collection cible n'est pas vide ; choisir une collection isolée.")
+    # No destructive operation occurs until every input has been loaded successfully.
+    if args.clear:
+        print("Vidage de l'index Chroma après validation des sources…")
+        clear_all_documents()
 
-    if errors:
-        print(f"\n{len(errors)} erreur(s).", file=sys.stderr)
-        sys.exit(1)
-    print(f"\nIndexation terminée : {total_chunks} chunk(s) au total.")
+    count = index_documents_haystack(prepared)
+    if count != len(prepared):
+        raise RuntimeError("Le nombre de documents indexés ne correspond pas aux sources préparées.")
+    print(f"Indexation terminée : {count} document(s).")
 
 
 if __name__ == "__main__":

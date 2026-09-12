@@ -1,5 +1,42 @@
 # Avoulia V2 — Implementation Handover Guide for Simplon
 
+## Reprise prioritaire — 12 septembre 2026
+
+**Point de départ :** classeur privé consolidé et sauvegardé ; intégration au chatbot non effectuée. Le chemin, l'empreinte et les journaux exacts se trouvent dans le suivi privé et le classeur, jamais dans un export GitHub public. Les anciennes mentions « Ready for Handover » ne concernent pas ce lot.
+
+1. **Choisir explicitement la source.** Préserver le classeur original et ses restrictions. Ne pas prendre le premier fichier `*.xlsx`, la plus grande version trouvée dans un dossier ou la copie historique du dépôt. Ne pas lire une feuille d'audit : `Sheet1` est le catalogue courant ; `BASE_PROPOSEE` est historique.
+2. **Valider l'import.** Contrôler l'unicité et la présence des IDs, les champs obligatoires, les valeurs calculées, puis le nombre de documents. Une formule sans valeur recalculée ne devient pas un texte indexable ; ne pas envoyer les formules elles-mêmes aux embeddings.
+3. **Aligner les secteurs.** Conserver l'ordre des choix existants et les domaines qui n'affichent pas Q1.5. Compléter les choix à partir des métadonnées du catalogue chargé ; ne jamais supprimer le secteur de la recherche pour obtenir des résultats. Des cas multi-sectoriels doivent rester accessibles.
+4. **Préparer ensemble index et parcours.** Utiliser le générateur `avoulia-parcours`, pas l'ancien script backend. Préserver les couples ID/hash publiés et le sel ; refuser un mapping incomplet ou ambigu. Générer dans une destination nouvelle plutôt qu'effacer le `dist` existant. Les gabarits CHAT-04/05/06 ne prennent effet qu'après cette régénération.
+5. **Recetter avant toute bascule.** Rapprocher ID → contenu source → résultat indexé → détail verbatim → URL → contenu de la page. Couvrir aussi listes courtes, absence de correspondance, secteurs composés, retour arrière, HTTP/SSE et mobile. Un bon décompte de pages n'est pas une preuve de bonne correspondance.
+6. **Autoriser la destination avant publication.** Une URL difficile à deviner et `noindex` ne constituent pas un contrôle d'accès. Les pages contiennent du texte issu du classeur : ne pas les publier sur un site public sans autorisation explicite sur cette exposition. Prévoir la restauration cohérente de l'index, des pages, du mapping et de l'image précédente.
+
+La demande d'exécution autonome du 12 septembre dispense des validations éditoriales répétitives, pas de la protection des données ni des gates de déploiement. Une publication GitHub de code/documentation ne doit contenir ni workbook, ni export de catalogue, ni nouveau mapping privé. Aucun package Simplon n'est demandé à ce stade.
+
+### Précontrôle d'indexation — lot local du 12 septembre
+
+Depuis `backend`, `python -m app.scripts.index_documents --validate-only "<source-privee.xlsx>"` charge et valide les sources, affiche les comptes et n'appelle ni Chroma ni les embeddings. Utiliser ce mode avant toute construction d'index ; conserver les résultats détaillés hors du dépôt public.
+
+Pour la future construction autorisée, configurer explicitement une **nouvelle collection et un emplacement privé** puis utiliser `--require-empty`. Cette option refuse une collection non vide ; elle ne choisit pas elle-même un environnement isolé. Ne jamais pointer cette commande sur l'index en service par commodité. Une erreur d'embeddings peut laisser un index candidat partiel : ne pas le promouvoir et reconstruire dans un autre candidat vide.
+
+`--clear` reste disponible pour les usages explicitement autorisés, mais les sources sont désormais toutes chargées avant le vidage. Ce mode **ne constitue pas une transaction ni un rollback**. Le démarrage du conteneur n'utilise plus `--clear` : il refuse une erreur de lecture du compte, un résultat invalide ou une indexation échouée, au lieu de démarrer comme si tout était prêt.
+
+Un index existant est volontairement conservé au redémarrage : remplacer uniquement `INDEX_PATH` ou le classeur ne réindexe pas les données. La future bascule doit donc identifier explicitement le nouvel index et garder l'ancien disponible.
+
+### Génération préparatoire explicite
+
+Depuis le dépôt associé `avoulia-parcours`, après autorisation de traitement dans la destination privée :
+
+```powershell
+python pipeline\genere.py --workbook "<source-privee.xlsx>" --sheet Sheet1 --mapping "<mapping-existant.csv>" --output-dir "<nouveau-dossier-prive>" --layout backend --app-url "https://nricl.github.io/A-Vous-l-IA/"
+```
+
+Cette commande prépare `action-<hash>.html` et un CSV `case_id,case_hash,url` dans un **dossier privé**. Ne pas publier ce dossier tel quel : le mapping ne doit pas être servi. Les entrées historiques du mapping sont conservées, mais leurs pages ne sont pas régénérées lorsqu'elles sont absentes du catalogue ; décider de leur conservation avant toute bascule globale. Les hashes ne sont pas recalculés avec un sel de développement.
+
+Le workflow du dépôt parcours associé est désormais manuel, avec source, mapping et confirmation de publication explicites. Il refuse une différence d'IDs entre catalogue et mapping avant un remplacement de site, retire le mapping du répertoire web et ne charge pas celui-ci en artefact. Configurer les protections de l'environnement GitHub `parcours-publication` avant usage ; aucune protection distante n'a été configurée par le code local.
+
+Les régressions backend se lancent avec `python -B -m unittest discover -s tests -q`. Pour couvrir aussi le générateur et son workflow, définir `PARCOURS_SOURCE_ROOT` vers le dépôt associé ; sinon les classes concernées sont explicitement ignorées. Les contrôles locaux ont utilisé Python 3.14 et un environnement `.venv` isolé pour la dépendance LangChain manquante ; revalider dans l'image Python 3.11 avant déploiement.
+
 ## Canal de livraison Eneric — confirmé le 10 septembre 2026
 
 Référence de code et suivi : `NricL/A-Vous-l-IA`. Référence de test utilisateur : https://nricl.github.io/A-Vous-l-IA/. Chaque livraison comprend code + `SUIVI_PROJET.md`, `ROADMAP.md`, `CHANGELOG.md` et ce guide lorsque pertinent.
@@ -8,8 +45,9 @@ Le workflow `.github/workflows/pages.yml` publie le frontend sous `/A-Vous-l-IA/
 
 Le rattrapage Pages est publié par le commit `4033e8e` (workflow34461697021 réussi, CI34461697054 réussie). Les tests de gabarits nécessitant le dépôt parcours associé sont explicitement ignorés sur le checkout CI isolé : ce succès n'atteste pas une régénération de parcours. Le package Simplon demeure différé.
 
-**Status:** Ready for Handover (2026-07-10)  
-**Target:** Deploy Avoulia V2 with Parcours Pages + App Insights Telemetry to Production Azure  
+**Status:** Integration preparation (2026-09-12); Simplon package deferred
+
+**Target:** Existing development environment; official production release not engaged
 **Audience:** Simplon DevOps / Backend Team
 
 ## Addendum du 9 septembre 2026 — préparation locale, pas encore une livraison
@@ -58,7 +96,7 @@ Les instructions et statuts historiques ci-dessous ne valent pas validation de l
 - Le gabarit des six étapes actuellement observées est `templates/page.html.j2` du dépôt `avoulia-parcours`, généré par son `pipeline/genere.py`.
 - Le script `backend/scripts/generate_parcours_pages.py` embarque un ancien gabarit ; ne pas l'exécuter pour publier les corrections UX de septembre.
 - Le générateur parcours produit `dist/action/<hash>/index.html`, alors que le backend observé sert `app/static/parcours/action-<hash>.html`. Les contrats de mapping, de sel et de liens de retour doivent être rapprochés avant toute régénération destinée au backend. Ne pas copier aveuglément un dossier `dist` sur les pages servies ; ne pas modifier celles-ci manuellement.
-- Préserver le classeur source et les mappings ; les corrections Excel nécessitent un nouveau fichier versionné et une validation d'Eneric. Ne pas régénérer depuis une vieille v453 par défaut.
+- Préserver le classeur source et les mappings ; les corrections Excel nécessitent un nouveau fichier versionné et un journal. Les arbitrages éditoriaux sont désormais délégués par Eneric ; le choix de publication reste distinct. Ne pas régénérer depuis une vieille v453 par défaut.
 
 **Contrôles locaux disponibles :** depuis `backend`, lancer `python -m unittest discover -s tests`. Les tests de gabarit `test_parcours_ux.py` utilisent des cas fictifs, sans lecture de classeur ; définir `PARCOURS_SOURCE_ROOT` vers le dépôt parcours si nécessaire (sinon cette classe de tests est explicitement ignorée). Vérifier que les tests de gabarit ne sont pas ignorés avant de conclure sur la cohérence des deux sources.
 

@@ -4,7 +4,29 @@
 Décisions prises en tant que Product Owner (Eneric) ; ce fichier est versionné dans le
 repo pour rester traçable côté Eneric **et** côté Simplon.
 
-**Dernière mise à jour :** 2026-09-09
+**Dernière mise à jour :** 2026-09-12
+
+## Priorité active du 12 septembre — intégrer la base consolidée
+
+La consolidation éditoriale du classeur privé est terminée et une nouvelle version est sauvegardée. **Elle n'est pas encore intégrée au chatbot.** Les journaux exacts, décomptes et arbitrages restent dans le classeur et le suivi privé, pas dans ce dépôt public. Les anciens états « audit Excel partiel » ci-dessous sont historiques.
+
+Eneric délègue les corrections éditoriales et de cohérence dans le cadre produit existant, puis demande à 15:25 d'exécuter la suite avec des tests à chaque étape. Il n'est plus nécessaire de solliciter une validation pour chaque formulation. Cette délégation ne vaut pas publication du classeur, suppression des anciennes versions ou autorisation de diffuser ses données.
+
+| Ordre | Lot | État | Condition de clôture |
+|---|---|---|---|
+| 1 | BASE-01/02/03 — intégrité, cohérence et premières actions | Terminé dans le classeur privé | Version conservée, journal avant/après et limites explicites ; pas de certification juridique ou de pertinence universelle. |
+| 2 | INT-01 — import et secteurs | Implémenté et testé localement | Sélection du catalogue, contrôles d'entrée et menus complétés par métadonnées ; ordre historique et pré-filtres conservés. |
+| 3 | INT-02 — source, index et parcours cohérents | Préparation locale testée ; aucun index réel construit | Génération explicite vers un dossier neuf, mapping conservé et contrôle en mémoire du catalogue ; construction d'index et publication restent conditionnées à la destination autorisée. |
+| 4 | INT-03 — recette de bout en bout puis livraison dev | Non déployé | Qualification, cas sélectionné, détail verbatim et bonne page ; mobile et HTTP/SSE ; cible et exposition autorisées, rollback identifié. |
+| 5 | CHAT-03 — calibrage métier | Ouvert | Scénarios attendus et pertinence évalués séparément des seuls contrôles techniques. |
+
+Les gabarits CHAT-04/05/06 sont à intégrer dans le lot de parcours, pas à publier seuls face à des pages anciennes. Le package Simplon reste différé. Aucun nouveau chantier d'instrumentation, pivot produit ou réorganisation des six étapes.
+
+**Résultat local :** 182 tests backend/générateur et 19 tests frontend réussis, types frontend contrôlés. L'import et le rendu de l'ensemble du catalogue réel ont aussi été parcourus en mémoire, sans publication ni embeddings. La génération est un staging privé ; le workflow parcours est désormais manuel et exclut le mapping de la racine web. Ces changements du dépôt parcours associé doivent être livrés séparément, pas assimilés à un push du seul chatbot.
+
+**Blocage avant INT-03 :** clarifier l'accès autorisé aux textes du catalogue avant toute exposition par API/page publique, confirmer la cible Azure et effectuer la validation de déploiement. La règle de non-publication des données privées reste active ; aucun contrôle d'accès ne peut être remplacé par `noindex` ou par le hash d'une URL.
+
+**Livraison documentaire et livraison applicative sont distinctes** : le code et les documents seront synchronisés dans GitHub après revue du contenu publiable ; un push documentaire ne réindexe pas le catalogue et ne déploie pas le backend.
 
 ## Décision active du 9 septembre — améliorer sans pivot
 
@@ -24,17 +46,17 @@ Cette décision remplace le séquencement d'août ci-dessous, conservé comme hi
 
 Deux axes seulement sont engagés :
 1. **Chatbot** : mobile et accessibilité de la saisie (CHAT-01), qualification sans répétition et état cohérent (CHAT-02), classement sans remplissage hors sujet (CHAT-03), durées cohérentes (CHAT-04), accès visible au prompt existant (CHAT-05), rôle à compléter dans les gabarits génériques (CHAT-06).
-2. **Excel** : contrôler puis améliorer les colonnes existantes, uniquement sur les points faibles et après validation éditoriale d'Eneric. Toute modification doit produire un nouveau fichier au même nom avec `vXXX` incrémenté, sans écraser la source ni une version existante.
+2. **Excel** : contrôler puis améliorer les colonnes existantes, uniquement sur les points faibles. Depuis le 12 septembre, les arbitrages éditoriaux sont délégués à Scout et tracés ; les contraintes de confidentialité et de versionnement restent inchangées. Toute modification doit produire un nouveau fichier au même nom avec `vXXX` incrémenté, sans écraser la source ni une version existante.
 
 Conserver la qualification guidée, le catalogue, les identifiants, le pré-filtrage métadonnées, le détail verbatim et l'ordre des six étapes. Pas de nouveau schéma métier, nouvelle entrée de découverte, assistant généraliste ou pilote remplaçant le catalogue. Eneric prend en charge les observations utilisateurs et les autres suites ; aucun chantier supplémentaire d'instrumentation n'est relancé.
 
-**État de réalisation** : CHAT-01/02 et CHAT-04/05/06 préparés dans les sources, revue ciblée clôturée ; CHAT-03 partiellement traité, calibrage sémantique restant. Aucun commit, push ou déploiement. Régénération/intégration des pages avec la source et le mapping approuvés nécessaire avant publication. Audit Excel M365 partiel seulement ; aucun classeur modifié ni nouvelle version créée. Les observations de développement ne prouvent pas l'état de la production officielle. Détail des livraisons et limites dans `SUIVI_PROJET.md` et `CHANGELOG.md`.
+**État actuel** : CHAT-01/02 et les corrections techniques CHAT-03 ont été livrés sur dev et Pages le 10 septembre ; CHAT-04/05/06 restent à intégrer aux parcours. Le classeur privé consolidé est sauvegardé, sans indexation ni régénération déployée. La recette de la nouvelle chaîne reste à faire. Détail dans `SUIVI_PROJET.md`, `CHANGELOG.md` et `HANDOFF.md`.
 
 ---
 
 ## 0. Contexte & proposition de valeur
 
-Avoulia aide un **dirigeant de PME non technique** à, en quelques minutes :
+Le cadrage historique ci-dessous doit être lu avec la décision active : Avoulia aide les **employés de PME non spécialistes de l'IA**, y compris les dirigeants lorsqu'un cas concerne leurs responsabilités, à :
 1. identifier **1 cas d'usage IA pertinent** pour SA situation (métier, secteur, problème) ;
 2. **passer à l'action** via un parcours personnalisé concret (6 étapes, ~2h, quick win + prompts).
 

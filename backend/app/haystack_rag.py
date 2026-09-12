@@ -7,8 +7,10 @@ RAG avec Haystack + Chroma, via Azure AI Foundry.
 import logging
 import re
 import unicodedata
+from functools import lru_cache
 from pathlib import Path
 from difflib import SequenceMatcher
+from time import monotonic
 
 import chromadb
 from jinja2 import Template
@@ -26,7 +28,6 @@ from app.rag_constants import (
     CASE_EXTRA_FIELD_ALIASES,
     CASE_EXTRA_KEYS,
     CHOIX_Q1_TO_DOMAINE_CODE,
-    CHROMA_DOMAIN_META_FILTER_FIELDS,
     DOMAINES_SANS_SECTEURS,
     DOMAINE_META_KEYS,
     INTENTIONS_PAR_DOMAINE,
@@ -65,13 +66,28 @@ def _strip_use_case_codes(text: str) -> str:
 
 
 def get_q15_choices(domaine_code: str) -> list[str] | None:
-    """Retourne la liste des choix secteur pour Q1.5, ou None. Q1.5 est posée uniquement si le domaine est présent dans SECTEURS_PAR_DOMAINE."""
-    if domaine_code not in SECTEURS_PAR_DOMAINE:
+    """Complète Q1.5 depuis le catalogue, sans renuméroter les choix historiques."""
+    if domaine_code in DOMAINES_SANS_SECTEURS or domaine_code not in SECTEURS_PAR_DOMAINE:
         return None
     secteurs = SECTEURS_PAR_DOMAINE[domaine_code]
     if not secteurs:
         return None
-    return secteurs + ["Autre / Non spécifique"]
+    choices = secteurs + ["Autre / Non spécifique"]
+    seen = {_sector_key(choice) for choice in choices}
+    additions: dict[str, str] = {}
+    label = _get_domaine_label(domaine_code)
+    for doc in _fetch_documents_for_domaine(domaine_code, metadata_only=True):
+        if not _doc_matches_domain(doc, label, domaine_code):
+            continue
+        meta = getattr(doc, "meta", None) or {}
+        for field in SECTEUR_META_KEYS:
+            for sector in _sector_labels(str(meta.get(field) or "")):
+                key = _sector_key(sector)
+                if key in seen or _is_multisector_label(sector):
+                    continue
+                # Choix stable même si les chunks/variantes arrivent dans un autre ordre.
+                additions[key] = min(additions.get(key, sector), sector)
+    return choices + [additions[key] for key in sorted(additions)]
 
 
 def _get_domaine_label(domaine_code: str) -> str:
@@ -322,17 +338,46 @@ SECTEUR_META_KEYS = (
     "secteur_activité",
 )
 MULTI_SECTOR_VALUES = ("multi-sectoriel", "multisectoriel", "multi sectoriel")
+_METADATA_CACHE_TTL_SECONDS = 300
+_metadata_cache_generation = 0
 
 
 def _normalize_metadata_value(value: str | None) -> str:
     return re.sub(r"\s+", " ", (value or "").strip()).lower()
 
 
+def _sector_key(value: str) -> str:
+    return " ".join(
+        re.sub(r"\bet\b", " ", _normalize_query_text(value)).split()
+    )
+
+
+def _sector_labels(raw: str) -> list[str]:
+    """Normalise la taxonomie connue avant de séparer les valeurs composées."""
+    if not raw.strip():
+        return []
+    canonical = {
+        _sector_key(label): label
+        for sectors in SECTEURS_PAR_DOMAINE.values()
+        for label in sectors
+    }
+    for label in ("Autre / Non spécifique", "Autre", "Non spécifique"):
+        canonical[_sector_key(label)] = "Autre / Non spécifique"
+    key = _sector_key(raw)
+    if key in canonical:
+        return [canonical[key]]
+    return [
+        canonical.get(_sector_key(token), re.sub(r"\s+", " ", token.strip()))
+        for token in re.split(r"[,;/|]", raw)
+        if token.strip()
+    ]
+
+
 def _is_multisector_label(value: str) -> bool:
-    normalized = _normalize_metadata_value(value)
-    if not normalized:
-        return False
-    return any(token in normalized for token in MULTI_SECTOR_VALUES)
+    return any(
+        _sector_key(token).replace(" ", "") == "multisectoriel"
+        for token in re.split(r"[,;/|]", value)
+    )
 
 
 def _doc_matches_sector(doc, selected_sector: str, *, include_multisector: bool = False) -> bool:
@@ -347,13 +392,13 @@ def _doc_matches_sector(doc, selected_sector: str, *, include_multisector: bool 
 
 
 def _sector_value_matches(raw: str, selected_sector: str, include_multisector: bool) -> bool:
-    expected = _normalize_metadata_value(selected_sector)
-    normalized = _normalize_metadata_value(raw)
+    expected = _sector_key(selected_sector)
+    normalized = _sector_key(raw)
     if not expected or not normalized:
         return False
     return (
         normalized == expected
-        or expected in [_normalize_metadata_value(t) for t in re.split(r"[,;/|]", raw)]
+        or expected in [_sector_key(t) for t in _sector_labels(raw)]
         or (include_multisector and _is_multisector_label(raw))
     )
 
@@ -404,47 +449,46 @@ def _build_retrieval_filters(
     return {"operator": "AND", "conditions": conditions}
 
 
+def _invalidate_metadata_cache() -> None:
+    global _metadata_cache_generation
+    _metadata_cache_generation += 1
+    _cached_domain_metadata.cache_clear()
+
+
+@lru_cache(maxsize=128)
+def _cached_domain_metadata(
+    domaine_code: str, persist_dir: str, collection_name: str, generation: int, refresh_window: int
+) -> tuple:
+    # Les autres arguments isolent le cache par index/version et bornent sa fraîcheur
+    # pour les mises à jour effectuées par un autre processus.
+    label = _get_domaine_label(domaine_code)
+    filters = _build_metadata_or_filter(DOMAINE_META_KEYS, [label, domaine_code])
+    docs = get_document_store().filter_documents(filters=filters)
+    return tuple(doc for doc in docs if _doc_matches_domain(doc, label, domaine_code))
+
+
 def _fetch_documents_for_domaine(
     domaine_code: str, *, top_k_fallback: int = 150, metadata_only: bool = False
 ) -> list:
     """
     Documents Chroma dont les métadonnées correspondent au domaine (libellé Q1 ou code interne).
-    Stratégie : filter_documents sur plusieurs champs meta, puis fallback retrieval + filtre Python.
+    Catalogue metadata partagé avec Q1.5/Q2 et les filtres vectoriels. Une lecture
+    échouée remonte l'erreur ; seul un résultat vide autorise le fallback historique.
     """
     label = _get_domaine_label(domaine_code) if domaine_code else None
-    docs: list = []
     if not domaine_code and not label:
+        return []
+    settings = get_settings()
+    docs = list(_cached_domain_metadata(
+        domaine_code, settings.chroma_persist_dir, settings.chroma_collection_name,
+        _metadata_cache_generation, int(monotonic() // _METADATA_CACHE_TTL_SECONDS),
+    ))
+    if docs or metadata_only:
         return docs
-    try:
-        store = get_document_store()
-        for field in CHROMA_DOMAIN_META_FILTER_FIELDS:
-            try:
-                if label:
-                    docs = store.filter_documents(
-                        filters={"field": field, "operator": "==", "value": label}
-                    )
-                if not docs and domaine_code:
-                    docs = store.filter_documents(
-                        filters={"field": field, "operator": "==", "value": domaine_code}
-                    )
-                if docs:
-                    break
-            except Exception:
-                continue
-        if not docs and (label or domaine_code) and not metadata_only:
-            query = label or domaine_code.replace("_", " ")
-            try:
-                all_candidates = _retrieve_docs(query, top_k=top_k_fallback)
-                if all_candidates and isinstance(all_candidates[0], list):
-                    all_candidates = [d for sub in all_candidates for d in sub]
-            except Exception:
-                all_candidates = []
-            for d in all_candidates:
-                if _doc_matches_domain(d, label, domaine_code):
-                    docs.append(d)
-    except Exception:
-        pass
-    return docs
+    all_candidates = _retrieve_docs(label or domaine_code.replace("_", " "), top_k=top_k_fallback)
+    if all_candidates and isinstance(all_candidates[0], list):
+        all_candidates = [d for sub in all_candidates for d in sub]
+    return [doc for doc in all_candidates if _doc_matches_domain(doc, label, domaine_code)]
 
 
 def _get_intentions_from_store(domaine_code: str) -> list[str]:
@@ -498,17 +542,12 @@ def _get_doc_sector_score(doc, secteur_choisi: str | None) -> int:
     """Score secteur pour un doc: 3=secteur exact, 2=multi-sectoriel, 1=autre."""
     if not secteur_choisi:
         return 1
-    selected_norm = _normalize_metadata_value(secteur_choisi)
+    if _doc_matches_sector(doc, secteur_choisi):
+        return 3
     for key in SECTEUR_META_KEYS:
         raw = str((getattr(doc, "meta", None) or {}).get(key) or "").strip()
         if not raw:
             continue
-        normalized = _normalize_metadata_value(raw)
-        if normalized == selected_norm:
-            return 3
-        tokens = [_normalize_metadata_value(t) for t in re.split(r"[,;/|]", raw)]
-        if selected_norm in tokens:
-            return 3
         if _is_multisector_label(raw):
             return 2
     return 1
@@ -653,15 +692,18 @@ def get_document_store():
 
 
 def _drop_chroma_collection() -> None:
-    """Supprime la collection Chroma (fichiers sous persist_path) pour permettre une recréation avec une nouvelle dimension d'embedding."""
-    s = get_settings()
-    path = Path(s.chroma_persist_dir).resolve()
-    path.mkdir(parents=True, exist_ok=True)
-    client = chromadb.PersistentClient(path=str(path))
+    """Supprime explicitement la collection ; seule son absence est tolérée."""
+    _invalidate_metadata_cache()
     try:
-        client.delete_collection(name=s.chroma_collection_name)
-    except Exception:
-        pass
+        s = get_settings()
+        path = Path(s.chroma_persist_dir).resolve()
+        client = chromadb.PersistentClient(path=str(path))
+        try:
+            client.delete_collection(name=s.chroma_collection_name)
+        except chromadb.errors.NotFoundError:
+            pass
+    finally:
+        _invalidate_metadata_cache()
 
 
 def _get_text_embedder():
@@ -794,8 +836,10 @@ Q1.5 — Secteur (conditionnel)
 Cette question est posée SI ET SEULEMENT SI 
 le domaine est dans SECTEURS_PAR_DOMAINE et que la liste de secteurs est non vide.
 
-IMPORTANT : À CHAQUE LISTE DE SECTEURS ci-dessous, le système ajoute automatiquement 
-« Autre / Non spécifique » comme dernier choix (position N+1). Affiche TOUJOURS ce choix.
+IMPORTANT : la liste numérotée Q1.5 injectée par le backend est la source de vérité.
+Elle conserve les positions historiques, y compris « Autre / Non spécifique »,
+puis ajoute les secteurs du catalogue. Affiche-la telle quelle, sans réordonner,
+renuméroter ni supprimer des choix. Les listes ci-dessous sont le socle historique.
 
 SECTEURS_PAR_DOMAINE est :{
 "ressources_humaines": [
@@ -1932,8 +1976,18 @@ def _parse_choice_from_message(
     return None
 
 
-def _parse_sector_from_message(text: str, choices: list[str]) -> str | None:
-    return _parse_choice_from_message(text, choices)
+def _parse_sector_from_message(
+    text: str, choices: list[str], *, allow_number: bool = True
+) -> str | None:
+    exact = _parse_choice_from_message(text, choices, allow_number=allow_number)
+    if exact:
+        return exact
+    normalized = _sector_key(_choice_text(text))
+    matches = [
+        choice for i, choice in enumerate(choices, 1)
+        if normalized in (_sector_key(choice), f"{i} {_sector_key(choice)}")
+    ]
+    return matches[0] if len(matches) == 1 else None
 
 
 def _parse_intention_from_message(text: str, choices: list[str]) -> str | None:
@@ -1997,7 +2051,7 @@ def _resolve_selection_state(
         return state
 
     sectors = get_q15_choices(selected_domain_code) or []
-    sector = _parse_choice_from_message(question, sectors, allow_number=expected_step == "sector")
+    sector = _parse_sector_from_message(question, sectors, allow_number=expected_step == "sector")
     if sector:
         return (selected_domain_code, sector, None) if sector != selected_sector else state
     if expected_step == "sector" or (sectors and not selected_sector):
@@ -2035,19 +2089,19 @@ def _explicit_sector_from_history(history: list[dict], domaine_code: str) -> str
         if (msg.get("role") or "").strip().lower() != "user":
             continue
         text = str(msg.get("content") or "")
-        exact = _parse_choice_from_message(text, choices, allow_number=False)
+        exact = _parse_sector_from_message(text, choices, allow_number=False)
         if exact:
             return exact
-        normalized = _normalize_query_text(text)
+        normalized = _sector_key(text)
         mentioned = [
             choice for choice in choices
-            if re.search(rf"\b{re.escape(_normalize_query_text(choice))}\b", normalized)
+            if re.search(rf"\b{re.escape(_sector_key(choice))}\b", normalized)
         ]
         if len(mentioned) > 1:
             return None
         if mentioned and re.search(
             rf"\b(?:dans le|dans l|secteur|secteur du|secteur de|entreprise de|entreprise du)\s+"
-            rf"{re.escape(_normalize_query_text(mentioned[0]))}\b",
+            rf"{re.escape(_sector_key(mentioned[0]))}\b",
             normalized,
         ) and not re.search(r"\b(?:pas|ni|hors|sauf)\b", normalized):
             return mentioned[0]
@@ -2061,6 +2115,35 @@ def _selection_state_after_message(
     expected_step: str | None,
 ) -> tuple[str | None, str | None, str | None]:
     content = str(history[index].get("content") or "").strip()
+    if expected_step == "sector" and state[0]:
+        previous_question = next((
+            str(msg.get("content") or "")
+            for msg in reversed(history[:index])
+            if (msg.get("role") or "").strip().lower() == "assistant"
+        ), "")
+        displayed_choices = {
+            match.group("number"): match.group("label")
+            for match in re.finditer(
+                r"(?m)^[ \t]*(?:#{1,6}[ \t]+)?(?:[-+*][ \t]+)?"
+                r"[*_`]{0,3}(?P<number>\d+)(?P<number_emphasis>[*_`]{1,3})?"
+                r"(?(number_emphasis)[.):]?|[.):])[*_`]{0,3}[ \t]*(?P<label>[^\n]+)",
+                previous_question,
+            )
+        }
+        numeric_reply = re.fullmatch(r"(\d+)(?:\s+(.+))?", _choice_text(content))
+        explicit_other_step = re.search(r"\b(?:domaine|objectif|intention)\b", _normalize_query_text(content))
+        if displayed_choices and numeric_reply and not explicit_other_step:
+            # Une actualisation du catalogue ne doit pas réinterpréter un ancien numéro.
+            number, supplied_label = numeric_reply.groups()
+            displayed_label = displayed_choices.get(number, "")
+            if supplied_label and _sector_key(supplied_label) != _sector_key(displayed_label):
+                return state
+            sector = _parse_sector_from_message(
+                displayed_label, get_q15_choices(state[0]) or [], allow_number=False
+            )
+            if not sector:
+                return state
+            content = sector
     if expected_step is None and not any(state):
         prior_turns = [
             msg for msg in history[:index]
@@ -3041,29 +3124,34 @@ def query_rag_haystack(
 
 def clear_all_documents() -> None:
     """Supprime tous les documents et la collection Chroma. La prochaine indexation recréera la collection avec la dimension d'embedding actuelle."""
+    _invalidate_metadata_cache()
     try:
-        store = get_document_store()
-        store.delete_all_documents(recreate_index=False)
-    except Exception:
-        pass
-    _drop_chroma_collection()
+        _drop_chroma_collection()
+    finally:
+        _invalidate_metadata_cache()
 
 
 def index_documents_haystack(documents: list[Document]) -> int:
     """Indexe des documents dans Chroma : embedding via Foundry puis écriture."""
     if not documents:
         return 0
-    embedder = _get_document_embedder()
-    store = get_document_store()
-    embedded = embedder.run(documents=documents)
-    docs_with_embeddings = embedded.get("documents", documents)
+    _invalidate_metadata_cache()
     try:
-        return store.write_documents(docs_with_embeddings)
-    except Exception as e:
-        err_msg = str(e).lower()
-        # Collection créée avec une autre dimension (ex. 384 vs 1536) : on supprime et on réessaie
-        if "dimension" in err_msg or "384" in err_msg or "1536" in err_msg:
-            _drop_chroma_collection()
-            store = get_document_store()
+        embedder = _get_document_embedder()
+        store = get_document_store()
+        embedded = embedder.run(documents=documents)
+        docs_with_embeddings = embedded.get("documents", documents)
+        try:
             return store.write_documents(docs_with_embeddings)
-        raise
+        except (chromadb.errors.InvalidDimensionException, chromadb.errors.InvalidArgumentError) as exc:
+            if isinstance(exc, chromadb.errors.InvalidDimensionException) or re.search(
+                r"\bdimension(?:s|ality)?\b", str(exc), re.IGNORECASE
+            ):
+                raise ValueError(
+                    "Embedding dimension mismatch: the existing Chroma collection was not deleted. "
+                    "Use its original embedding configuration or index into a new collection. "
+                    "A destructive rebuild requires an explicit clear after backing up the existing data."
+                ) from exc
+            raise
+    finally:
+        _invalidate_metadata_cache()

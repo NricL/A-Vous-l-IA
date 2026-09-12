@@ -1,5 +1,27 @@
 # Avoulia V2 — Suivi Projet & Décisions
 
+### 12 septembre 2026 — base consolidée, intégration applicative engagée
+
+**État faisant foi :** la nouvelle version du classeur privé est sauvegardée après revue du catalogue et corrections tracées. Aucun de ses contenus, journaux ou exports n'est ajouté au dépôt public. La base sauvegardée n'est pas la preuve d'une version indexée ou déployée.
+
+- **Décisions :** arbitrages éditoriaux et de classement délégués par Eneric ; demande à 15:25 de poursuivre l'intégration et de tester à chaque étape. Catalogue, IDs, colonnes existantes, pré-filtrage, détail verbatim et six étapes conservés.
+- **Défaut d'intégration identifié :** `app/services/ingest.py` et le générateur parcours lisent actuellement la première feuille. Un onglet d'audit placé avant les données peut donc être ingéré à tort. Le classeur consolidé place le catalogue en tête ; le code doit aussi sélectionner et valider la feuille explicitement.
+- **Secteurs :** certains rattachements métier légitimes ne figurent pas dans les menus statiques. La correction doit rendre ces choix accessibles à partir des métadonnées, sans changer les données pour contourner le filtre et sans casser l'ordre des choix existants.
+- **Suite ordonnée :** INT-01 import/secteurs et tests synthétiques ; INT-02 génération explicite et rapprochement source/index/mapping/pages ; INT-03 recette et livraison dev après les contrôles de cible, confidentialité et publication. État détaillé dans `ROADMAP.md`.
+- **Toujours en ligne selon le dernier relevé :** backend0045, frontend0023 et Pages du 10 septembre. Aucun nouveau contrôle cloud effectué dans cette mise à jour documentaire.
+- **Hors lot :** package Simplon différé, pas de production officielle, pas de publication de la base sur GitHub, pas de nouvel outil de télémétrie.
+
+Les entrées datées ci-dessous décrivent leur état au moment du lot ; elles ne remplacent pas ce statut courant.
+
+**Clôture de la préparation locale INT-01/02 :**
+
+- `backend/app/services/ingest.py` sélectionne `Sheet1` ou un unique catalogue historique non ambigu, exclut les colonnes de travail et conserve les métadonnées métier. IDs vides/dupliqués après normalisation, erreurs Excel et caches de formules manquants sont refusés ; les loaders sont fermés en cas d'erreur.
+- `backend/app/haystack_rag.py` complète les secteurs depuis les métadonnées sans changer les numéros historiques, y compris « Autre ». Le rejeu utilise les libellés effectivement affichés, y compris en Markdown. Le cache est invalidé lors des écritures/effacements et borné dans le temps ; une lecture en échec n'est pas masquée.
+- L'indexation dispose d'un précontrôle sans réseau et d'une option de collection vide ; aucun effacement automatique lors d'un conflit de dimension d'embeddings. Le démarrage échoue explicitement si l'index ne peut pas être lu ou construit.
+- Le générateur du dépôt parcours associé utilise source/mapping/destination explicites, conserve les hashes et refuse les remplacements implicites. Le lien de retour est paramétrable ; son workflow devient manuel, sans export du mapping dans le répertoire public.
+- **Tests finaux locaux :** 182 backend/générateur, 19 frontend et typecheck réussis. Passage sur le catalogue réel en mémoire : import, secteurs, pré-filtres, rendu des six étapes, champs verbatim et URLs rapprochés ; source et mapping inchangés, aucune page persistée ni requête embeddings.
+- **Limites :** Python local 3.14 avec avertissement de compatibilité Pydantic-v1, pas le runtime 3.11 de l'image ; aucun nouvel index Chroma réel ni test de modèle réel dans ce lot. Publication GitHub et Azure non exécutées ; préparation locale ne vaut pas recette dev.
+
 ### Publication GitHub Pages clôturée le 10 septembre 2026
 
 - **Commit livré** : [`4033e8e`](https://github.com/NricL/A-Vous-l-IA/commit/4033e8e03a60346be855c3f6cac8c3d69bf02ce2), code, tests, workflows et documentation nettoyée, dans `main`.
@@ -69,8 +91,9 @@ Section chronologique intermédiaire ; état final ci-dessus fait foi.
 - Hors périmètre de cette mesure : recherche vectorielle, base réelle, parcours UI complet et validation des attentes par des utilisateurs. Rapport brut synthétique conservé dans les artefacts privés de session, pas dans les pages publiées.
 
 **Date de démarrage:** 2026-07-08  
-**Statut global:** Chantiers A/C/D/E ✅ Complétés — Prêt pour handover Simplon  
-**Tenant cible:** Production Azure (westeurope, tenant officiel)  
+**Statut global:** Base privée consolidée ; intégration et recette en cours de préparation ; package Simplon différé
+
+**Cible de travail:** environnement dev existant ; production officielle non engagée
 **Repo:** `NricL/A-Vous-l-IA` (public — code et documentation ; données sources exclues)
 
 ### Update 2026-09-09 — Améliorations ciblées engagées, non déployées

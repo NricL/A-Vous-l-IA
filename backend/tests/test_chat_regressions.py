@@ -24,6 +24,8 @@ INTENTIONS = ["Rédiger les comptes rendus", "Coordonner les interventions"]
 class SyntheticRagTests(unittest.TestCase):
     def setUp(self):
         # Toutes les données sont fictives ; aucun accès Chroma, Azure ou fichier métier.
+        rag._invalidate_metadata_cache()
+        self.addCleanup(rag._invalidate_metadata_cache)
         for target in ("get_document_store", "_get_generator", "_retrieve_docs"):
             p = patch.object(rag, target, side_effect=AssertionError(f"Unexpected I/O: {target}"))
             p.start()
@@ -556,6 +558,366 @@ class RetrievalRegressionTests(SyntheticRagTests):
         docs = [SimpleNamespace(content="Synthèse des échanges", meta={}), SimpleNamespace(content="Procès-verbal", meta={})]
         self.assertEqual(rag._rank_docs_by_query_overlap("compte rendu", docs), docs)
         self.assertEqual(rag._rank_docs_by_query_overlap("1", docs), docs)
+
+
+class IndexedSectorMenuTests(SyntheticRagTests):
+    domain = "activites_terrain"
+
+    def doc(self, sector, *, domain=None, field="secteur"):
+        return SimpleNamespace(
+            id=f"synthetic-{sector}", content="Exemple fictif.",
+            meta={"domaine": domain or self.domain, field: sector, "intention": INTENTIONS[0]},
+        )
+
+    def test_indexed_sector_extends_menu_without_changing_existing_numbers(self):
+        original = rag.SECTEURS_PAR_DOMAINE[self.domain] + ["Autre / Non spécifique"]
+        docs = [
+            self.doc("Atelier Zêta"), self.doc("Atelier Alpha"),
+            self.doc("atelier zeta"), self.doc("btp"), self.doc("Services et artisanat"),
+            self.doc("Santé & médico-social", field="Sector"),
+            self.doc("Hôtellerie et tourisme", field="secteur_activité"),
+            self.doc("Atelier Interdit", domain="production"),
+        ]
+        expected = original + ["Atelier Alpha", "Atelier Zêta", "Hôtellerie & tourisme"]
+        for corpus in (docs, list(reversed(docs))):
+            with patch.object(rag, "_fetch_documents_for_domaine", return_value=corpus) as metadata:
+                choices = rag.get_q15_choices(self.domain)
+            self.assertEqual(choices, expected)
+            metadata.assert_called_once_with(self.domain, metadata_only=True)
+        self.assertEqual(rag.SECTEURS_PAR_DOMAINE[self.domain], original[:-1])
+
+    def test_compounds_and_multisector_use_same_rules_in_menu_q2_and_prefilters(self):
+        compound = "Atelier Alpha / BTP; Santé et médico-social | Multi sectoriel"
+        docs = [self.doc(compound), self.doc("Autre / Non spécifique; BTP")]
+        with patch.object(rag, "_fetch_documents_for_domaine", return_value=docs):
+            choices = rag.get_q15_choices(self.domain)
+            self.assertEqual(choices[-1], "Atelier Alpha")
+            self.assertEqual(len(choices), len(rag.SECTEURS_PAR_DOMAINE[self.domain]) + 2)
+            for sector in ("Atelier Alpha", "BTP", "Santé & médico-social"):
+                self.assertTrue(rag._doc_matches_sector(docs[0], sector))
+                self.assertEqual(rag._get_doc_sector_score(docs[0], sector), 3)
+                self.assertEqual(rag.get_q2_choices(self.domain, sector), [INTENTIONS[0]])
+                filters = rag._build_retrieval_filters(self.domain, "1", sector)
+                self.assertIn(compound, {c["value"] for c in filters["conditions"][-1]["conditions"]})
+            self.assertFalse(rag._doc_matches_sector(docs[0], "Atelier Inconnu"))
+            self.assertTrue(rag._doc_matches_sector(docs[0], "Atelier Inconnu", include_multisector=True))
+            self.assertEqual(rag.get_q2_choices(self.domain, "Autre / Non spécifique"), [INTENTIONS[0]])
+        self.assertFalse(rag._is_multisector_label("Pas multi-sectoriel"))
+        aliases = self.doc("Multi-sectoriel")
+        aliases.meta["Sector"] = "Atelier Alpha"
+        self.assertEqual(rag._get_doc_sector_score(aliases, "Atelier Alpha"), 3)
+
+    def test_empty_index_keeps_static_menu_and_no_match_intentions(self):
+        with patch.object(rag, "_fetch_documents_for_domaine", return_value=[]):
+            self.assertEqual(
+                rag.get_q15_choices(self.domain),
+                rag.SECTEURS_PAR_DOMAINE[self.domain] + ["Autre / Non spécifique"],
+            )
+            self.assertTrue(rag.get_q2_choices(self.domain, "Atelier Alpha")["fallback"])
+
+    def test_skip_domains_never_read_sector_metadata(self):
+        with patch.object(rag, "_fetch_documents_for_domaine") as metadata:
+            for domain in rag.DOMAINES_SANS_SECTEURS + ["domaine_inconnu"]:
+                self.assertIsNone(rag.get_q15_choices(domain))
+                self.assertEqual(rag._get_secteur_choices_affichage([], domain), "")
+            for domain in rag.DOMAINES_SANS_SECTEURS:
+                self.assertEqual(
+                    rag._resolve_selection_state("1", domain, None, None, expected_step="intention"),
+                    (domain, None, "1"),
+                )
+        metadata.assert_not_called()
+
+    def test_indexed_sector_resolves_text_numbers_early_mentions_and_replay(self):
+        with patch.object(rag, "_fetch_documents_for_domaine", return_value=[self.doc("Atelier Alpha")]):
+            choices = rag.get_q15_choices(self.domain)
+            number = str(choices.index("Atelier Alpha") + 1)
+            for text in (number, f"{number}. Atelier Alpha", "Je choisis atelier alpha"):
+                history = [assistant(DOMAIN_QUESTION), user("13"), assistant(SECTOR_QUESTION), user(text)]
+                self.assertEqual(rag._get_sector_from_history(history), "Atelier Alpha")
+                self.assertEqual(rag._derive_selection_state_from_history(history), (self.domain, "Atelier Alpha", None))
+            early = [user("Je travaille dans le secteur Atelier Alpha."), assistant(DOMAIN_QUESTION)]
+            self.assertEqual(
+                rag._resolve_current_selection_state(early, "13", None, None, None)[1:],
+                (self.domain, "Atelier Alpha", None),
+            )
+            self.assertIsNone(rag._parse_sector_from_message("Atelier Alpha ou BTP", choices))
+            self.assertEqual(
+                rag._parse_sector_from_message("Services et artisanat", choices), "Services & artisanat"
+            )
+
+    def test_replay_uses_displayed_label_when_dynamic_numbers_shift(self):
+        with patch.object(rag, "_fetch_documents_for_domaine", return_value=[self.doc("Atelier Zêta")]):
+            old_menu = rag._get_secteur_choices_affichage([], self.domain)
+            number = str(rag.get_q15_choices(self.domain).index("Atelier Zêta") + 1)
+        history = [
+            assistant(DOMAIN_QUESTION), user("13"),
+            assistant(SECTOR_QUESTION + "\n" + old_menu), user(number),
+        ]
+        with patch.object(rag, "_fetch_documents_for_domaine",
+                          return_value=[self.doc("Atelier Alpha"), self.doc("Atelier Zêta")]):
+            self.assertEqual(rag._get_sector_from_history(history), "Atelier Zêta")
+            self.assertEqual(
+                rag._get_sector_from_history(history[:-1] + [user(number + ". Atelier Zêta")]), "Atelier Zêta"
+            )
+            self.assertEqual(
+                rag._derive_selection_state_from_history(history[:-1] + [user("domaine 7")]),
+                ("finance_pilotage", None, None),
+            )
+            self.assertIsNone(
+                rag._get_sector_from_history(history[:-1] + [user(number + ". Atelier Alpha")])
+            )
+        with patch.object(rag, "_fetch_documents_for_domaine", return_value=[self.doc("Atelier Alpha")]):
+            self.assertIsNone(rag._get_sector_from_history(history))
+
+    def test_markdown_sector_numbers_replay_the_displayed_label_after_refresh(self):
+        number = len(rag.SECTEURS_PAR_DOMAINE[self.domain]) + 2
+        for line in (
+            f"**{number}.** Atelier Zêta",
+            f"**{number}**. **Atelier Zêta**",
+            f"**{number}. Atelier Zêta**",
+            f"{number}) **Atelier Zêta**",
+            f"__{number}__ __Atelier Zêta__",
+            f"- **{number}.** **Atelier Zêta**",
+            f"### **{number}.** Atelier Zêta",
+        ):
+            history = [
+                assistant(DOMAIN_QUESTION), user("13"),
+                assistant(SECTOR_QUESTION + "\n" + line), user(str(number)),
+            ]
+            with (
+                self.subTest(line=line),
+                patch.object(rag, "_fetch_documents_for_domaine",
+                             return_value=[self.doc("Atelier Alpha"), self.doc("Atelier Zêta")]),
+            ):
+                self.assertEqual(rag._get_sector_from_history(history), "Atelier Zêta")
+            with patch.object(rag, "_fetch_documents_for_domaine", return_value=[self.doc("Atelier Alpha")]):
+                self.assertIsNone(rag._get_sector_from_history(history))
+
+    def test_http_and_streaming_use_identical_indexed_menu_and_selection(self):
+        with (
+            patch.object(rag, "_fetch_documents_for_domaine", return_value=[self.doc("Atelier Alpha")]),
+            patch.object(rag, "_get_generator", return_value=Mock(run=Mock(return_value={"replies": ["Réponse"]}))) as generator,
+            patch.object(rag, "_retrieve_docs_for_question") as retrieve,
+        ):
+            menu = rag._get_secteur_choices_affichage([], self.domain)
+            number = str(rag.get_q15_choices(self.domain).index("Atelier Alpha") + 1)
+            for entry in (rag.get_rag_prompt_and_sources, rag.query_rag_haystack):
+                result = entry("13", [assistant(DOMAIN_QUESTION)])
+                prompt = result[0] if entry == rag.get_rag_prompt_and_sources else (
+                    rag._reply_to_text(generator.return_value.run.call_args.kwargs["messages"][0])
+                )
+                self.assertIn(menu, prompt)
+                self.assertIn("prochaine question non résolue : Q1.5", prompt)
+                result = entry(number, [
+                    assistant(DOMAIN_QUESTION), user("13"), assistant(SECTOR_QUESTION + "\n" + menu),
+                ])
+                state = result[5:8] if entry == rag.get_rag_prompt_and_sources else result[8:11]
+                self.assertEqual(state, (self.domain, "Atelier Alpha", None))
+            retrieve.assert_not_called()
+
+    def test_metadata_cache_reads_all_domain_aliases_and_reuses_results(self):
+        docs = [self.doc("Atelier Alpha"), self.doc("Atelier Interdit", domain="production")]
+        docs[0].meta["domaine_label_fr"] = docs[0].meta.pop("domaine")
+        store = Mock(filter_documents=Mock(return_value=docs))
+        with patch.object(rag, "get_document_store", return_value=store):
+            first = self.original_metadata_fetch(self.domain, metadata_only=True)
+            first.clear()
+            self.assertEqual(self.original_metadata_fetch(self.domain, metadata_only=True), docs[:1])
+        store.filter_documents.assert_called_once()
+        fields = {c["field"] for c in store.filter_documents.call_args.kwargs["filters"]["conditions"]}
+        self.assertEqual(fields, {f"meta.{key}" for key in rag.DOMAINE_META_KEYS})
+
+    def test_menu_and_q2_share_complete_metadata_catalogue_without_vector_fallback(self):
+        first = self.doc("BTP")
+        second = self.doc("Atelier Alpha")
+        second.meta["domaine_label_fr"] = second.meta.pop("domaine")
+        second.meta["intention"] = "Objectif fictif Alpha"
+        store = Mock(filter_documents=Mock(return_value=[first, second]))
+        with (
+            patch.object(rag, "get_document_store", return_value=store),
+            patch.object(rag, "_fetch_documents_for_domaine", side_effect=self.original_metadata_fetch),
+            patch.object(rag, "_retrieve_docs") as vector,
+        ):
+            self.assertIn("Atelier Alpha", rag.get_q15_choices(self.domain))
+            self.assertEqual(rag.get_q2_choices(self.domain, "Atelier Alpha"), ["Objectif fictif Alpha"])
+            self.assertTrue(rag.get_q2_choices(self.domain, "Atelier Inconnu")["fallback"])
+            rag._build_retrieval_filters(self.domain, selected_sector="Atelier Alpha")
+        store.filter_documents.assert_called_once()
+        vector.assert_not_called()
+
+    def test_only_empty_nonmetadata_reads_keep_legacy_domain_fallback(self):
+        own = self.doc("Atelier Alpha")
+        other = self.doc("Atelier Interdit", domain="production")
+        store = Mock(filter_documents=Mock(return_value=[]))
+        with (
+            patch.object(rag, "get_document_store", return_value=store),
+            patch.object(rag, "_retrieve_docs", return_value=[[own, other]]) as vector,
+        ):
+            self.assertEqual(self.original_metadata_fetch(self.domain, metadata_only=True), [])
+            vector.assert_not_called()
+            self.assertEqual(self.original_metadata_fetch(self.domain, top_k_fallback=12), [own])
+        vector.assert_called_once_with(rag._get_domaine_label(self.domain), top_k=12)
+        store.filter_documents.assert_called_once()
+
+    def test_metadata_error_propagates_is_not_cached_and_never_uses_vectors(self):
+        store = Mock(filter_documents=Mock(side_effect=[RuntimeError("synthetic lookup failure"), []]))
+        with (
+            patch.object(rag, "get_document_store", return_value=store),
+            patch.object(rag, "_fetch_documents_for_domaine", side_effect=self.original_metadata_fetch),
+            patch.object(rag, "_retrieve_docs") as vector,
+        ):
+            with self.assertRaisesRegex(RuntimeError, "synthetic lookup failure"):
+                rag.get_q15_choices(self.domain)
+            self.assertEqual(
+                rag.get_q15_choices(self.domain),
+                rag.SECTEURS_PAR_DOMAINE[self.domain] + ["Autre / Non spécifique"],
+            )
+        self.assertEqual(store.filter_documents.call_count, 2)
+        vector.assert_not_called()
+        rag._invalidate_metadata_cache()
+        store.filter_documents.side_effect = RuntimeError("synthetic lookup failure")
+        with (
+            patch.object(rag, "get_document_store", return_value=store),
+            patch.object(rag, "_retrieve_docs") as vector,
+        ):
+            with self.assertRaisesRegex(RuntimeError, "synthetic lookup failure"):
+                self.original_metadata_fetch(self.domain)
+        vector.assert_not_called()
+
+    def test_metadata_cache_expires_and_isolates_index_configuration(self):
+        settings = SimpleNamespace(chroma_persist_dir="synthetic-index", chroma_collection_name="first")
+        store = Mock(filter_documents=Mock(return_value=[]))
+        with (
+            patch.object(rag, "get_document_store", return_value=store),
+            patch.object(rag, "get_settings", return_value=settings),
+            patch.object(rag, "monotonic", return_value=0) as clock,
+        ):
+            self.original_metadata_fetch(self.domain, metadata_only=True)
+            self.original_metadata_fetch(self.domain, metadata_only=True)
+            self.assertEqual(store.filter_documents.call_count, 1)
+            clock.return_value = rag._METADATA_CACHE_TTL_SECONDS
+            self.original_metadata_fetch(self.domain, metadata_only=True)
+            settings.chroma_collection_name = "second"
+            self.original_metadata_fetch(self.domain, metadata_only=True)
+            settings.chroma_persist_dir = "other-synthetic-index"
+            self.original_metadata_fetch(self.domain, metadata_only=True)
+        self.assertEqual(store.filter_documents.call_count, 4)
+
+    def test_index_writes_and_clear_invalidate_metadata_even_after_partial_failure(self):
+        store = Mock(filter_documents=Mock(return_value=[]), write_documents=Mock(return_value=1))
+        doc = self.doc("Atelier Alpha")
+        with (
+            patch.object(rag, "get_document_store", return_value=store),
+            patch.object(rag, "_get_document_embedder", return_value=Mock(run=Mock(return_value={"documents": [doc]}))),
+            patch.object(rag, "_drop_chroma_collection"),
+        ):
+            self.original_metadata_fetch(self.domain, metadata_only=True)
+            self.assertEqual(rag.index_documents_haystack([doc]), 1)
+            self.original_metadata_fetch(self.domain, metadata_only=True)
+            self.assertEqual(store.filter_documents.call_count, 2)
+            store.write_documents.side_effect = RuntimeError("synthetic partial write")
+            with self.assertRaisesRegex(RuntimeError, "synthetic partial write"):
+                rag.index_documents_haystack([doc])
+            self.original_metadata_fetch(self.domain, metadata_only=True)
+            self.assertEqual(store.filter_documents.call_count, 3)
+            rag.clear_all_documents()
+            self.original_metadata_fetch(self.domain, metadata_only=True)
+            self.assertEqual(store.filter_documents.call_count, 4)
+
+    def test_dimension_mismatch_is_actionable_and_never_deletes_or_retries(self):
+        doc = self.doc("Atelier Alpha")
+        for error in (
+            rag.chromadb.errors.InvalidDimensionException("Embedding dimension 384 does not match 1536"),
+            rag.chromadb.errors.InvalidArgumentError("Collection expecting embedding dimension of 1536, got 384"),
+        ):
+            store = Mock(filter_documents=Mock(return_value=[]), write_documents=Mock(side_effect=error))
+            with (
+                self.subTest(error=type(error).__name__),
+                patch.object(rag, "get_document_store", return_value=store) as get_store,
+                patch.object(rag, "_get_document_embedder",
+                             return_value=Mock(run=Mock(return_value={"documents": [doc]}))),
+                patch.object(rag, "_drop_chroma_collection") as drop,
+            ):
+                with self.assertRaisesRegex(ValueError, "not deleted.*original embedding configuration") as raised:
+                    rag.index_documents_haystack([doc])
+                self.assertIs(raised.exception.__cause__, error)
+            get_store.assert_called_once()
+            store.write_documents.assert_called_once_with([doc])
+            store.delete_all_documents.assert_not_called()
+            drop.assert_not_called()
+
+    def test_unrelated_write_errors_with_old_magic_words_preserve_original_failure(self):
+        doc = self.doc("Atelier Alpha")
+        for error in (
+            RuntimeError("failure on row 384"),
+            RuntimeError("dimension service unavailable"),
+            rag.chromadb.errors.InvalidArgumentError("invalid metadata at row 1536"),
+        ):
+            store = Mock(write_documents=Mock(side_effect=error))
+            with (
+                self.subTest(error=str(error)),
+                patch.object(rag, "get_document_store", return_value=store),
+                patch.object(rag, "_get_document_embedder",
+                             return_value=Mock(run=Mock(return_value={"documents": [doc]}))),
+                patch.object(rag, "_drop_chroma_collection") as drop,
+            ):
+                with self.assertRaises(type(error)) as raised:
+                    rag.index_documents_haystack([doc])
+                self.assertIs(raised.exception, error)
+            store.write_documents.assert_called_once_with([doc])
+            drop.assert_not_called()
+
+    def test_embedding_failure_invalidates_cache_without_writing(self):
+        store = Mock(filter_documents=Mock(return_value=[]))
+        with (
+            patch.object(rag, "get_document_store", return_value=store),
+            patch.object(rag, "_get_document_embedder",
+                         return_value=Mock(run=Mock(side_effect=RuntimeError("synthetic embedding failure")))),
+            patch.object(rag, "_drop_chroma_collection") as drop,
+        ):
+            self.original_metadata_fetch(self.domain, metadata_only=True)
+            with self.assertRaisesRegex(RuntimeError, "synthetic embedding failure"):
+                rag.index_documents_haystack([self.doc("Atelier Alpha")])
+            self.assertEqual(rag._cached_domain_metadata.cache_info().currsize, 0)
+        store.write_documents.assert_not_called()
+        drop.assert_not_called()
+
+    def test_explicit_clear_is_single_delete_and_tolerates_only_real_not_found(self):
+        settings = SimpleNamespace(chroma_persist_dir="synthetic-unused-index", chroma_collection_name="synthetic")
+        for error in (None, rag.chromadb.errors.NotFoundError("synthetic missing collection")):
+            client = Mock(delete_collection=Mock(side_effect=error))
+            store = Mock(filter_documents=Mock(return_value=[]))
+            with (
+                self.subTest(error=error),
+                patch.object(rag, "get_settings", return_value=settings),
+                patch.object(rag, "get_document_store", return_value=store),
+                patch.object(rag.chromadb, "PersistentClient", return_value=client),
+            ):
+                self.original_metadata_fetch(self.domain, metadata_only=True)
+                rag.clear_all_documents()
+                self.assertEqual(rag._cached_domain_metadata.cache_info().currsize, 0)
+            client.delete_collection.assert_called_once_with(name="synthetic")
+            store.delete_all_documents.assert_not_called()
+
+    def test_explicit_clear_propagates_backend_failures_and_invalidates_cache(self):
+        settings = SimpleNamespace(chroma_persist_dir="synthetic-unused-index", chroma_collection_name="synthetic")
+        for during_initialization in (True, False):
+            error = RuntimeError("synthetic backend collection not found or inaccessible")
+            client = Mock(delete_collection=Mock(side_effect=error))
+            store = Mock(filter_documents=Mock(return_value=[]))
+            with (
+                self.subTest(during_initialization=during_initialization),
+                patch.object(rag, "get_settings", return_value=settings),
+                patch.object(rag, "get_document_store", return_value=store),
+                patch.object(rag.chromadb, "PersistentClient", return_value=client,
+                             side_effect=error if during_initialization else None),
+            ):
+                self.original_metadata_fetch(self.domain, metadata_only=True)
+                with self.assertRaises(RuntimeError) as raised:
+                    rag.clear_all_documents()
+                self.assertIs(raised.exception, error)
+                self.assertEqual(rag._cached_domain_metadata.cache_info().currsize, 0)
+            self.assertEqual(client.delete_collection.call_count, 0 if during_initialization else 1)
 
 
 if __name__ == "__main__":

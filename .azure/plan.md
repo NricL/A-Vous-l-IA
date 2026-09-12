@@ -2,7 +2,39 @@
 
 ## Status
 
-Deployed and verified on DEV (2026-09-10). Target and plan confirmed by Eneric at 10:15 ("Oui, environnement dev"). Backend0045/frontend0023; no official Simplon deployment or package.
+Local preparation complete; Azure validation blocked (2026-09-12). The azure-validate checkpoint was invoked, but target confirmation and the private-content exposure decision remain outstanding. This release is NOT `Validated`. The last verified DEV deployment remains backend0045/frontend0023 from 10 September. No official Simplon deployment or package.
+
+## Current plan — catalogue integration, 12 September
+
+- **Mode / recipe:** MODIFY, existing FastAPI/Vue applications and separate Python parcours pipeline; retain the existing AZCLI/Container Apps recipe. No new resources, dependencies or infrastructure migration planned.
+- **Approval:** integration sequence presented at 15:24; Eneric instructed at 15:25 to execute it autonomously and test each stage. Routine implementation decisions are delegated. External publication, private-data exposure and Azure target confirmation remain separate safety gates.
+- **Data:** the newly consolidated private, versioned workbook is the integration candidate, not the currently deployed catalogue. Preserve its original; use explicit input paths and never copy the workbook, private mapping or generated private content into the public repository.
+- **Architecture:** existing Azure backend + GitHub Pages frontend. Existing development target is France Central; subscription and resource identity must be reconfirmed through the prescribed Azure workflow before deployment. No change to the official Simplon environment.
+- **Stage 1:** update roadmap, changelog, tracking and handoff; distinguish saved workbook, local application changes and deployed versions.
+- **Stage 2:** make catalogue-sheet selection explicit and reject malformed/ambiguous inputs; derive missing sector options from indexed metadata while preserving existing choice order and domains without a sector question. Cover with synthetic offline tests.
+- **Stage 3:** prepare a safe explicit-source generation path in the existing parcours pipeline; preserve published ID/hash associations and the six-step templates. Do not run the legacy backend generator, rotate the salt, or overwrite existing generated directories.
+- **Stage 4:** run targeted regression tests, then an offline in-memory check against the authorized local workbook if needed. Do not persist unprotected content or call external embeddings from this check.
+- **Stage 5:** before a real index rebuild, page publication or Azure update, establish the authorized destination and exposure boundary. Confirm the Azure target, run azure-validate, then azure-deploy only if its gates pass. Public GitHub receives reviewed source/documentation only, with exact outbound preview and confirmation.
+- **Acceptance:** no data/ID renumbering, no taxonomy redesign, verbatim fields and metadata prefilters preserved; source/index/mapping/pages form one coherent release with an identified rollback. Success of synthetic tests is not full semantic relevance calibration.
+
+### Validation proof — new integration
+
+Local preparation evidence, **not an Azure deployment validation**:
+
+| Check | Command / method | Result |
+|---|---|---|
+| Backend integration, index safety and generator regressions | Scoped `.venv` Python, `-B -m unittest discover -s tests -q` from `backend` | 182 passed; external parcours repository present. |
+| Frontend state and types | `npm run check:chat` and `npm run type-check` | 19 state tests passed; typecheck passed. |
+| Real source import | `python -m app.scripts.index_documents --validate-only "<authorized-private-source>"` | Success, no Chroma access or embedding calls. Counts retained privately. |
+| Real catalogue compatibility | In-memory import, metadata filters, retained mapping, template rendering and source hash comparison | Entire current catalogue covered; no pages/index written, no model calls. Private evidence in local tracking. |
+
+Python available locally is 3.14; `langchain-core==0.3.15` was restored in an ignored scoped environment after a missing-dependency failure. Existing libraries report a Pydantic-v1/Python-3.14 compatibility warning. These runs do not replace validation in the production Python 3.11 image or a real Chroma/embedding build.
+
+Remaining release gates: confirm target subscription/region, approve the exact outbound code/documentation diff, determine permitted access to new catalogue texts, reconcile historical mapped pages, then build a new private index and run real dev end-to-end checks. Do not reuse the historical proof below to mark this release `Validated`.
+
+### Azure validation checkpoint — not passed
+
+`azure-validate` loaded this plan after preparation. No Azure deployment command or external embedding request was executed: the catalogue's no-publication constraint is not resolved, the target has not been reconfirmed for this release, and no Docker executable is available locally for the production-image check. Recipe overview files referenced by the installed validation skill are absent; the available AZCLI error reference was read. The local tests above pass, but they cannot satisfy these release gates. `azure-deploy` was therefore not invoked.
 
 ## Current deployment result
 
@@ -15,7 +47,7 @@ Deployed and verified on DEV (2026-09-10). Target and plan confirmed by Eneric a
 - Two served-page SHA-256 values unchanged from baseline below; data/pages/pitch inherited by construction, not rebuilt from local workbook.
 - Final local tests106 backend,19 frontend; build/typecheck success. No exhaustive production relevance or whole-catalog UX claim.
 
-## 7. Validation Proof — current release
+## 7. Validation Proof — historical 10 September deployment only
 
 - Follow-up validated after dev E2E: initial numeric domain allowed only with empty/welcome-only history and no selected state. `python -B -m unittest discover -s tests -q`: 106 passed; real welcome → 13 → BTP tests for HTTP/SSE with and without client state. New backend tag `v2-nomatch-20260910-r2`, same pinned base image and two-file overlay. Frontend remains0023.
 - `python -B -m unittest discover -s tests -q` from backend: 104 passed, including both no-match paths and clarification recovery.

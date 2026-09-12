@@ -1,5 +1,23 @@
 # Avoulia — Changelog v1 → v2 (synthèse d'onboarding)
 
+## 12 septembre — consolidation privée et préparation de l'intégration
+
+**Quoi / pourquoi :** nouvelle version du classeur privé sauvegardée après revue des situations, classements, premières actions, prérequis et garde-fous. Les textes de recherche dépendants sont synchronisés et le catalogue est placé avant les onglets de travail. Les données, preuves exactes et décomptes restent hors du dépôt public.
+
+**Impact applicatif identifié :** import dépendant de la première feuille ; options de secteurs statiques ne couvrant pas tous les rattachements métier. Les travaux INT-01/02 doivent corriger ces contrats et préparer une génération depuis une source explicite, avec conservation du mapping et des six étapes.
+
+**Où / statut :** cadrage dans `ROADMAP.md`, `SUIVI_PROJET.md`, `HANDOFF.md` et `.azure/plan.md`. Les contrôles de l'ancienne livraison ne valent pas validation de ce nouveau lot. Aucun index, page parcours ou backend mis à jour par la sauvegarde Excel ou cette documentation.
+
+**Autorité et limites :** arbitrages de contenu délégués par Eneric, pas de validation individuelle à redemander ; versionnement, confidentialité et confirmation préalable des publications demeurent requis. Package Simplon toujours différé.
+
+**Indexation préparée localement :** `backend/app/scripts/index_documents.py` propose `--validate-only` sans Chroma/embeddings et `--require-empty` pour un index candidat. Toutes les sources sont chargées avant un éventuel `--clear` ; source absente, vide ou invalide et nombre écrit incohérent donnent un échec. `backend/entrypoint.sh` ne transforme plus une erreur de lecture en index vide et ne démarre plus après une indexation échouée. Couverture synthétique dans `test_index_preflight.py` et `test_index_entrypoint.py`. Aucun index réel reconstruit par ces modifications.
+
+**Import et secteurs implémentés :** sélection explicite de la feuille métier et validation des données dans `backend/app/services/ingest.py` ; secteurs dérivés des métadonnées, numéros historiques conservés et cache invalidé dans `backend/app/haystack_rag.py`. Un conflit de dimension d'embeddings ne supprime plus automatiquement la collection. Tests dans `test_catalogue_integration.py` et `test_chat_regressions.py`.
+
+**Parcours, dépôt associé :** `pipeline/genere.py` prépare un dossier neuf à partir de source/mapping explicites, garde les associations historiques, supporte les layouts existant et backend et un lien de retour HTTP(S) paramétrable dans le gabarit. `publish.yml` est manuel et nécessite l'autorisation de publication ; le mapping n'est ni servi ni exporté en artefact. Couverture dans `test_catalogue_integration.py`, `test_parcours_ux.py` et `test_parcours_publication_gate.py` du chatbot. Ces fichiers du dépôt associé ne sont pas livrés par un commit du seul dépôt chatbot.
+
+**Résultat :** 182 tests backend/générateur et 19 tests frontend, types contrôlés. Vérification en mémoire sur le catalogue réel sans embeddings ni pages écrites. Limites conservées dans le suivi : runtime local différent de l'image de production, exposition des contenus et cible à confirmer avant mise en ligne.
+
 ## Publication effective du 10 septembre
 
 **Commit** `4033e8e` : corrections chatbot et documentation publique synchronisées dans `main`. Workflow Pages34461697021 et CI34461697054 réussis ; contrôles sur https://nricl.github.io/A-Vous-l-IA/ : nouveau bundle, mobile390px, qualification et retour arrière après absence de correspondance. Le backend reste0045 ; ni les données ni les gabarits parcours n'ont été redéployés par Pages. Détails et limites de la CI dans `SUIVI_PROJET.md`.

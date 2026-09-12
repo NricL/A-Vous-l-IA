@@ -2,6 +2,12 @@
 Chatbot open source pour aider à explorer et structurer des cas d’usage de
 l’IA.
 
+## État courant — 12 septembre 2026
+
+À Vous l'IA reste destiné à la découverte d'usages par les employés de PME non spécialistes de l'IA. La nouvelle base privée consolidée est sauvegardée, **pas encore intégrée au chatbot**. La priorité est l'import robuste, la couverture des secteurs, puis une recette cohérente source/index/parcours avant livraison dev. Voir [`ROADMAP.md`](./ROADMAP.md) et [`HANDOFF.md`](./HANDOFF.md).
+
+Le dernier état de livraison observé reste celui du 10 septembre : backend0045 et frontend de référence sur https://nricl.github.io/A-Vous-l-IA/. Le package Simplon est différé. Ne pas déposer de classeur privé ou d'export de catalogue dans ce dépôt public ; `noindex` et une URL non devinable ne remplacent pas une autorisation d'accès.
+
 ## Principe projet — Livraison Simplon & traçabilité (À LIRE EN PREMIER)
 Cette application est **co-construite puis livrée à Simplon**, qui l'héberge chez elle.
 Deux contraintes **régissent l'intégralité du projet** — pas seulement les évolutions à
