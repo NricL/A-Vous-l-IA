@@ -14,10 +14,28 @@ INT-01 et INT-02 sont intégrés au backend déployé ; INT-03 a passé la bascu
 |---|---|
 | Catalogue, index isolé et parcours v461 | Déployés ; fichiers Excel/audit/mapping non servis, hashes conservés. |
 | Questions guidées et sélection des cas | Correctifs réels intégrés, questions déterministes et prompt de sélection distinct ; scénarios répétés passés. |
-| Sources et documentation du dernier déploiement | Modifications locales à synchroniser ; rapprochement parcours réalisé dans un worktree isolé. |
-| Chiffres et libellés de la vitrine | Correction locale testée (`1 021`, `Domaines métier`), publication frontend à terminer. |
+| Sources du dernier déploiement | Publiées : chatbot `24e145b`, parcours `a500a22`. |
+| Chiffres et libellés de la vitrine | Publiés sur Pages et frontend Azure : `1 021`, `Domaines métier`. |
 | Calibrage métier à plus grande échelle | Ouvert ; les essais de livraison ne garantissent pas toutes les formulations. |
 | Package et production Simplon | Toujours différés. |
+
+### Lot actif — fluidité après livraison, autorisé le 13 septembre
+
+La finalisation frontend est terminée ; les états de préparation et « à publier » dans l'historique sont remplacés par l'état ci-dessus. La présente remise à jour documentaire est locale tant qu'elle n'est pas publiée.
+
+| Ordre | Lot | Résultat attendu | État |
+|---|---|---|---|
+| 1 | UX-01 — cas unique | Bouton « Choisir ce cas » issu des identités serveur ; liste et ordre restaurés lors du retour depuis une fiche. | Implémenté localement |
+| 2 | UX-02 — lisibilité Q3 | Au plus quatre situations individuelles, dédoublonnées après séparation des pipes ; source inchangée. | Implémenté localement |
+| 3 | UX-03 — pertinence des exemples | Même éligibilité sectorielle pour Q2/Q3, filtre objectif conservé, aucun remplissage par un autre secteur. | Implémenté localement |
+| 4 | UX-04 — besoin initial | Objectifs et constats explicites français reconnus ; présentations seules exclues, nouvelle précision prioritaire, ancien Q3 invalidé après changement de choix. | Implémenté localement |
+| 5 | UX-05 — hypothèses non exprimées | Prompt de sélection excluant les conditions métier non établies, sans interdire les garde-fous conditionnels légitimes. | Implémenté localement ; huit réponses réelles conformes aux scénarios fictifs |
+
+Arbitrages techniques délégués. Pas de changement de base, de schéma métier, d'ordre des six étapes, de modèle ni d'instrumentation. La qualification, les pré-filtres et le détail verbatim restent les contrats de référence. Publication du code et documentation après aperçu exact confirmé ; Azure et Pages sont des livraisons distinctes.
+
+Contrôles locaux : 171 tests backend ciblés, 31 tests frontend, types/build et composants actifs ; navigateur sur le frontend construit à 390/1280 px avec SSE fictif. Ces contrôles ne sont ni un déploiement, ni une mesure exhaustive de pertinence du catalogue. Le banc existant dispose de `--suite stock-assumptions` pour l'évaluation bornée de UX-05 avec des cas entièrement fictifs.
+
+Évaluation UX-05 terminée sur le modèle existant : quatre scénarios dans les deux ordres de candidats, huit réponses complètes, aucune divergence aux attentes techniques, aucune troncature ni erreur de transport. Saisonnalité exclue lorsqu'absente du besoin, retenue lorsqu'explicite ; garde-fou conditionnel conservé et refus sans cas adapté. Cette mesure ciblée n'est pas un taux de précision utilisateurs. Les cinq correctifs restent locaux ; publication GitHub/Pages et mise à jour Azure à confirmer sur leur aperçu exact.
 
 ## Historique de préparation du 12 septembre — intégrer la base consolidée
 

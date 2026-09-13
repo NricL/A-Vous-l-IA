@@ -2,7 +2,7 @@
 
 **Historical scope:** July implementation summary; not the current integration or deployment status.
 
-**Current status (2026-09-13):** v461 catalogue text and parcours are deployed on the existing DEV backend revision `avoulia-backend--v461-20260913-r3`; private workbook, mapping and audit exports are not served. Source reconciliation, controlled staging, rollback and successful live checks are recorded in [`ROADMAP.md`](./ROADMAP.md), [`SUIVI_PROJET.md`](./SUIVI_PROJET.md) and [`HANDOFF.md`](./HANDOFF.md). Final source/documentation synchronization and the frontend count-label refresh remain separate publication steps. The Simplon package remains deferred; historical generation instructions below are not the current release recipe.
+**Current status (2026-09-13):** v461 catalogue text and parcours are deployed on the existing DEV backend revision `avoulia-backend--v461-20260913-r3`; private workbook, mapping and audit exports are not served. Sources are published (`24e145b` chatbot, `a500a22` parcours), and the Pages/Azure frontend count-label refresh is complete. Five post-release UX fixes are implemented locally, not deployed; see [`ROADMAP.md`](./ROADMAP.md), [`SUIVI_PROJET.md`](./SUIVI_PROJET.md) and [`HANDOFF.md`](./HANDOFF.md). The Simplon package remains deferred; historical generation instructions below are not the current release recipe.
 
 ---
 

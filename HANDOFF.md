@@ -10,7 +10,23 @@ Le mapping et le classeur sont sous `/app/private`, jamais sous la racine web. L
 
 **Rollback :** anciennes images et définitions de révision conservées ; les anciennes répliques sont inactives pour éviter des coûts et des endpoints hérités inutiles. Une restauration doit remettre ensemble code, catalogue, index et pages. Le retour à0045 remettrait aussi ses anciens comportements de confidentialité : préférer une correction conservant la protection du webroot lorsque possible. Ne jamais vider le nouvel index pour improviser un retour arrière.
 
-**Sources / vitrine :** rapprochement parcours local `a500a22`; derniers correctifs et documentation prêts à synchroniser. La retouche des deux chiffres/libellés de vitrine reste locale. Voir le suivi pour les preuves de recette et la distinction entre version du frontend et catalogue réellement servi.
+**Sources / vitrine finalisées :** chatbot `24e145b` et parcours `a500a22` publiés ; Pages et frontend Azure affichent 1 021 cas, 14 domaines métier et 71 intentions. Frontend Azure `avoulia-frontend--v461-20260913`. Les mentions de préparation/non-publication plus bas sont historiques.
+
+### Reprise du 13 septembre — lot UX-01 à UX-05
+
+Les cinq frictions post-livraison ont des correctifs locaux : sélection du cas unique, exemples Q3 trop denses avec pipes bruts, exemples hors contexte Cabinet & conseil, besoin initial du magasin redemandé et suggestion secondaire supposant une saisonnalité. Ces correctifs ne sont pas encore déployés.
+
+La documentation a été rapprochée avant l'implémentation. Voir la table active de `ROADMAP.md`. Ne pas relancer l'intégration v461, régénérer les pages, modifier le classeur ou préparer Simplon. Le composant actif est `frontend/src/views/HomeView.vue` ; ses boutons utilisent `suggestedCases` conservé dans chaque message. La réponse détail peut contenir plusieurs candidats : la présence de candidats seule ne suffit pas, le CTA autoritaire `parcours_url` et le marqueur de détail restent prioritaires. Le retour à la liste restaure ces candidats, pas ceux du dernier détail.
+
+Les exemples Q3 utilisent l'éligibilité sectorielle de Q2, conservent le filtre intention et limitent à quatre situations après séparation/dédoublonnage. Une intention invalide ne doit pas revenir à tous les exemples du domaine. Le besoin initial reste réutilisable lors d'une correction ; un Q3 donné sous d'anciens choix est au contraire invalidé.
+
+**Reproduire hors ligne depuis `backend` :** définir `PYTHONPATH=tests` puis lancer `python -B -m unittest test_haystack_rag test_chat_regressions test_chat_relevance test_case_selection_prompt test_relevance_evaluation test_catalogue_integration -q`. Définir `PARCOURS_SOURCE_ROOT` vers le checkout parcours rapproché pour inclure les contrôles associés. Depuis `frontend` : `npm run check:chat`, `npm run type-check`, `npm run build-only`.
+
+**Évaluer UX-05 :** `python scripts\evaluate_chat_relevance.py --suite stock-assumptions --repeats 2 --max-completion-tokens 6000` prépare les huit requêtes sans réseau. Ajouter `--live --subscription "<abonnement-dev>" --resource-group rg-avoulia-fr-dev --container-app avoulia-backend --interval-seconds 90 --output "<dossier-prive-existant>\ux05.json"` uniquement pour un passage autorisé. Aucun classeur n'est lu ; les rapports contiennent les réponses brutes fictives et les paramètres, pas les identifiants d'authentification. Ne pas transformer les attentes techniques en taux de précision utilisateurs.
+
+**Prochaine recette de déploiement, après confirmation :** utiliser `Dockerfile.dev-catalogue-code-fix` avec l'image r3 épinglée en tête et un contexte privé minimal. L'overlay doit comprendre **`app/haystack_rag.py` et `app/rag_constants.py`** ensemble ; inclure les tests et le banc à jour dans le paquet de validation. L'ancien `Dockerfile.dev-code-only` du 10 septembre ne copie pas `rag_constants.py` et ne suffit pas à ce lot. Hériter catalogue/pages/mapping, préserver les exports hors webroot, et valider dans l'image avant bascule. Pas de régénération ou d'effacement d'index ; un remplacement de réplique peut néanmoins reconstruire son index local au démarrage.
+
+Préserver les changements préexistants du plan Azure et des worktrees parcours. Le reçu local Azure décrit la finalisation déjà effectuée ; sa présence modifiée n'indique pas un déploiement en attente. Les futures publications nécessitent leur aperçu et confirmation propres.
 
 ## Reprise prioritaire — 12 septembre 2026
 

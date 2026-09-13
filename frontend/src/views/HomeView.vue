@@ -53,15 +53,16 @@
                             >
                                 <span class="msg-text">{{ msg.content }}</span>
                                 <div
-                                    v-if="msg.role !== 'user' && i === lastAssistantIndex && !loading && choicesFor(msg.content).length"
+                                    v-if="msg.role !== 'user' && i === lastAssistantIndex && !loading && choicesFor(msg).length"
                                     class="choice-chips"
                                 >
                                     <button
-                                        v-for="c in choicesFor(msg.content)"
+                                        v-for="c in choicesFor(msg)"
                                         :key="c.num"
                                         type="button"
                                         class="chip choice-chip"
                                         :disabled="loading"
+                                        :aria-label="c.accessibleLabel || c.label"
                                         @click="submit(String(c.num))"
                                     >{{ c.label }}</button>
                                 </div>
@@ -466,8 +467,7 @@ function onCaseFeedback(msg, useful) {
 /**
  * Extrait les choix cliquables d'un message de type "question guidée" (Q1 domaine,
  * Q1.5 secteur, Q2 objectif) : une liste de lignes « N. libellé » contiguës.
- * Retourne [] pour la liste de cas d'usage (où des paragraphes séparent les items) afin
- * de NE PAS transformer ce contenu en chips — la sélection d'un cas reste au clavier/nombre.
+ * Les listes de cas utilisent leurs métadonnées serveur, pas ce parseur de questions.
  */
 function parseSimpleChoices(content) {
     const lines = String(content || '').split('\n')
@@ -489,31 +489,18 @@ function parseSimpleChoices(content) {
     return choices.length >= 2 ? choices : []
 }
 
-/**
- * Chips de sélection pour la LISTE DE CAS : chaque cas est une ligne « N. Titre » suivie de
- * paragraphes de description. On garde le texte complet (les descriptions sont utiles) et on
- * propose des chips courtes « Cas N » pour sélectionner d'un clic. On ne s'active que sur une
- * vraie liste de cas (marqueurs « approfondir » / séparateurs « --- ») pour éviter les faux
- * positifs sur la fiche détail (qui n'a pas de lignes « N. » en début de ligne).
- */
-function parseCaseChoices(content) {
-    // Une liste de cas = plusieurs lignes « N. Titre » en début de ligne, séparées par des
-    // paragraphes de description (donc parseSimpleChoices a déjà renvoyé [] avant d'arriver ici).
-    // On ne dépend PAS de marqueurs de texte (« approfondir »/« --- ») car le format LLM varie.
-    // La fiche détail et Q3 n'ont pas de lignes « N. » en début de ligne → pas de faux positif.
-    const numRe = /^\s*(\d{1,2})\.\s+.+$/
-    const choices = []
-    for (const line of String(content || '').split('\n')) {
-        const m = line.match(numRe)
-        if (m) choices.push({ num: Number(m[1]), label: `Cas ${m[1]}` })
+function choicesFor(msg) {
+    if (msg.role === 'user') return []
+    const phase = messagePhase(msg)
+    if (phase === 4) {
+        const cases = msg.suggestedCases || []
+        return cases.map((c, i) => ({
+            num: i + 1,
+            label: cases.length === 1 ? 'Choisir ce cas' : `Cas ${i + 1}`,
+            accessibleLabel: `Choisir le cas ${i + 1}${c.cas_utilisation ? ` : ${c.cas_utilisation}` : ''}`,
+        }))
     }
-    return choices.length >= 2 ? choices : []
-}
-
-/** Choix cliquables du message courant : questions guidées (libellés) OU sélection de cas (« Cas N »). */
-function choicesFor(content) {
-    const simple = parseSimpleChoices(content)
-    return simple.length ? simple : parseCaseChoices(content)
+    return phase >= 0 && phase <= 2 ? parseSimpleChoices(msg.content) : []
 }
 
 
@@ -553,10 +540,17 @@ function detectPhase(text) {
     return -1 // hors questionnaire / message d'accueil
 }
 
+function messagePhase(msg) {
+    const phase = detectPhase(msg.content)
+    if (msg.parcoursUrl || phase === 5) return 5
+    if (msg.suggestedCases?.length) return 4
+    return phase
+}
+
 const currentPhase = computed(() => {
     for (let i = messages.value.length - 1; i >= 0; i--) {
         const m = messages.value[i]
-        if (m?.role !== 'user' && (m?.content || '').trim()) return detectPhase(m.content)
+        if (m?.role !== 'user' && (m?.content || '').trim()) return messagePhase(m)
     }
     return -1
 })
@@ -591,7 +585,7 @@ function goBackToStep(stepIndex) {
     let qIdx = -1
     for (let k = 0; k < messages.value.length; k++) {
         const m = messages.value[k]
-        if (m.role !== 'user' && (m.content || '').trim() && detectPhase(m.content) === stepIndex) { qIdx = k; break }
+        if (m.role !== 'user' && (m.content || '').trim() && messagePhase(m) === stepIndex) { qIdx = k; break }
     }
     if (qIdx === -1) return
     messages.value = messages.value.slice(0, qIdx + 1)
@@ -599,6 +593,7 @@ function goBackToStep(stepIndex) {
     if (stepIndex <= 1) { selectedSector.value = null; sectorEverShown.value = false }
     if (stepIndex <= 2) selectedIntention.value = null
     if (stepIndex <= 3) lastSuggestedCases.value = null // les cas dépendent des questions en amont
+    if (stepIndex === 4) lastSuggestedCases.value = messages.value[qIdx].suggestedCases ?? null
     pendingAction.value = null
     pendingUseCaseId.value = null
     error.value = null
@@ -717,7 +712,7 @@ async function submit(forcedText = null) {
                     if (idx >= 0 && messages.value[idx]?.role === 'assistant') {
                         messages.value = [
                             ...messages.value.slice(0, idx),
-                            { ...messages.value[idx], parcoursUrl, parcoursCtaLabel, caseLabel },
+                            { ...messages.value[idx], parcoursUrl, parcoursCtaLabel, caseLabel, suggestedCases: payload.suggested_cases ?? [] },
                         ]
                     }
 

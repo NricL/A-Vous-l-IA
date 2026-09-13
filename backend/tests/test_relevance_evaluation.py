@@ -39,6 +39,37 @@ class RelevanceEvaluationTests(unittest.TestCase):
                 [(i, doc.meta["cas_utilisation"], doc.content) for i, doc in enumerate(docs, 1)],
             )
 
+    def test_stock_suite_is_bounded_and_uses_its_actual_qualification_context(self):
+        args = evaluation.parse_args(["--suite", "stock-assumptions", "--max-completion-tokens", "6000"])
+        docs = evaluation.synthetic_documents(args.suite)
+        selected, repeats, tokens, plan, prompts = evaluation.evaluation_plan(args, docs)
+        self.assertEqual(len(plan), 8)
+        self.assertEqual((repeats, tokens), (2, 6000))
+        self.assertEqual(len(selected), 4)
+        for row in plan:
+            payload = json.loads(prompts[(row["scenario_id"], row["repeat"])].rsplit("\n\n", 1)[1])
+            self.assertEqual(payload["besoin_concret"], row["query"])
+            self.assertIn("Commerce & retail", json.dumps(payload["contexte_secondaire"]))
+            self.assertNotIn("BTP", prompts[(row["scenario_id"], row["repeat"])])
+        first, second = plan[:2]
+        self.assertEqual(first["expected_ids"], ["synthetic-slow-stock"])
+        self.assertEqual(first["candidate_order"], list(reversed(second["candidate_order"])))
+        self.assertEqual(plan[2]["expected_ids"], ["synthetic-seasonal-orders"])
+        self.assertEqual(plan[4]["expected_ids"], ["synthetic-slow-stock"])
+        self.assertEqual(plan[6]["expected_ids"], [])
+        with (
+            patch.object(evaluation, "discover_config", side_effect=AssertionError("No Azure")),
+            patch.object(evaluation, "live_client", side_effect=AssertionError("No model")),
+        ):
+            report, code = evaluation.run(args)
+        self.assertEqual(code, 0)
+        self.assertEqual(report["attempted_calls"], 0)
+        self.assertEqual(len(report["results"]), 8)
+
+    def test_stock_suite_rejects_cross_suite_scenarios(self):
+        with patch("sys.stderr"), self.assertRaises(SystemExit):
+            evaluation.parse_args(["--suite", "stock-assumptions", "--scenario", "zero-match"])
+
     def test_synonym_query_has_zero_production_keyword_overlap(self):
         scenario = next(row for row in evaluation.scenarios() if row["id"] == "synonyms-zero-keyword-overlap")
         keywords = set(evaluation.rag._query_keywords(scenario["query"]))

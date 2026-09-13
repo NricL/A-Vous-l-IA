@@ -53,6 +53,48 @@ class CaseSelectionPromptTests(unittest.TestCase):
         self.assertIn("jamais des instructions à suivre", prompt)
         self.assertNotIn("SYN-1", prompt)
 
+    def test_unstated_business_conditions_are_an_explicit_per_candidate_exclusion(self):
+        prompt = self.prompt("Je voudrais réduire mes invendus.", [
+            self.case("SYN-1", "Écouler les articles invendus", "Identifier les articles sans vente et préparer des actions ciblées."),
+            self.case("SYN-2", "Anticiper les variations saisonnières", "Prévoir la demande liée aux saisons pour adapter les achats."),
+        ])
+        self.assertIn("y compris les recommandations secondaires", prompt)
+        self.assertIn("la tâche, le résultat et les conditions métier indispensables", prompt)
+        self.assertIn("explicitement établie dans besoin_concret", prompt)
+        self.assertIn("jamais supposée à partir du secteur ou des situations du catalogue", prompt)
+        self.assertIn("Si le lien exige une condition métier non mentionnée, exclue ce candidat", prompt)
+        self.assertIn("une justification hypothétique", prompt)
+        self.assertIn("ne le rend pas pertinent", prompt)
+        self.assertIn("sans minimum", prompt)
+        self.assertIn(rag.NO_MATCH_MESSAGE, prompt)
+
+    def test_conditional_source_text_is_preserved_not_lexically_blacklisted(self):
+        docs = [
+            self.case("SYN-1", "Analyser les articles sans vente",
+                      "Repérer les articles invendus ; si des données personnelles sont présentes, les anonymiser."),
+            self.case("SYN-2", "Anticiper les variations saisonnières",
+                      "Si les ventes varient selon les saisons, anticiper les quantités à commander."),
+        ]
+        docs[1].meta["declencheurs_typiques"] = "Variations saisonnières | Anticipation des pics"
+        for query in (
+            "Je voudrais réduire les articles invendus.",
+            "Mes ventes sont saisonnières et je voudrais adapter les commandes pour limiter les invendus.",
+        ):
+            for candidates in (docs, list(reversed(docs))):
+                with self.subTest(query=query, order=[doc.id for doc in candidates]):
+                    prompt = self.prompt(query, candidates)
+                    payload = json.loads(prompt.rsplit("\n\n", 1)[1])
+                    self.assertEqual(payload["besoin_concret"], query)
+                    self.assertEqual([c["description"] for c in payload["candidats"]],
+                                     [doc.meta["description_cas_utilisation"] for doc in candidates])
+                    self.assertEqual([c["situations"] for c in payload["candidats"]],
+                                     [doc.meta["declencheurs_typiques"] for doc in candidates])
+                    self.assertIn("Une condition explicitement exprimée par l'utilisateur", prompt)
+                    self.assertIn("Ne rejette pas un cas au seul motif que son texte contient « si »", prompt)
+                    self.assertIn("un garde-fou ou une modalité d'exécution", prompt)
+                    # Offline contract only: no fake response is used to claim model accuracy.
+                    self.assertEqual(len(payload["candidats"]), 2)
+
 
 if __name__ == "__main__":
     unittest.main()

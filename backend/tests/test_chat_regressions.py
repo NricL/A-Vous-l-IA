@@ -202,6 +202,84 @@ class SelectionRegressionTests(SyntheticRagTests):
 
 
 class ProblemReuseTests(SyntheticRagTests):
+    def test_french_initial_needs_survive_numeric_guidance_without_topic_keywords(self):
+        for text in (
+            "Je tiens un magasin de décoration et je voudrais réduire mes invendus.",
+            "Je tiens un magasin de décoration et souhaite écouler mes invendus.",
+            "J'ai un magasin de décoration. Comment écouler les articles qui ne se vendent plus ?",
+            "Bonjour, je souhaite vendre les articles qui restent en rayon.",
+            "Nous voulons convertir nos notes de visite en compte rendu.",
+            "On voudrait mieux répondre aux demandes des clients.",
+            "J'aimerais rapprocher nos factures des paiements reçus.",
+            "Je cherche à comparer les propositions reçues.",
+            "Je dois transformer mes notes de réunion de chantier en compte rendu.",
+            "Les invendus s'accumulent dans ma boutique.",
+            "Mes clients n'obtiennent jamais de réponse.",
+            "J'ai des invendus dans mon magasin de décoration.",
+            "Réduire les articles qui restent sur les étagères.",
+        ):
+            history = self.guided_history(text) + [user("1")]
+            with self.subTest(text=text):
+                self.assertEqual(rag._user_probleme_q3_text(history), text)
+                self.assertEqual(rag._derive_selection_state_from_history(history),
+                                 ("activites_terrain", "BTP", "1"))
+
+    def test_social_profession_and_control_turns_never_become_a_need(self):
+        for text in (
+            "Bonjour !", "Hello", "Bonsoir, merci !", "Merci pour votre aide.",
+            "Je suis commerçante.", "Bonjour. Je dirige un magasin de décoration.",
+            "Je gère une boutique.", "Je suis responsable marketing et communication.",
+            "Je suis commerçante. Je tiens une boutique de décoration.",
+            "Je suis artisan et j'exerce dans le BTP.",
+            "Je travaille pour un cabinet de conseil.", "Je ne travaille pas dans le BTP.",
+            "J'ai un magasin de décoration.", "J'ai une boutique.", "Nous avons une entreprise.",
+            "Je ne sais pas encore", "OK, merci !", "pas de problème", "1",
+            "Détaille le point 1", "Pouvez-vous me donner plus de détails ?",
+        ):
+            for state, prefix in (
+                (None, []),
+                (("activites_terrain", "BTP", "1"), [assistant(PROBLEM_QUESTION)]),
+            ):
+                with self.subTest(text=text, state=state):
+                    self.assertEqual(rag._user_probleme_q3_text(prefix + [user(text)], selected_state=state), "")
+
+    def test_initial_need_survives_domain_correction_but_obsolete_q3_does_not(self):
+        initial = "Je voudrais réduire les articles invendus dans mon magasin."
+        correction = [user("Finances & rentabilité"), assistant(SECTOR_QUESTION), user("2"),
+                      assistant(INTENTION_QUESTION), user("1")]
+        history = self.guided_history(initial) + [user("1")]
+        self.assertEqual(rag._user_probleme_q3_text(history + correction), initial)
+        explicit_q3 = history + [assistant(PROBLEM_QUESTION), user("Les notes restent dispersées.")]
+        self.assertEqual(rag._user_probleme_q3_text(explicit_q3 + correction), "")
+        for correction_text in ("Industrie", INTENTIONS[1]):
+            self.assertEqual(rag._user_probleme_q3_text(explicit_q3 + [user(correction_text)]), "")
+
+    def test_latest_meaningful_clarification_replaces_initial_need_during_guidance(self):
+        clarification = "J'aimerais comparer les commandes aux quantités réellement vendues."
+        history = self.guided_history("Je voudrais réduire les invendus.")[:-1] + [
+            user(clarification), assistant(INTENTION_QUESTION), user("1"),
+        ]
+        self.assertEqual(rag._user_probleme_q3_text(history), clarification)
+        self.assertEqual(rag._user_probleme_q3_text(history + [user("OK, merci !")]), clarification)
+
+    def test_early_need_replay_respects_partial_history_and_domains_without_sector(self):
+        need = "J'aimerais comparer les propositions reçues."
+        for domain, sector in (("activites_terrain", "BTP"), ("direction_strategie", None)):
+            for entry in (rag.get_rag_prompt_and_sources, rag.query_rag_haystack):
+                with (
+                    self.subTest(domain=domain, entry=entry.__name__),
+                    patch.object(rag, "_retrieve_docs_for_question", return_value=[]) as retrieve,
+                ):
+                    entry("1", [user(need), assistant(INTENTION_QUESTION)],
+                          selected_domain_code=domain, selected_sector=sector)
+                retrieve.assert_called_once_with(
+                    need, selected_domain_code=domain, selected_intention="1", selected_sector=sector,
+                )
+        self.assertEqual(rag._user_probleme_q3_text(
+            [assistant(INTENTION_QUESTION), user("1")],
+            selected_state=("activites_terrain", "BTP", "1"),
+        ), "")
+
     def test_sector_specific_numbered_objective_uses_real_q2_order(self):
         docs = [
             SimpleNamespace(content="Synthetic", meta={"intention": "Analyser les stocks", "secteur": "Industrie"}),

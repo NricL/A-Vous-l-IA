@@ -40,6 +40,10 @@ MAX_CALLS = 16
 MAX_TOKENS = 1200
 HYPOTHESIS = "Engineering hypotheses on synthetic fixtures; not human-user validated."
 DIAGNOSTIC_VERSION = "2.0-numbered-clarifications"
+SUITE_CONTEXTS = {
+    "chantier": (DOMAIN, "BTP", INTENTION),
+    "stock-assumptions": ("logistique_stocks", "Commerce & retail", "Réduire les stocks invendus"),
+}
 
 _NUMBERED_LINE = re.compile(r"(?m)^[ \t]*(?:#{1,6}[ \t]*)?(?:[-+*][ \t]+)?[*_`]*\d+")
 _ZERO_MATCH = re.compile(
@@ -74,7 +78,28 @@ def _numbered_clarifications_only(raw, headings):
     return True
 
 
-def synthetic_documents():
+def synthetic_documents(suite="chantier"):
+    if suite == "stock-assumptions":
+        domain, sector, intention = SUITE_CONTEXTS[suite]
+        rows = [
+            ("slow-stock", "Analyser les articles invendus",
+             "Repérer les articles à faible rotation dans les historiques de vente et préparer "
+             "des actions ciblées pour les écouler. Si des données personnelles sont présentes, "
+             "les anonymiser avant analyse."),
+            ("seasonal-orders", "Prévoir les commandes saisonnières",
+             "Prévoir la demande future liée aux saisons et adapter les quantités à commander "
+             "avant chaque saison. Ce cas nécessite des variations saisonnières des ventes."),
+            ("expiry", "Suivre les dates de péremption",
+             "Repérer les produits périssables proches de leur date limite et prioriser leur écoulement."),
+        ]
+        return [
+            SimpleNamespace(id=f"synthetic-{key}", content=description, meta={
+                "domaine": domain, "secteur": sector, "intention": intention,
+                "cas_utilisation": title, "description_cas_utilisation": description,
+            }) for key, title, description in rows
+        ]
+    if suite != "chantier":
+        raise EvaluationError("Unknown evaluation suite")
     rows = [
         ("summary", "Synthétiser les notes de réunion de chantier",
          "Transformer les notes de réunion en compte rendu clair. Restituer les échanges et les décisions."),
@@ -95,7 +120,29 @@ def synthetic_documents():
     ]
 
 
-def scenarios():
+def scenarios(suite="chantier"):
+    if suite == "stock-assumptions":
+        return [
+            {"id": "stock-no-seasonality", "query":
+             "Je tiens un magasin de décoration et je voudrais comprendre quels articles restent "
+             "invendus, puis trouver des actions pour les écouler.",
+             "expected_ids": ["synthetic-slow-stock"]},
+            {"id": "stock-explicit-seasonality", "query":
+             "Les ventes de mon magasin varient selon les saisons. Je veux uniquement prévoir la "
+             "demande de la prochaine saison et adapter les quantités à commander, pas analyser "
+             "les articles invendus aujourd'hui.",
+             "expected_ids": ["synthetic-seasonal-orders"]},
+            {"id": "stock-conditional-guardrail", "query":
+             "Je souhaite analyser mes historiques de vente pour repérer les articles à faible "
+             "rotation et préparer leur écoulement. Les fichiers contiennent des noms de clients "
+             "qui devront être anonymisés.",
+             "expected_ids": ["synthetic-slow-stock"]},
+            {"id": "stock-zero-match", "query":
+             "Je dois rédiger le compte rendu d'une réunion avec mon équipe.",
+             "expected_ids": []},
+        ]
+    if suite != "chantier":
+        raise EvaluationError("Unknown evaluation suite")
     return [
         {"id": "summary-not-safety", "query":
          "Je veux transformer mes notes de réunion de chantier en compte rendu des échanges, "
@@ -129,16 +176,17 @@ def scenarios():
     ]
 
 
-def build_prompt(query, documents):
+def build_prompt(query, documents, suite="chantier"):
     # Only document/metadata reads are substituted; prompt and parser remain real.
+    domain, sector, intention = SUITE_CONTEXTS[suite]
     with ExitStack() as stack:
         stack.enter_context(patch.object(rag, "_fetch_documents_for_domaine", return_value=documents))
-        stack.enter_context(patch.object(rag, "_get_q2_choices_list", return_value=[INTENTION]))
+        stack.enter_context(patch.object(rag, "_get_q2_choices_list", return_value=[intention]))
         stack.enter_context(patch.object(
             rag, "get_document_store", side_effect=AssertionError("Real document reads forbidden")))
         return rag._build_rag_prompt_from_docs(
             query, "", "", documents, [{"role": "user", "content": query}],
-            selected_domain_code=DOMAIN, selected_sector="BTP", selected_intention="1",
+            selected_domain_code=domain, selected_sector=sector, selected_intention="1",
         )
 
 
@@ -405,7 +453,8 @@ def reassess_report(source):
 
 
 def evaluation_plan(args, documents):
-    by_id = {row["id"]: row for row in scenarios()}
+    suite = getattr(args, "suite", "chantier")
+    by_id = {row["id"]: row for row in scenarios(suite)}
     selected = list(dict.fromkeys(getattr(args, "scenario", None) or by_id))
     repeats = getattr(args, "repeats", 2)
     tokens = getattr(args, "max_completion_tokens", MAX_TOKENS)
@@ -422,7 +471,7 @@ def evaluation_plan(args, documents):
         scenario = by_id[name]
         for repeat in range(1, repeats + 1):
             ordered = documents if repeat == 1 else list(reversed(documents))
-            prompt = build_prompt(scenario["query"], ordered)
+            prompt = build_prompt(scenario["query"], ordered, suite)
             plan.append({
                 "scenario_id": name, "repeat": repeat, "query": scenario["query"],
                 "expected_ids": scenario["expected_ids"],
@@ -460,7 +509,7 @@ def validate_resume(saved, fresh):
 
 
 def run(args):
-    documents = synthetic_documents()
+    documents = synthetic_documents(getattr(args, "suite", "chantier"))
     selected, repeats, tokens, plan, prompts = evaluation_plan(args, documents)
     scope = {
         "subscription": getattr(args, "subscription", None) or SUBSCRIPTION,
@@ -584,7 +633,10 @@ def parse_args(argv=None):
                         help="Continue only unattempted scenarios; preserve failures and total 16-call budget")
     parser.add_argument("--interval-seconds", type=float, default=60,
                         help="Minimum delay between request starts (default 60 for existing 10k TPM limit)")
-    parser.add_argument("--scenario", action="append", choices=[row["id"] for row in scenarios()],
+    parser.add_argument("--suite", choices=list(SUITE_CONTEXTS), default="chantier",
+                        help="Synthetic fixtures; stock-assumptions covers unstated conditions")
+    parser.add_argument("--scenario", action="append",
+                        choices=[row["id"] for suite in SUITE_CONTEXTS for row in scenarios(suite)],
                         help="Select a scenario; repeat flag to select several (default: all)")
     parser.add_argument("--repeats", type=int, choices=[1, 2], default=2)
     parser.add_argument("--max-completion-tokens", type=int, default=MAX_TOKENS,
@@ -593,6 +645,8 @@ def parse_args(argv=None):
     parser.add_argument("--resource-group", help=f"Required for live; existing dev group: {RESOURCE_GROUP}")
     parser.add_argument("--container-app", help=f"Required for live; existing dev app: {CONTAINER_APP}")
     args = parser.parse_args(argv)
+    if any(name not in {row["id"] for row in scenarios(args.suite)} for name in args.scenario or []):
+        parser.error("--scenario must belong to the selected --suite")
     if args.live and not args.output:
         parser.error("--live requires --output to preserve evidence")
     if args.output and not args.output.parent.is_dir():

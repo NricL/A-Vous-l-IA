@@ -18,7 +18,7 @@ const setup = parse(homeSource).descriptor.scriptSetup.content
   .replace(/import \{([^}]+)\} from '@\/api\/chat'/, 'const {$1} = api')
 const expose = `
 return { submit, goBackToStep, messages, loading, currentPhase, showStepper, steps, selectedDomainCode,
-  selectedSector, selectedIntention, lastSuggestedCases, pendingAction, pendingUseCaseId }
+  selectedSector, selectedIntention, lastSuggestedCases, pendingAction, pendingUseCaseId, choicesFor, lastAssistantIndex }
 `
 const createSetup = new Function('vue', 'api', setup + expose)
 
@@ -152,8 +152,131 @@ test('no-match keeps previous steps available without selectable case buttons', 
   assert.equal(f.home.steps.value[0].state, 'done')
   assert.equal(f.home.steps.value[4].state, 'upcoming')
   assert.deepEqual(f.home.lastSuggestedCases.value, [])
+  assert.deepEqual(f.home.choicesFor(f.home.messages.value.at(-1)), [])
   f.home.goBackToStep(0)
   assert.deepEqual(state(f.home), [null, null, null])
+})
+
+const stockCase = {
+  id: 'UC-SYNTHETIC-STOCK',
+  content: 'Cas fictif pour tester la selection.',
+  cas_utilisation: 'Analyser les invendus',
+  parcours_url: 'https://example.test/action-stock.html',
+}
+const followupCase = {
+  id: 'UC-SYNTHETIC-FOLLOWUP',
+  content: 'Autre cas fictif.',
+  cas_utilisation: 'Suivre les actions',
+  parcours_url: 'https://example.test/action-followup.html',
+}
+
+for (const text of [
+  '1. Analyser les invendus\nPourquoi : comprendre la faible rotation.\nIndiquez son numéro.',
+  '**1. Analyser les invendus**\nPourquoi : comprendre la faible rotation.',
+  'Voici le cas adapté : Analyser les invendus.',
+]) {
+  test(`single case is selectable from server metadata, independent of Markdown: ${text.split('\n')[0]}`, async t => {
+    const f = fixture(t)
+    const list = f.home.submit('Je souhaite comprendre les invendus.')
+    await vue.nextTick()
+    f.token(text)
+    f.done({ suggested_cases: [stockCase], suggested_case_ids: [stockCase.id] })
+    await list
+    const msg = f.home.messages.value.at(-1)
+    const choices = f.home.choicesFor(msg)
+    assert.deepEqual(choices, [{
+      num: 1, label: 'Choisir ce cas', accessibleLabel: 'Choisir le cas 1 : Analyser les invendus',
+    }])
+    assert.equal(msg.parcoursUrl, null, 'candidate URL is not yet a parcours CTA')
+    assert.equal(f.home.currentPhase.value, 4)
+    const detail = f.home.submit(String(choices[0].num))
+    await vue.nextTick()
+    assert.equal(f.requests[1].message, '1')
+    assert.deepEqual(f.requests[1].last_suggested_cases.map(c => c.id), [stockCase.id])
+    f.token('Ce que ça vous apporte : une analyse des invendus.')
+    f.done({ suggested_cases: [stockCase], parcours_url: stockCase.parcours_url })
+    await detail
+    assert.equal(f.home.messages.value.at(-1).parcoursUrl, stockCase.parcours_url)
+    assert.deepEqual(f.home.choicesFor(f.home.messages.value.at(-1)), [])
+    assert.equal(f.home.currentPhase.value, 5)
+    f.home.goBackToStep(4)
+    assert.equal(f.home.choicesFor(f.home.messages.value.at(-1)).length, 1)
+    assert.equal(f.home.currentPhase.value, 4)
+  })
+}
+
+test('rewinding from a detail restores the original selectable cases and their order', async t => {
+  const f = fixture(t)
+  const list = f.home.submit('Besoin fictif')
+  await vue.nextTick()
+  f.token('**1. Analyser les invendus**\nDescription.\n**2. Suivre les actions**\nDescription.')
+  f.done({ suggested_cases: [stockCase, followupCase] })
+  await list
+  assert.deepEqual(f.home.choicesFor(f.home.messages.value.at(-1)).map(c => c.label), ['Cas 1', 'Cas 2'])
+  const firstDetail = f.home.submit('1')
+  await vue.nextTick()
+  f.token('Ce que ça vous apporte : analyse.')
+  f.done({ suggested_cases: [stockCase], parcours_url: stockCase.parcours_url })
+  await firstDetail
+  f.home.goBackToStep(4)
+  assert.deepEqual(f.home.lastSuggestedCases.value.map(c => c.id), [stockCase.id, followupCase.id])
+  const secondDetail = f.home.submit('2')
+  await vue.nextTick()
+  assert.deepEqual(f.requests[2].last_suggested_cases.map(c => c.id), [stockCase.id, followupCase.id])
+  f.token('Ce que ça vous apporte : suivi.')
+  f.done({ suggested_cases: [followupCase], parcours_url: followupCase.parcours_url })
+  await secondDetail
+  assert.equal(f.home.messages.value.at(-1).parcoursUrl, followupCase.parcours_url)
+})
+
+for (const content of [
+  'Pouvez-vous décrire le problème concret ?\n1. Délais\n2. Erreurs',
+  "Je n'ai pas de cas suffisamment pertinent avec les choix actuels.\n1. Précisez votre besoin\n2. Changez de domaine",
+  'Ce que ça vous apporte\n1. Un résultat\n2. Une action',
+  '1. Un titre sans identité serveur\nDescription.\n2. Un autre titre\nDescription.',
+]) {
+  test(`numbered non-case content does not create selectable cases: ${content.split('\n')[0]}`, async t => {
+    const f = fixture(t)
+    const pending = f.home.submit('suite')
+    await vue.nextTick()
+    f.token(content)
+    f.done({ suggested_cases: [] })
+    await pending
+    assert.deepEqual(f.home.choicesFor(f.home.messages.value.at(-1)), [])
+  })
+}
+
+test('detail without a mapped parcours still does not offer its single case for selection', async t => {
+  const f = fixture(t)
+  const pending = f.home.submit('1')
+  await vue.nextTick()
+  f.token('Ce que ça vous apporte : un résultat utile.')
+  f.done({ suggested_cases: [stockCase] })
+  await pending
+  assert.deepEqual(f.home.choicesFor(f.home.messages.value.at(-1)), [])
+  assert.equal(f.home.currentPhase.value, 5)
+})
+
+test('guided menus retain their labels and rewinding to qualification clears cases', async t => {
+  const f = fixture(t)
+  f.home.messages.value.at(-1).content = 'Quel est votre objectif principal ?\n1. Synthétiser\n2. Organiser'
+  assert.deepEqual(f.home.choicesFor(f.home.messages.value.at(-1)), [
+    { num: 1, label: 'Synthétiser' }, { num: 2, label: 'Organiser' },
+  ])
+  const pending = f.home.submit('1')
+  await vue.nextTick()
+  f.token('1. Analyser les invendus\nDescription.')
+  f.done({ suggested_cases: [stockCase] })
+  await pending
+  f.home.goBackToStep(2)
+  assert.equal(f.home.lastSuggestedCases.value, null)
+  assert.deepEqual(f.home.choicesFor(f.home.messages.value.at(-1)).map(c => c.label), ['Synthétiser', 'Organiser'])
+})
+
+test('case chips are wired to message metadata and hidden on older or streaming messages', () => {
+  assert.match(homeSource, /i === lastAssistantIndex && !loading && choicesFor\(msg\)\.length/)
+  assert.match(homeSource, /v-for="c in choicesFor\(msg\)"/)
+  assert.match(homeSource, /@click="submit\(String\(c\.num\)\)"/)
 })
 
 const apiSource = readFileSync(new URL('../src/api/chat.ts', import.meta.url), 'utf8')

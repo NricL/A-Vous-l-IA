@@ -1,4 +1,5 @@
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from app import haystack_rag
@@ -58,6 +59,67 @@ class HaystackRagRetrievalFilterTests(unittest.TestCase):
             )
 
         self.assertEqual(triggers, ["charge rédactionnelle élevée"])
+
+    def test_q3_splits_deduplicates_and_limits_individual_source_examples(self):
+        docs = [
+            SimpleNamespace(meta={"intention": "Objectif", "secteur": "Cabinet & conseil",
+                                  "declencheurs_typiques": f"Échanges   dispersés | Exemple {i} A | Exemple {i} B | Exemple {i} C"})
+            for i in range(6)
+        ]
+        docs += [SimpleNamespace(meta={
+            "intention": "Objectif", "secteur": "Cabinet & conseil",
+            "Trigger": " echanges disperses | | Exemple 0 A ",
+        })]
+        source_items = {part.strip() for doc in docs for part in
+                        haystack_rag._get_trigger_from_meta(doc.meta).split("|") if part.strip()}
+        with patch.object(haystack_rag, "_fetch_documents_for_domaine", return_value=docs):
+            pool = haystack_rag.build_pool("relation_client", "Objectif", "Cabinet & conseil")
+            self.assertEqual(len(pool), 19)
+            self.assertEqual(len({haystack_rag._normalize_query_text(t) for t in pool}), len(pool))
+            for accessor in (haystack_rag.get_q3_triggers, haystack_rag._get_triggers_from_store):
+                examples = accessor("relation_client", "Objectif", "Cabinet & conseil")
+                self.assertEqual(examples, pool[:4])
+                self.assertTrue(set(examples) <= source_items)
+                self.assertTrue(all("|" not in t for t in examples))
+
+    def test_q3_uses_same_applicability_as_q2_without_padding_other_sectors(self):
+        docs = [
+            SimpleNamespace(meta={"objectif": "Objectif", "Sector": sector, "situation": trigger})
+            for sector, trigger in (
+                ("Cabinet et conseil", "Échanges dispersés"),
+                ("BTP; Cabinet & conseil", "Réponses incohérentes"),
+                ("Multi-sectoriel", "Demande sans réponse"),
+                ("Commerce & retail", "Stock commercial"),
+                ("Énergie & télécoms", "Consommation énergétique"),
+                ("Cabinet & conseil élargi", "Secteur non équivalent"),
+                ("", "Secteur absent"),
+                ("Autre / Non spécifique", "Secteur non renseigné"),
+            )
+        ]
+        docs += [SimpleNamespace(meta={
+            "objectif": "Autre objectif", "Sector": "Cabinet & conseil", "situation": "Facturation",
+        })]
+        with patch.object(haystack_rag, "_fetch_documents_for_domaine", return_value=docs):
+            self.assertEqual(haystack_rag.build_pool(
+                "relation_client", "Objectif", "Cabinet & conseil", top_k=6,
+            ), ["Échanges dispersés", "Réponses incohérentes", "Demande sans réponse"])
+            self.assertEqual(haystack_rag.build_pool(
+                "relation_client", "Objectif", "Autre / Non spécifique",
+            ), ["Demande sans réponse"])
+            self.assertEqual(haystack_rag.build_pool(
+                "relation_client", "Autre objectif", "Industrie",
+            ), [])
+            self.assertIn("Stock commercial", haystack_rag.build_pool("relation_client", "Objectif"))
+
+    def test_invalid_q2_code_cannot_expand_examples_to_all_intentions(self):
+        with (
+            patch.object(haystack_rag, "_get_intention_label_from_code", return_value=None),
+            patch.object(haystack_rag, "get_q3_triggers") as triggers,
+        ):
+            self.assertEqual(haystack_rag._get_q3_triggers_affichage(
+                [], "relation_client", "99", "Cabinet & conseil",
+            ), "")
+            triggers.assert_not_called()
 
     def test_build_retrieval_filters_combines_domain_and_intention_metadata(self):
         with patch.object(

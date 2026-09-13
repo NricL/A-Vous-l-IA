@@ -116,6 +116,92 @@ class SyntheticRelevanceTests(unittest.TestCase):
         self.assertEqual(payload["selected_sector"], "BTP")
         self.assertEqual(payload["selected_intention"], "1")
 
+    def test_consulting_journey_q3_displays_four_applicable_individual_examples_in_http_and_sse(self):
+        intention = "Améliorer la qualité de la relation client"
+        docs = [
+            SimpleNamespace(id=str(i), content="Description synthétique", meta={
+                "domaine": "relation_client", "intention": goal, "secteur": sector,
+                "declencheurs_typiques": triggers,
+            })
+            for i, (sector, goal, triggers) in enumerate((
+                ("Cabinet & conseil", intention, "Échanges dispersés | Réponses incohérentes | Suivi incomplet"),
+                ("Cabinet et conseil", intention, "echanges disperses | Réponses incohérentes"),
+                ("Multi-sectoriel", intention, "Demandes sans réponse | Messages oubliés"),
+                ("Énergie & télécoms", intention, "Consommation énergétique | Facturation énergétique"),
+                ("Commerce & retail", intention, "Churn commercial | Planning magasin"),
+                ("Cabinet & conseil", "Automatiser la facturation", "Factures dispersées"),
+            ))
+        ]
+        with (
+            patch.object(rag, "_fetch_documents_for_domaine", return_value=docs),
+            patch.object(rag, "_get_q2_choices_list", side_effect=rag.get_q2_choices),
+        ):
+            for streaming in (False, True):
+                with self.subTest(streaming=streaming):
+                    history = [{"role": "assistant", "content": rag.WELCOME_MESSAGE}]
+                    state = {}
+                    for message in ("hello", "6", "8", "1"):
+                        answer, payload = self._handler_result(
+                            "Dans quel domaine souhaitez-vous agir en priorité ?",
+                            streaming,
+                            request=ChatRequest(message=message, history=history, **state),
+                            expect_generation=message == "hello",
+                        )
+                        history += [{"role": "user", "content": message}, {"role": "assistant", "content": answer}]
+                        state = {key: payload[key] for key in
+                                 ("selected_domain_code", "selected_sector", "selected_intention")}
+                    self.assertEqual(state, {
+                        "selected_domain_code": "relation_client",
+                        "selected_sector": "Cabinet & conseil", "selected_intention": "1",
+                    })
+                    examples = [line[2:] for line in answer.splitlines() if line.startswith("- ")]
+                    self.assertEqual(examples, [
+                        "echanges disperses", "Réponses incohérentes", "Suivi incomplet", "Demandes sans réponse",
+                    ])
+                    self.assertNotIn("|", answer)
+                    self.assertIn("Décrivez votre situation", answer)
+                    self.assertEqual(payload["suggested_case_ids"], [])
+                    self.assertNotIn("Factur", answer)
+                    self.assertNotIn("Planning", answer)
+
+    def test_initial_retail_need_is_reused_at_numeric_objective_in_http_and_sse(self):
+        need = "Je tiens un magasin de décoration et je voudrais réduire mes invendus."
+        docs = [SimpleNamespace(id="synthetic-invendus", content="Repérer les articles invendus.", meta={
+            "domaine": "logistique_stocks", "intention": "Réduire les stocks invendus",
+            "secteur": "Commerce & retail", "cas_utilisation": "Analyser les articles invendus",
+            "description_cas_utilisation": "Repérer les articles invendus.",
+        })]
+        with (
+            patch.object(rag, "_fetch_documents_for_domaine", return_value=docs),
+            patch.object(rag, "_get_q2_choices_list", side_effect=rag.get_q2_choices),
+        ):
+            for streaming in (False, True):
+                with self.subTest(streaming=streaming):
+                    history = [{"role": "assistant", "content": rag.WELCOME_MESSAGE}]
+                    state = {}
+                    for message in (need, "11", "3"):
+                        answer, payload = self._handler_result(
+                            "Dans quel domaine souhaitez-vous agir en priorité ?", streaming,
+                            request=ChatRequest(message=message, history=history, **state),
+                            expect_generation=message == need,
+                        )
+                        history += [{"role": "user", "content": message}, {"role": "assistant", "content": answer}]
+                        state = {key: payload[key] for key in
+                                 ("selected_domain_code", "selected_sector", "selected_intention")}
+                    with patch.object(rag, "_user_probleme_q3_text", wraps=rag._user_probleme_q3_text) as problem:
+                        answer, payload = self._handler_result(
+                            model_list(docs), streaming, docs=docs,
+                            request=ChatRequest(message="1", history=history, **state),
+                        )
+                        self.assertEqual(rag._user_probleme_q3_text(
+                            problem.call_args.args[0], **problem.call_args.kwargs,
+                        ), need)
+                    self.assertEqual(payload["selected_domain_code"], "logistique_stocks")
+                    self.assertEqual(payload["selected_sector"], "Commerce & retail")
+                    self.assertEqual(payload["selected_intention"], "1")
+                    self.assertEqual(payload["suggested_case_ids"], ["synthetic-invendus"])
+                    self.assertNotIn("Décrivez votre situation", answer)
+
     def test_initial_domain_number_after_real_welcome_then_sector_in_http_and_sse(self):
         sector_question = (
             "Pour mieux cibler mes recommandations, pouvez-vous me dire dans quel secteur "

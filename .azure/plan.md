@@ -2,7 +2,39 @@
 
 ## Status
 
-Deployed on DEV (2026-09-13): backend `avoulia-backend--v461-20260913-r3`, healthy and serving100% traffic. User confirmation at06:42 covers this target and public v461 case/parcours texts. Workbook, audit history and mapping remain outside static serving. Frontend application behavior is verified through the existing GitHub Pages URL; its catalogue-count label correction remains local pending publication.
+Deployed — frontend finalization completed (2026-09-13), following user approval at08:35. Frontend `avoulia-frontend--v461-20260913` is Healthy and serves100% traffic. Backend `avoulia-backend--v461-20260913-r3` remains unchanged. GitHub Pages and both repository main branches carry the approved finalization.
+
+## New local UX work — 13 September, 09:27
+
+User authorized documentation reconciliation followed by five fixes: single-case selection, readable Q3 examples, sector/objective-relevant examples, reuse of the initial explicit need, and rejection of recommendations requiring unstated assumptions. Implementation and regression work are local; this is not a new deployment receipt.
+
+Implemented locally: frontend per-message case choices and rewind restoration; backend example eligibility/splitting/limit, explicit-need recognition, and selection prompt conditions. Targeted regressions:171 backend and31 frontend; frontend build/types and real built UI with synthetic SSE at390/1280px. New synthetic `stock-assumptions` evaluation suite completed eight calls on the existing model: all eight matched engineering expectations, no truncation/transport failures, reversed candidate order unchanged. Private evidence retained separately. Local Python3.14 warnings remain; no new Python3.11 image validation or deployment is claimed.
+
+Future candidate build must use `Dockerfile.dev-catalogue-code-fix` on the current r3 immutable digest. Include both `app/haystack_rag.py` and `app/rag_constants.py` in the minimal app overlay, plus updated tests/evaluation script in the validation package. Do not use the September10 two-file recipe, which omits rag_constants. Do not copy the whole working tree or old workbook/static data into the context. Existing replica-local index can rebuild on a new replica even though its catalogue is unchanged.
+
+Preserve v461 workbook, index, private mapping, generated pages, environment and previous images. No infrastructure, model or Simplon packaging change. Any future outbound publication needs its exact preview and confirmation; the approvals and validation receipts below belong to the already completed release, not this new lot.
+
+## Frontend completion receipt — 13 September
+
+- Chatbot `main`: `24e145b0b75ab43feb5aec9fd6df5c51af33809e`; parcours `main`: `a500a2273318fcf09536807e9bb28517e51c9d49`. Both fast-forward pushes succeeded; no private workbook or mapping added.
+- Pages `34743193980` and CI `34743193992` succeeded. CI:167 unittest entries with3 external-repository class skips,20 frontend state tests, types and build successful. Existing informational lint issues remain.
+- Frontend ACR build `dd2j` succeeded, digest `sha256:dd4598880ea05482eddf5795f81f97e30bfe6b21ff544ecdcfb38e1dadad1930`, tag `v461-20260913-85cd9f56e7fc4ded8025870fa0f8f347`.
+- Azure frontend proxy: welcome JSON and streaming domain selection passed, including the metadata-derived hotel sector. Backend revision/image still r3/`9c356b0643a3313709f434d73505b6c7e98b49fca735ad869983b0e835410c1b`.
+- Browser checks on Pages and Azure frontend show1,021 cases,14 business domains,71 intentions. At390px input/send remain visible without horizontal overflow. Pages bundle `index-C7H9OISj.js`; Azure bundle `index-CNyu_LPU.js`.
+- The container build used the unchanged lockfile. npm reported18 dependency advisories; they were not assessed or automatically fixed in this label-only release. Local Azure CLI log rendering failed on a Unicode checkmark, but the registry control-plane build status/digest and live image were verified successfully.
+- No backend deployment, index rebuild, workbook change or parcours workflow execution occurred during this frontend finalization. Previous frontend image retained for rollback.
+
+## Frontend finalization — validation proof, 13 September
+
+- Exact approved source commit `24e145b0b75ab43feb5aec9fd6df5c51af33809e` published to chatbot `main`; reconciled parcours merge `a500a2273318fcf09536807e9bb28517e51c9d49` published to its `main`, both by non-forced fast-forward.
+- User08:35 approval explicitly includes publication on GitHub Pages and the existing Azure DEV frontend. The only new visible frontend labels are1,021 cases and14 business domains.
+- `npm run check:chat`, `npm run type-check`, `npm run build-only` rerun on this exact source:20 tests passed, types and build passed. Existing bundle-size warning remains.
+- GitHub Pages run `34743193980` and CI run `34743193992`: both succeeded for the approved commit. The parcours deployment workflow remains manual and was not triggered.
+- `az containerapp show` confirms frontend0023, France Central, previous image `avoulia-frontend:v2-nomatch-20260910`. The backend is still r3 at its previously validated digest.
+- Private frontend build context contains only35 tracked files exported from the approved Git tree; no workbook, mapping, local environment secret or node_modules. Build using the existing frontend Dockerfile in the existing private registry, then deploy by resulting digest.
+- Validate new frontend health, bundle labels and API proxy; preserve the previous frontend image for rollback. Do not touch backend/index configuration.
+
+Validated by the active `azure-validate` checkpoint. No new IaC/resource creation is required.
 
 ## Final deployment result — 13 September
 

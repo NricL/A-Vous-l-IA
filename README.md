@@ -6,7 +6,9 @@ l’IA.
 
 À Vous l'IA reste destiné à la découverte d'usages par les employés de PME non spécialistes de l'IA. **Le catalogue v461 et ses parcours sont déployés sur le dev**, avec import contrôlé, secteurs issus des métadonnées et conservation des hashes. Voir [`ROADMAP.md`](./ROADMAP.md) et [`HANDOFF.md`](./HANDOFF.md).
 
-Révision backend active : `avoulia-backend--v461-20260913-r3`. Référence utilisateur : https://nricl.github.io/A-Vous-l-IA/. Le package Simplon est différé. Ne pas déposer de classeur privé ou d'export de catalogue dans ce dépôt public ; `noindex` et une URL non devinable ne remplacent pas une autorisation d'accès. La publication des derniers correctifs de source/documentation et de la retouche des chiffres de vitrine est distincte de cette bascule du backend.
+Révision backend active : `avoulia-backend--v461-20260913-r3`. Référence utilisateur : https://nricl.github.io/A-Vous-l-IA/. Sources publiées : chatbot `24e145b`, parcours `a500a22`. La finalisation Pages et frontend Azure est terminée : 1 021 cas, 14 domaines métier et 71 intentions. Le package Simplon est différé. Ne pas déposer de classeur privé ou d'export de catalogue dans ce dépôt public ; `noindex` et une URL non devinable ne remplacent pas une autorisation d'accès.
+
+Lot courant : cinq corrections de fluidité post-livraison implémentées localement (UX-01 à UX-05 dans la roadmap) : cas unique sélectionnable, exemples Q3 limités à quatre situations applicables, besoin initial conservé, consignes de sélection sans hypothèses métier non exprimées. Ce lot local ne modifie pas encore la version en ligne.
 
 ## Principe projet — Livraison Simplon & traçabilité (À LIRE EN PREMIER)
 Cette application est **co-construite puis livrée à Simplon**, qui l'héberge chez elle.

@@ -1,5 +1,19 @@
 # Avoulia V2 — Suivi Projet & Décisions
 
+### 13 septembre 2026 — finalisation publiée et reprise UX
+
+La finalisation est terminée : chatbot `24e145b` et parcours `a500a22` publiés sur leurs branches `main`. Pages `34743193980` et CI `34743193992` terminées ; frontend Azure `avoulia-frontend--v461-20260913`, backend r3 inchangé. Les deux frontends affichent 1 021 cas, 14 domaines métier et 71 intentions. Aucun classeur, audit ou mapping ajouté à cette publication.
+
+Les simulations post-livraison ont révélé cinq points restant ouverts : bouton absent pour un cas unique ; exemples Q3 en groupes à pipes, trop nombreux ; exemples incohérents dans Cabinet & conseil / relation client ; besoin initial redemandé dans le scénario magasin même sans retour arrière ; piste secondaire dépendant d'une saisonnalité non mentionnée.
+
+Eneric autorise le 13 septembre la mise à jour des documents puis les corrections en autonomie. Lots UX-01 à UX-05 dans `ROADMAP.md`, maintenant implémentés localement ; aucun nouveau déploiement. Base et parcours inchangés ; package Simplon différé. Les états datés « reste à publier » ci-dessous sont historiques.
+
+**Résultat local :** bouton du cas unique piloté par les métadonnées ; au plus quatre exemples individuels Q3, filtrés par secteur/objectif ; besoin initial français réutilisé, sans transformer une simple présentation en problème ; sélection instruite de rejeter les hypothèses métier non exprimées. Restauration de la liste/ordre au retour depuis une fiche également corrigée. Détail des causes et fichiers dans le changelog.
+
+**Portée des contrôles :** 171 tests backend ciblés, 31 frontend, build/types/composants ; navigateur à 390/1280 px sur frontend construit avec SSE fictif. Test de qualification Cabinet & conseil et réutilisation du besoin magasin dans les deux routes HTTP/SSE avec catalogue synthétique. La suite `stock-assumptions` a produit huit réponses réelles complètes conformes aux quatre scénarios fictifs répétés, sur le modèle Azure existant ; aucun cas saisonnier ajouté sans besoin explicite, garde-fou conditionnel conservé, refus approprié sans correspondance. Pas de précision universelle revendiquée. Le runtime Python local 3.14 avertit de la compatibilité Pydantic-v1 ; aucun nouveau résultat dans l'image Python 3.11 n'est revendiqué pour ce lot.
+
+**Clôture locale :** cinq correctifs et documents persistés, sans publication ni déploiement ; les textes des fiches, Excel, index et mapping sont inchangés. La livraison distante reste à autoriser à partir du diff exact, puis à valider dans l'image et sur l'URL de référence.
+
 ### 13 septembre 2026 — catalogue et parcours v461 déployés sur DEV
 
 **État courant :** `avoulia-backend--v461-20260913-r3`, Healthy,100% du trafic, mode Single. Le chatbot accessible depuis https://nricl.github.io/A-Vous-l-IA/ utilise désormais le catalogue v461 et ses parcours régénérés. Le classeur, les audits et le mapping restent privés ; leurs fichiers ne sont pas servis par la racine web.
@@ -14,7 +28,7 @@
 
 **Preuves :** 198 tests backend locaux,8 tests de rapprochement, puis mêmes suites dans l'image Python3.11 (un test nécessitant Node explicitement ignoré dans cette image). Essais HTTP/SSE, cas hôtelier, refus répétés hors sujet, pages et mobile390px réussis. Ces essais ne constituent pas une certification de pertinence sur toutes les formulations possibles.
 
-**Écart restant de publication :** les correctifs de déploiement et leur documentation sont encore locaux par rapport au dernier commit GitHub approuvé. Deux libellés de la vitrine sont corrigés localement : `1 025` → `1 021` et `Secteurs couverts` → `Domaines métier`. Le nouveau build frontend et ses20 tests passent, mais cette retouche n'est pas encore publiée sur Pages ni sur le frontend Azure. Le fonctionnement du chat et les pages métier sont, eux, déjà servis par r3.
+**Publication clôturée :** correctifs et documentation publiés par `24e145b`, ainsi que la retouche `1 025` → `1 021` et `Secteurs couverts` → `Domaines métier` sur Pages et frontend Azure. Voir la finalisation en tête.
 
 ### 12 septembre 2026 — base consolidée, intégration applicative engagée
 

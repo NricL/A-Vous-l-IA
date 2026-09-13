@@ -1,5 +1,25 @@
 # Avoulia — Changelog v1 → v2 (synthèse d'onboarding)
 
+## 13 septembre — finalisation publiée ; corrections UX engagées
+
+**Livré :** chatbot `24e145b`, parcours `a500a22`, GitHub Pages et frontend Azure `avoulia-frontend--v461-20260913`. Vitrine : 1 021 cas, 14 domaines métier, 71 intentions ; backend r3 et catalogue v461 inchangés.
+
+**Ce lot documentaire :** état de finalisation rapproché entre README, suivi, roadmap et handoff. Les mentions anciennes de publication à terminer ne décrivent plus l'état courant.
+
+**Corrections locales UX-01 à UX-05, non déployées :**
+
+- `frontend/src/views/HomeView.vue` : le seuil de deux lignes numérotées empêchait le bouton du cas unique. Les boutons utilisent maintenant les métadonnées de la réponse, conservées par message ; un cas donne « Choisir ce cas », plusieurs donnent « Cas N », avec titre accessible. Le retour à la liste restaure également ses identités et son ordre. Aucune sélection sur Q3/refus/détail ; le CTA parcours reste autoritaire côté backend.
+- `backend/app/haystack_rag.py`, `build_pool` : les exemples étaient des groupes de situations, simplement triés par score de secteur. Les secteurs non applicables restaient dans le pool. Filtre d'éligibilité partagé avec Q2, intention conservée, séparation des pipes puis dédoublonnage ; `rag_constants.py` borne l'affichage à quatre situations. L'intention non résolue n'élargit plus les exemples.
+- `_user_probleme_q3_text` : élargissement prudent des formulations explicites de tâche, objectif et difficulté ; exclusion des salutations, présentations seules et commandes de sélection. Les besoins initiaux restent réutilisables ; les réponses Q3 liées à d'anciens choix sont invalidées. La dernière clarification utile prévaut.
+- `_build_rag_prompt_from_docs` : contrôle explicite des conditions nécessaires à chaque recommandation, y compris secondaire. Une justification « si vous… » ne compense pas un fait métier absent du besoin. Les conditions d'exécution et garde-fous légitimes ne sont pas interdits lexicalement.
+- `backend/scripts/evaluate_chat_relevance.py` : suite opt-in `stock-assumptions`, quatre scénarios fictifs (saisonnalité absente/présente, garde-fou conditionnel, aucun cas adapté), deux ordres possibles, huit appels maximum. Le banc chantier par défaut reste inchangé.
+
+Régressions dans les suites existantes `test_haystack_rag`, `test_chat_regressions`, `test_chat_relevance`, `test_case_selection_prompt`, `test_relevance_evaluation` et `frontend/scripts/check-chat-state.mjs`. 171 tests backend ciblés avec intégration catalogue, 31 frontend ; build/types et contrôle des composants actifs réussis. Frontend construit parcouru à 390/1280 px avec un backend SSE fictif, notamment sélection du cas unique et retour au deuxième cas. Une première invocation backend avait omis le chemin des helpers de tests ; relance avec `PYTHONPATH=tests`, sans installation supplémentaire.
+
+**Évaluation modèle UX-05 terminée :** huit appels sur le `gpt-5-mini` existant, quatre scénarios fictifs dans les deux ordres de candidats ; huit réponses complètes conformes aux attentes, pas de troncature, erreur réseau ou divergence d'ordre. Le cas saisonnier n'est retenu que lorsque le besoin l'établit ; un « si » de garde-fou n'exclut pas le bon cas. Rapport brut privé, sans lecture du catalogue ni modification des attentes après résultat. Ce passage ne mesure pas la précision de production ou tout le parcours utilisateur.
+
+Pas de changement Excel, index, mapping, gabarit parcours, modèle ou déploiement par ce lot local. La reconnaissance française reste déterministe et ne garantit pas toutes les formulations.
+
 ## 13 septembre — v461 et parcours déployés sur DEV
 
 **Résultat :** backend `avoulia-backend--v461-20260913-r3`, image `sha256:9c356b0643a3313709f434d73505b6c7e98b49fca735ad869983b0e835410c1b`,100% trafic, mode Single. Texte des fiches et parcours autorisé explicitement par Eneric à06:42 ; classeur, audits et mapping restent privés.
@@ -12,7 +32,7 @@
 
 **Recette :**198 tests backend,8 de rapprochement, tests d'image Python3.11 avec un test Node explicitement ignoré ; scénarios réels sur candidate puis URL normale, trois refus hors sujet consécutifs à chaque passage, HTTP/SSE, pages et mobile390px. Une régression de sélection a déclenché un rollback de r2 avant la correction finale ; aucun échec n'est masqué.
 
-**Suite de publication :** correction locale des chiffres de vitrine (`1 025` → `1 021`, `Secteurs couverts` → `Domaines métier`),20 tests frontend et build réussis. Cette retouche et les derniers commits de documentation/source restent à publier ; elle ne remet pas en cause le catalogue v461 déjà servi par le backend.
+**Publication finalisée :** les chiffres de vitrine (`1 025` → `1 021`, `Secteurs couverts` → `Domaines métier`) et les derniers commits source/documentation sont publiés. Le catalogue v461 reste servi par le backend r3.
 
 ## 12 septembre — consolidation privée et préparation de l'intégration
 

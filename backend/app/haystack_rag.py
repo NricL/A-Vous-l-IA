@@ -509,34 +509,12 @@ def _get_intentions_from_store(domaine_code: str) -> list[str]:
     return sorted(out)
 
 
-def _get_triggers_from_store(domaine_code: str, intention: str | None = None) -> list[str]:
-    """
-    Récupère les triggers (exemples de situations) distincts depuis Chroma pour ce domaine,
-    optionnellement filtrés par intention. Même logique que _get_intentions_from_store pour les docs.
-    """
-    docs = _fetch_documents_for_domaine(domaine_code)
-
-    if intention:
-        intention_norm = intention.strip().lower()
-        filtered = []
-        for d in docs:
-            meta = getattr(d, "meta", None) or {}
-            doc_int = _get_intention_from_meta(meta)
-            if doc_int and doc_int.strip().lower() == intention_norm:
-                filtered.append(d)
-        # Ne jamais élargir silencieusement au domaine entier : cela mélange
-        # les exemples d'autres intentions et invalide la qualification Q2.
-        docs = filtered
-
-    seen: set[str] = set()
-    out: list[str] = []
-    for d in docs:
-        meta = getattr(d, "meta", None) or {}
-        trigger = _get_trigger_from_meta(meta)
-        if trigger and trigger not in seen:
-            seen.add(trigger)
-            out.append(trigger)
-    return sorted(out)
+def _get_triggers_from_store(
+    domaine_code: str, intention: str | None = None, secteur_choisi: str | None = None,
+    top_k: int | None = Q3_TRIGGERS_DISPLAY_LIMIT,
+) -> list[str]:
+    """Même sélection d'exemples individuels que le parcours Q3."""
+    return get_q3_triggers(domaine_code, intention, secteur_choisi, top_k)
 
 
 def _get_doc_sector_score(doc, secteur_choisi: str | None) -> int:
@@ -554,6 +532,13 @@ def _get_doc_sector_score(doc, secteur_choisi: str | None) -> int:
     return 1
 
 
+def _doc_is_applicable_to_sector(doc, secteur_choisi: str) -> bool:
+    if _normalize_metadata_value(secteur_choisi).startswith("autre"):
+        meta = getattr(doc, "meta", None) or {}
+        return any(_is_multisector_label(str(meta.get(key) or "")) for key in SECTEUR_META_KEYS)
+    return _doc_matches_sector(doc, secteur_choisi, include_multisector=True)
+
+
 def build_pool(
     domaine_code: str,
     intention: str | None = None,
@@ -561,11 +546,8 @@ def build_pool(
     top_k: int | None = None,
 ) -> list[str]:
     """
-    Construit le pool Q3 trié:
-    - score 3 si secteur doc == secteur utilisateur
-    - score 2 si secteur doc == Multi-sectoriel
-    - score 1 sinon
-    Restitue les triggers triés par score DESC (puis alpha), limités à top_k si fourni.
+    Exemples individuels des cas applicables, secteur exact avant multi-sectoriel.
+    Déduplique les variantes sans réécrire le texte source ; borne après séparation.
     """
     docs = _fetch_documents_for_domaine(domaine_code)
 
@@ -578,19 +560,25 @@ def build_pool(
             == intention_norm
         ]
 
-    # Conserver le meilleur score par trigger.
-    trigger_scores: dict[str, int] = {}
-    for doc in docs:
-        trigger = _get_trigger_from_meta(getattr(doc, "meta", None) or {})
-        if not trigger:
-            continue
-        score = _get_doc_sector_score(doc, secteur_choisi)
-        prev = trigger_scores.get(trigger)
-        if prev is None or score > prev:
-            trigger_scores[trigger] = score
+    if secteur_choisi:
+        docs = [doc for doc in docs if _doc_is_applicable_to_sector(doc, secteur_choisi)]
 
-    ranked = sorted(trigger_scores.items(), key=lambda item: (-item[1], item[0].lower()))
-    triggers = [trigger for trigger, _ in ranked]
+    # Les chunks et les groupes de situations peuvent répéter le même exemple.
+    trigger_scores: dict[str, tuple[int, str]] = {}
+    for doc in docs:
+        score = _get_doc_sector_score(doc, secteur_choisi)
+        group = _get_trigger_from_meta(getattr(doc, "meta", None) or {})
+        for raw in group.split("|"):
+            trigger = raw.strip()
+            key = _normalize_query_text(trigger)
+            if not key:
+                continue
+            prev = trigger_scores.get(key)
+            if prev is None or (-score, trigger) < (-prev[0], prev[1]):
+                trigger_scores[key] = score, trigger
+
+    ranked = sorted(trigger_scores.items(), key=lambda item: (-item[1][0], item[0]))
+    triggers = [value[1] for _, value in ranked]
     if top_k is not None and top_k > 0:
         return triggers[:top_k]
     return triggers
@@ -611,15 +599,6 @@ def get_q2_choices(
     if not intentions:
         return {'fallback': True, 'message': '...'}
     """
-    def _doc_has_multisector_case(candidate_doc) -> bool:
-        """True si le doc porte au moins un champ secteur contenant 'Multi-sectoriel'."""
-        meta = getattr(candidate_doc, "meta", None) or {}
-        for key in SECTEUR_META_KEYS:
-            raw = str(meta.get(key) or "").strip()
-            if raw and _is_multisector_label(raw):
-                return True
-        return False
-
     docs = _fetch_documents_for_domaine(domaine_code)
 
     intentions_set: set[str] = set()
@@ -635,20 +614,13 @@ def get_q2_choices(
     if not secteur_choisi:
         return sorted(intentions_set)
 
-    secteur_norm = _normalize_metadata_value(secteur_choisi)
-    filter_for_autre = secteur_norm.startswith("autre")
-
     filtered: list[str] = []
     for intention in sorted(intentions_set):
         intention_norm = _normalize_metadata_value(intention)
 
         has_sector_case = any(
             _normalize_metadata_value(_get_intention_from_meta(getattr(candidate_doc, "meta", None) or {})) == intention_norm
-            and (
-                _doc_has_multisector_case(candidate_doc)
-                if filter_for_autre
-                else _doc_matches_sector(candidate_doc, secteur_choisi, include_multisector=True)
-            )
+            and _doc_is_applicable_to_sector(candidate_doc, secteur_choisi)
             for candidate_doc in docs
         )
         if has_sector_case:
@@ -672,7 +644,7 @@ def get_q3_triggers(
     domaine_code: str,
     intention: str | None = None,
     secteur_choisi: str | None = None,
-    top_k: int | None = None,
+    top_k: int | None = Q3_TRIGGERS_DISPLAY_LIMIT,
 ) -> list[str]:
     """Retourne la liste des triggers (exemples de situations) pour Q3 pour ce domaine, optionnellement pour cette intention."""
     return build_pool(domaine_code, intention, secteur_choisi=secteur_choisi, top_k=top_k)
@@ -1353,6 +1325,17 @@ def _build_rag_prompt_from_docs(
             "Un secteur commun ne suffit pas ; un mot en commun ou une possibilité très indirecte non plus. "
             "Les synonymes et formulations différentes sont acceptés lorsque la tâche et le résultat correspondent. "
             "Ne transforme pas le besoin pour justifier un candidat. Ne complète jamais une liste par défaut.\n\n"
+            "CONTRÔLE POUR CHAQUE CANDIDAT, y compris les recommandations secondaires : "
+            "vérifie la tâche, le résultat et les conditions métier indispensables à sa pertinence. "
+            "Toute condition nécessaire pour relier ce cas au besoin doit être explicitement établie "
+            "dans besoin_concret, jamais supposée à partir du secteur ou des situations du catalogue. "
+            "Les situations du catalogue décrivent des possibilités, pas des faits sur l'utilisateur. "
+            "Si le lien exige une condition métier non mentionnée, exclue ce candidat : "
+            "une justification hypothétique (« si vous… », « à condition que… ») ne le rend pas pertinent. "
+            "Une condition explicitement exprimée par l'utilisateur peut en revanche justifier le choix. "
+            "Ne rejette pas un cas au seul motif que son texte contient « si » : une réserve, "
+            "un garde-fou ou une modalité d'exécution peut être conditionnel sans changer le besoin couvert. "
+            "La justification doit décrire un lien direct déjà établi, pas proposer un nouveau besoin.\n\n"
             "Si AUCUN candidat ne répond directement au besoin, ou si le besoin est trop ambigu pour retenir "
             "un candidat fiable, réponds UNIQUEMENT avec cette phrase, sans cas ni numéro :\n"
             + NO_MATCH_MESSAGE + "\n\n"
@@ -1535,6 +1518,66 @@ def _is_affirmation(message: str) -> bool:
     return msg in {_normalize_query_text(a) for a in affirmations}
 
 
+_EXPLICIT_GOAL_RE = re.compile(
+    r"\b(?:je|nous|on|et|mais) (?:veux|voulons|veut|voudrais|voudrions|voudrait|"
+    r"souhaite|souhaitons|souhaiterais|souhaiterions|dois|devons|doit|"
+    r"cherche|cherchons|essaie|essayons) \S|"
+    r"\bj (?:aimerais|aimerai|essaie) \S"
+)
+
+
+def _is_context_only_message(message: str) -> bool:
+    message = re.sub(r"^(?:(?:bonjour|bonsoir|salut|hello|coucou)\b[\s,.!:-]*)+", "", message, flags=re.I)
+    clauses = [part.strip() for part in re.split(
+        r"[.;!?]\s*|(?:,\s*|\s+(?:et|mais|car)\s+)(?=(?:je|j|nous|on)\b)",
+        message, flags=re.I,
+    ) if part.strip()]
+    if len(clauses) > 1:
+        return all(_is_context_only_message(part) for part in clauses)
+    normalized = _normalize_query_text(message)
+    if not normalized or _is_affirmation(normalized):
+        return True
+    if re.fullmatch(
+        r"(?:merci(?: beaucoup)?(?: pour .+)?|comment ca va|"
+        r"(?:je ne sais pas|aucune idee)(?: encore)?|pas de (?:probleme|souci))",
+        normalized,
+    ):
+        return True
+    # Une présentation professionnelle n'est pas un besoin. Une seconde proposition
+    # (but, difficulté, demande…) doit cependant rester disponible pour l'analyse.
+    if _EXPLICIT_GOAL_RE.search(normalized) or re.search(
+        r"\b(?:et|mais|car) (?:je|j|nous|on|les|le|la|mes|mon|ma|nos|notre)\b|"
+        r"\bpour \w+(?:er|ir|re)\b|\b(?:besoin|probleme|difficultes?|trop|perds|perdons)\b|"
+        r"\b(?:qui|que) .+? (?:pas|plus|jamais)\b",
+        normalized,
+    ):
+        return False
+    return bool(re.fullmatch(
+        r"(?:(?:je|nous|on) (?:ne )?(?:suis|sommes|est|travaille|travaillons|"
+        r"dirige|dirigeons|gere|gerons|tiens|tenons|exerce|exercons)(?: pas| plus)? .+|"
+        r"j exerce .+|"
+        r"j ai (?:un|une|mon|ma) (?:magasin|commerce|boutique|entreprise|cabinet|atelier)(?: .+)?|"
+        r"nous avons (?:un|une|notre) (?:magasin|commerce|boutique|entreprise|cabinet|atelier)(?: .+)?)",
+        normalized,
+    ))
+
+
+def _has_explicit_problem_statement(message: str) -> bool:
+    """Reconnaît une tâche, un objectif ou un constat, indépendamment du métier."""
+    normalized = _normalize_query_text(message)
+    return bool(_EXPLICIT_GOAL_RE.search(normalized) or re.search(
+        r"\b(?:besoin|probleme|difficultes?|perds|perdons|trop|chronophage|"
+        r"automatiser|rediger|synthetiser|manuellement)\b|"
+        r"\bj (?:ai|arrive) \S|"
+        r"\b(?:comment|aidez moi a|aide moi a|aidez nous a) \S|"
+        r"\b(?:ne|n) .+? (?:pas|plus|jamais)\b|"
+        r"\b(?:les|le|la|mes|mon|ma|nos|notre|des) .+? "
+        r"(?:est|sont|reste|restent|manque|manquent|empeche|empechent|s accumule|s accumulent)\b|"
+        r"(?:^|\bpour )\w+(?:er|ir|re) (?:le|la|les|un|une|des|mes|nos|mon|ma|notre) \S",
+        normalized,
+    ))
+
+
 def _user_probleme_q3_text(
     history: list[dict],
     current_question: str | None = None,
@@ -1545,6 +1588,7 @@ def _user_probleme_q3_text(
     state = (None, None, None)
     expected_step = None
     problem = ""
+    problem_is_scoped = False
     messages = list(history or [])
     if current_question and messages and messages[-1].get("role") == "user":
         if str(messages[-1].get("content") or "").strip() == current_question.strip():
@@ -1568,6 +1612,11 @@ def _user_probleme_q3_text(
         state = _selection_state_after_message(messages, index, state, expected_step)
         was_problem_step = expected_step == "problem"
         expected_step = None
+        if state != previous_state and problem_is_scoped:
+            # Une réponse Q3 appartient aux choix sous lesquels elle a été donnée ;
+            # un besoin exprimé en amont reste, lui, valable lors d'une correction.
+            problem = ""
+            problem_is_scoped = False
         if state != previous_state or _parse_domaine_from_message(t) or _choice_text(t).isdigit():
             continue
         if state[0]:
@@ -1579,20 +1628,14 @@ def _user_probleme_q3_text(
                 )
             ):
                 continue
-        if _is_affirmation(t):
+        if _is_context_only_message(t):
             continue
         if _is_explicit_detail_command(t) or _has_explicit_point_number(t):
             continue
-        normalized = _normalize_query_text(t)
-        if normalized in ("je ne sais pas", "aucune idee", "je ne sais pas encore"):
-            continue
-        # Hors Q3, rester conservateur : un métier seul n'est pas un problème explicite.
         ready_for_problem = _should_inject_rag_documents(*previous_state)
-        if was_problem_step or (ready_for_problem and len(normalized.split()) >= 3) or re.search(
-            r"\b(?:besoin|probleme|difficultes?|perds|perdons|trop|chronophage|"
-            r"automatiser|rediger|synthetiser|manuellement)\b", normalized
-        ):
+        if was_problem_step or ready_for_problem or _has_explicit_problem_statement(t):
             problem = t
+            problem_is_scoped = was_problem_step or ready_for_problem
     return problem
 
 
@@ -2390,6 +2433,8 @@ def _get_q3_triggers_affichage(
     intention = _get_intention_label_from_code(
         domaine_code, selected_intention, secteur_choisi=selected_sector
     )
+    if not intention:
+        return ""
     triggers = get_q3_triggers(
         domaine_code,
         intention,
