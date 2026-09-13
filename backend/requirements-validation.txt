@@ -1,0 +1,3 @@
+# Existing parcours rendering dependencies, isolated from the runtime image.
+pandas==3.0.3
+Markdown==3.10.2

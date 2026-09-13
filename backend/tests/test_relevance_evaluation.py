@@ -33,11 +33,11 @@ class RelevanceEvaluationTests(unittest.TestCase):
             prompt = evaluation.build_prompt("Besoin synthétique précis pour mon chantier.", docs)
             self.assertIn("Un secteur commun ne suffit pas", prompt)
             self.assertIn("Partager les informations terrain", prompt)
-            positions = []
-            for i, doc in enumerate(docs, 1):
-                block = f"{i}. {doc.meta['cas_utilisation']}\nDescription source : {doc.content}"
-                positions.append(prompt.index(block))
-            self.assertEqual(positions, sorted(positions))
+            candidates = json.loads(prompt.rsplit("\n\n", 1)[1])["candidats"]
+            self.assertEqual(
+                [(c["numero"], c["titre"], c["description"]) for c in candidates],
+                [(i, doc.meta["cas_utilisation"], doc.content) for i, doc in enumerate(docs, 1)],
+            )
 
     def test_synonym_query_has_zero_production_keyword_overlap(self):
         scenario = next(row for row in evaluation.scenarios() if row["id"] == "synonyms-zero-keyword-overlap")

@@ -1,0 +1,37 @@
+# Build only from a reviewed private context; never from the full working tree.
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE} AS validation
+WORKDIR /app
+COPY app/ ./app/
+COPY entrypoint.sh ./entrypoint.sh
+COPY requirements-validation.txt /validation/requirements-validation.txt
+RUN pip install --no-cache-dir --quiet -r /validation/requirements-validation.txt
+COPY validation/ /validation/
+RUN sed -i 's/\r$//' /app/entrypoint.sh /validation/chatbot-src/backend/entrypoint.sh \
+    && find /app/app -name '__pycache__' -type d -prune -exec rm -rf {} + \
+    && PYTHONPATH=/app:/validation/chatbot-src/backend:/validation/chatbot-src/backend/tests \
+       PARCOURS_SOURCE_ROOT=/validation/parcours-src/avoulia-parcours \
+       python -B -m unittest discover -s /validation/chatbot-src/backend/tests -q \
+    && python -B -m unittest discover -s /validation/parcours-src/avoulia-parcours/tests -q \
+    && touch /validation/passed
+
+FROM ${BASE_IMAGE}
+WORKDIR /app
+COPY app/ ./app/
+COPY entrypoint.sh ./entrypoint.sh
+COPY --from=validation /validation/passed /app/private/runtime-tests-passed
+COPY private/ /app/private/
+COPY pages/ /app/app/static/parcours/
+RUN sed -i 's/\r$//' /app/entrypoint.sh \
+    && chmod +x /app/entrypoint.sh \
+    && find /app/app -name '__pycache__' -type d -prune -exec rm -rf {} + \
+    && python -B -m app.scripts.validate_release_payload \
+       /app/private/catalogue.xlsx /app/private/mapping_uc_hash.csv \
+       /app/private/release-manifest.json /app/app/static/parcours --quarantine-inherited
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    INDEX_PATH=/app/private/catalogue.xlsx \
+    PARCOURS_MAPPING_LOCAL_PATH=/app/private/mapping_uc_hash.csv \
+    DEBUG=false
+ENTRYPOINT ["./entrypoint.sh"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

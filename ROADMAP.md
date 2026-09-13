@@ -4,9 +4,22 @@
 Décisions prises en tant que Product Owner (Eneric) ; ce fichier est versionné dans le
 repo pour rester traçable côté Eneric **et** côté Simplon.
 
-**Dernière mise à jour :** 2026-09-12
+**Dernière mise à jour :** 2026-09-13
 
-## Priorité active du 12 septembre — intégrer la base consolidée
+## État actif du 13 septembre — v461 servie sur DEV
+
+INT-01 et INT-02 sont intégrés au backend déployé ; INT-03 a passé la bascule contrôlée et les essais sur l'URL habituelle. Révision active `avoulia-backend--v461-20260913-r3`. Les comptes rendus du 12 septembre ci-dessous décrivent la préparation et sont historiques.
+
+| Suite | État |
+|---|---|
+| Catalogue, index isolé et parcours v461 | Déployés ; fichiers Excel/audit/mapping non servis, hashes conservés. |
+| Questions guidées et sélection des cas | Correctifs réels intégrés, questions déterministes et prompt de sélection distinct ; scénarios répétés passés. |
+| Sources et documentation du dernier déploiement | Modifications locales à synchroniser ; rapprochement parcours réalisé dans un worktree isolé. |
+| Chiffres et libellés de la vitrine | Correction locale testée (`1 021`, `Domaines métier`), publication frontend à terminer. |
+| Calibrage métier à plus grande échelle | Ouvert ; les essais de livraison ne garantissent pas toutes les formulations. |
+| Package et production Simplon | Toujours différés. |
+
+## Historique de préparation du 12 septembre — intégrer la base consolidée
 
 La consolidation éditoriale du classeur privé est terminée et une nouvelle version est sauvegardée. **Elle n'est pas encore intégrée au chatbot.** Les journaux exacts, décomptes et arbitrages restent dans le classeur et le suivi privé, pas dans ce dépôt public. Les anciens états « audit Excel partiel » ci-dessous sont historiques.
 

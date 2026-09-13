@@ -8,6 +8,11 @@ import ts from 'typescript'
 
 // Exercise the real setup script with lifecycle/network mocks, without a DOM or backend.
 const homeSource = readFileSync(new URL('../src/views/HomeView.vue', import.meta.url), 'utf8')
+test('homepage figures match the consolidated catalogue and distinguish domains from sectors', () => {
+  assert.match(homeSource, /class="stat-number">1&nbsp;021<\/div>/)
+  assert.match(homeSource, /class="stat-number">14<\/div>\s*<div class="stat-label">Domaines m&eacute;tier<\/div>/)
+  assert.doesNotMatch(homeSource, /1&nbsp;025|Secteurs couverts/)
+})
 const setup = parse(homeSource).descriptor.scriptSetup.content
   .replace(/import \{([^}]+)\} from 'vue'/, 'const {$1} = vue')
   .replace(/import \{([^}]+)\} from '@\/api\/chat'/, 'const {$1} = api')

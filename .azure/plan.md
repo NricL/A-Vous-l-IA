@@ -2,7 +2,60 @@
 
 ## Status
 
-Local preparation complete; Azure validation blocked (2026-09-12). The azure-validate checkpoint was invoked, but target confirmation and the private-content exposure decision remain outstanding. This release is NOT `Validated`. The last verified DEV deployment remains backend0045/frontend0023 from 10 September. No official Simplon deployment or package.
+Deployed on DEV (2026-09-13): backend `avoulia-backend--v461-20260913-r3`, healthy and serving100% traffic. User confirmation at06:42 covers this target and public v461 case/parcours texts. Workbook, audit history and mapping remain outside static serving. Frontend application behavior is verified through the existing GitHub Pages URL; its catalogue-count label correction remains local pending publication.
+
+## Final deployment result — 13 September
+
+- Image: `acravoulia97186.azurecr.io/avoulia-backend@sha256:9c356b0643a3313709f434d73505b6c7e98b49fca735ad869983b0e835410c1b`.
+- Registry build: `dd2h`, tag `v461-20260913-r3-034b9f2f4e5c4b1282ed856bef911054`. Code-only overlay on the previously validated v461 payload image; workbook, pages and mapping unchanged by this last fix.
+- Reconciled parcours source: merge `a500a2273318fcf09536807e9bb28517e51c9d49`, including the integration branch and the newer remote source, without overwriting unrelated user edits.
+- Runtime-image tests: full backend suite (198 entries; the Node-only browser-handler test is skipped in the Python image) plus8 reconciliation tests. Payload checks validate all current pages and retained historical pages, including hashes and private export exclusion.
+- The first candidate never received live traffic. The second passed staging but exposed intermittent off-topic selection after promotion; traffic was rolled back to0045 immediately. The final fix separates case selection from qualification instructions, with no arbitrary lexical threshold or model replacement.
+- Final candidate and normal live URL both passed real hotel-sector discovery, expected case selection, HTTP/SSE source-verbatim detail, three repeated off-topic refusals, nine representative current/historical page digests and four private-file404 checks.
+- GitHub Pages at390px: sector/objective buttons, case/detail/link, six-step page, prompt shortcut/focus and return link verified; no horizontal overflow. Missing page favicon is a non-blocking asset404, not a chat failure.
+- Single-revision mode restored. Only r3 remains active; test candidates and0045 are inactive. Old images/revision definitions remain available. Since index storage is replica-local, reactivating an old image can require rebuilding its derived index.
+- No workbook, audit export or mapping was pushed to GitHub. The public mapping endpoint found in the old image is now404.
+
+## Approved execution — 13 September
+
+1. Reconcile the approved parcours integration changes with the newer remote source in an isolated worktree; preserve unrelated user edits and published hashes.
+2. Generate the authorized case pages from the explicit private source, retaining previous pages only where needed for historical links. Keep the complete mapping outside the public static directory; block sensitive source/export file types from static serving.
+3. Build an overlay from the currently deployed immutable backend image, retaining installed dependencies and unrelated runtime code. Include the approved application changes, the private input workbook, private mapping, generated HTML and corrected startup logic; never place source/audit data under the static webroot or in GitHub.
+4. Use a new version-specific Chroma directory/collection in the candidate replica. Inspection found a volume declaration but **no container volume mount**: the current index uses replica-local storage. Preserve this storage topology in this release; do not imply persistent Azure Files is in use. Do not clear or reuse the live index. Keep the old image, revision, index and pages available for rollback.
+5. Complete the validation checkpoint, build in the existing private registry, stage a revision without replacing live traffic, verify indexing and representative HTTP/SSE/page/mobile flows, then switch traffic. Restore the old revision if readiness or end-to-end checks fail.
+6. Keep frontend Pages as the reference URL; deploy frontend only if its bundle actually changes. This is not a Simplon production deployment or package.
+
+Source texts exposed by step 2/5 are the v461 business fields explicitly authorized by the user, not the workbook file, audit history or mapping. Technical integration decisions and tests remain delegated. No new resource group, subscription, region or paid service is proposed.
+
+## 7. Validation Proof — approved 13 September recipe
+
+Validated by the `azure-validate` workflow after reading this plan and executing the following checks. No new IaC/provisioning template is involved; this is an image/configuration update of existing resources.
+
+| Check | Actual command / method | Result |
+|---|---|---|
+| Confirmed target | `az account show --subscription <confirmed-dev-id>` and `az group show` | Displayed subscription enabled; existing RG in France Central, as confirmed by the user. |
+| Existing revision / rollback | `az containerapp show` and `az containerapp revision list` | Backend0045 healthy, 100% traffic, single revision mode; exact image digest pinned below. |
+| Registry safety | `az acr show` and `az acr manifest show-metadata` | Registry ready, anonymous pull disabled; inherited digest exists. No source upload to GitHub. |
+| Reconciled parcours source | Local merge `a500a2273318fcf09536807e9bb28517e51c9d49` | Both integration and remote wording retained; unrelated original worktree changes preserved. |
+| Source regressions | `python -B -m unittest discover -s tests -q` with reconciled `PARCOURS_SOURCE_ROOT` | 193 passed locally, including static export denial and payload identity tests. |
+| Reconciliation regressions | `python -B -m unittest discover -s <parcours-release>/tests -q` | 8 passed. |
+| Private payload | Explicit generator and `validate_release_payload` | Current pages match catalogue identities; historical mapped pages retained; mapping/source outside the static directory; source unchanged. Exact counts/hashes in private evidence. |
+| Source diff | `git diff --check` in both source trees | Passed. |
+
+The live mapping endpoint was found accessible; the new release removes that CSV from the webroot and denies private source/export extensions. Existing hashes are unchanged.
+
+**Build gate:** `Dockerfile.dev-catalogue-release` runs regression tests in the inherited Python 3.11 image, validates the private payload and only then produces the runtime stage. No API keys or model credentials are passed into the build.
+
+**Promotion gate:** pin traffic to0045 before creating the candidate; use candidate-specific index settings and inherited runtime credentials; wait for indexing/startup, check pages/private-file denials and representative HTTP/SSE behavior. Promote only after success; otherwise leave0045 serving. No index deletion or salt rotation.
+
+### Candidate validation and promotion decision — 13 September
+
+- Builds `dd2d` and `dd2e` stopped safely before a runnable release was published: missing validation-script packaging, then inherited private exports detected in the webroot. Both root causes were fixed; inherited exports are preserved outside static serving.
+- `dd2f` produced the first candidate, with Python 3.11 tests and payload checks passed. Live validation exposed sector re-questioning by the model. This candidate received **no live traffic**.
+- Guided Q1.5/Q2/Q3 questions now come directly from validated server state and catalogue choices. The model no longer revalidates sector membership or renumbers these menus. Local regression suite: 196 passed.
+- Corrected build `dd2g` succeeded, image `acravoulia97186.azurecr.io/avoulia-backend@sha256:9d2121d80a5c027faa96279410bead6b90b8ab33ebaaeb20c7db5f49964c67d8`, tag `v461-20260913-r2`; candidate `avoulia-backend--v461-20260913-r2` is Healthy.
+- Candidate HTTP checks passed: health; four private-source/export paths return404; nine current/historical page digests match the staged payload. Actual discovery in a previously missing sector, expected case, source-verbatim details in HTTP/SSE, retained hashes and off-topic rejection passed.
+- Live traffic was still100% on0045 during these checks. Promotion is now permitted for this validated candidate. Frontend bundle is unchanged.
 
 ## Current plan — catalogue integration, 12 September
 

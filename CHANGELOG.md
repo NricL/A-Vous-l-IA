@@ -1,5 +1,19 @@
 # Avoulia — Changelog v1 → v2 (synthèse d'onboarding)
 
+## 13 septembre — v461 et parcours déployés sur DEV
+
+**Résultat :** backend `avoulia-backend--v461-20260913-r3`, image `sha256:9c356b0643a3313709f434d73505b6c7e98b49fca735ad869983b0e835410c1b`,100% trafic, mode Single. Texte des fiches et parcours autorisé explicitement par Eneric à06:42 ; classeur, audits et mapping restent privés.
+
+**Pourquoi / où :**
+- `app/parcours_static.py` et `app/main.py` : seules les pages et ressources web attendues sont servies ; refus des classeurs, CSV, exports et chemins privés.
+- `app/scripts/validate_release_payload.py`, `Dockerfile.dev-catalogue-release` et `Dockerfile.dev-catalogue-code-fix` : contrôle de la cohérence source/mapping/pages, conservation des pages historiques, mise à l'écart des exports hérités et tests dans l'image avant publication.
+- `app/haystack_rag.py` : questions Q1.5/Q2/Q3 déterministes à partir de l'état validé ; sélection des cas confiée à un prompt dédié, sans instructions contradictoires de qualification. Pré-filtres, ordre source et détail verbatim maintenus.
+- Dépôt parcours associé, merge local `a500a22` : rapprochement des évolutions distantes et de la génération sûre, avec contexte métier dans les prompts et consignes d'essai autorisé.
+
+**Recette :**198 tests backend,8 de rapprochement, tests d'image Python3.11 avec un test Node explicitement ignoré ; scénarios réels sur candidate puis URL normale, trois refus hors sujet consécutifs à chaque passage, HTTP/SSE, pages et mobile390px. Une régression de sélection a déclenché un rollback de r2 avant la correction finale ; aucun échec n'est masqué.
+
+**Suite de publication :** correction locale des chiffres de vitrine (`1 025` → `1 021`, `Secteurs couverts` → `Domaines métier`),20 tests frontend et build réussis. Cette retouche et les derniers commits de documentation/source restent à publier ; elle ne remet pas en cause le catalogue v461 déjà servi par le backend.
+
 ## 12 septembre — consolidation privée et préparation de l'intégration
 
 **Quoi / pourquoi :** nouvelle version du classeur privé sauvegardée après revue des situations, classements, premières actions, prérequis et garde-fous. Les textes de recherche dépendants sont synchronisés et le catalogue est placé avant les onglets de travail. Les données, preuves exactes et décomptes restent hors du dépôt public.

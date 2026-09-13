@@ -2,11 +2,11 @@
 Chatbot open source pour aider à explorer et structurer des cas d’usage de
 l’IA.
 
-## État courant — 12 septembre 2026
+## État courant — 13 septembre 2026
 
-À Vous l'IA reste destiné à la découverte d'usages par les employés de PME non spécialistes de l'IA. La nouvelle base privée consolidée est sauvegardée, **pas encore intégrée au chatbot**. La priorité est l'import robuste, la couverture des secteurs, puis une recette cohérente source/index/parcours avant livraison dev. Voir [`ROADMAP.md`](./ROADMAP.md) et [`HANDOFF.md`](./HANDOFF.md).
+À Vous l'IA reste destiné à la découverte d'usages par les employés de PME non spécialistes de l'IA. **Le catalogue v461 et ses parcours sont déployés sur le dev**, avec import contrôlé, secteurs issus des métadonnées et conservation des hashes. Voir [`ROADMAP.md`](./ROADMAP.md) et [`HANDOFF.md`](./HANDOFF.md).
 
-Le dernier état de livraison observé reste celui du 10 septembre : backend0045 et frontend de référence sur https://nricl.github.io/A-Vous-l-IA/. Le package Simplon est différé. Ne pas déposer de classeur privé ou d'export de catalogue dans ce dépôt public ; `noindex` et une URL non devinable ne remplacent pas une autorisation d'accès.
+Révision backend active : `avoulia-backend--v461-20260913-r3`. Référence utilisateur : https://nricl.github.io/A-Vous-l-IA/. Le package Simplon est différé. Ne pas déposer de classeur privé ou d'export de catalogue dans ce dépôt public ; `noindex` et une URL non devinable ne remplacent pas une autorisation d'accès. La publication des derniers correctifs de source/documentation et de la retouche des chiffres de vitrine est distincte de cette bascule du backend.
 
 ## Principe projet — Livraison Simplon & traçabilité (À LIRE EN PREMIER)
 Cette application est **co-construite puis livrée à Simplon**, qui l'héberge chez elle.

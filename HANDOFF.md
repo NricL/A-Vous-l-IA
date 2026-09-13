@@ -1,8 +1,20 @@
 # Avoulia V2 — Implementation Handover Guide for Simplon
 
+## État déployé — 13 septembre 2026
+
+Le dev sert maintenant v461 via `avoulia-backend--v461-20260913-r3`,100% trafic, mode Single ; image `sha256:9c356b0643a3313709f434d73505b6c7e98b49fca735ad869983b0e835410c1b`. Le frontend de référence reste https://nricl.github.io/A-Vous-l-IA/. Les étapes de préparation ci-dessous sont historiques, pas des tâches à recommencer.
+
+Le mapping et le classeur sont sous `/app/private`, jamais sous la racine web. Les exports hérités sont conservés dans un sous-dossier privé et le serveur statique refuse leurs extensions. `INDEX_PATH` désigne le fichier explicite ; l'index utilise un répertoire/une collection propres à cette révision, sans effacement du précédent.
+
+**Attention stockage :** une déclaration Azure Files existe, mais aucun montage n'était attaché au conteneur observé. L'index est donc local à la réplique et peut être reconstruit à son redémarrage. Ne pas annoncer une persistance Azure Files sans la mettre en œuvre et la vérifier dans un lot dédié.
+
+**Rollback :** anciennes images et définitions de révision conservées ; les anciennes répliques sont inactives pour éviter des coûts et des endpoints hérités inutiles. Une restauration doit remettre ensemble code, catalogue, index et pages. Le retour à0045 remettrait aussi ses anciens comportements de confidentialité : préférer une correction conservant la protection du webroot lorsque possible. Ne jamais vider le nouvel index pour improviser un retour arrière.
+
+**Sources / vitrine :** rapprochement parcours local `a500a22`; derniers correctifs et documentation prêts à synchroniser. La retouche des deux chiffres/libellés de vitrine reste locale. Voir le suivi pour les preuves de recette et la distinction entre version du frontend et catalogue réellement servi.
+
 ## Reprise prioritaire — 12 septembre 2026
 
-**Point de départ :** classeur privé consolidé et sauvegardé ; intégration au chatbot non effectuée. Le chemin, l'empreinte et les journaux exacts se trouvent dans le suivi privé et le classeur, jamais dans un export GitHub public. Les anciennes mentions « Ready for Handover » ne concernent pas ce lot.
+**Point de départ historique au 12 septembre :** classeur privé consolidé et sauvegardé, avant son intégration. Le chemin, l'empreinte et les journaux exacts se trouvent dans le suivi privé et le classeur, jamais dans un export GitHub public. L'état courant figure en tête.
 
 1. **Choisir explicitement la source.** Préserver le classeur original et ses restrictions. Ne pas prendre le premier fichier `*.xlsx`, la plus grande version trouvée dans un dossier ou la copie historique du dépôt. Ne pas lire une feuille d'audit : `Sheet1` est le catalogue courant ; `BASE_PROPOSEE` est historique.
 2. **Valider l'import.** Contrôler l'unicité et la présence des IDs, les champs obligatoires, les valeurs calculées, puis le nombre de documents. Une formule sans valeur recalculée ne devient pas un texte indexable ; ne pas envoyer les formules elles-mêmes aux embeddings.

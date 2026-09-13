@@ -117,18 +117,17 @@ class SyntheticRelevanceTests(unittest.TestCase):
         self.assertEqual(payload["selected_intention"], "1")
 
     def test_initial_domain_number_after_real_welcome_then_sector_in_http_and_sse(self):
-        sector_question = "Dans quel secteur exercez-vous ?\n1. BTP\n2. Industrie"
-        intention_question = f"Quel est votre objectif principal ?\n1. {INTENTION}"
+        sector_question = (
+            "Pour mieux cibler mes recommandations, pouvez-vous me dire dans quel secteur "
+            "vous opérez ? Répondez avec le numéro du choix. (optionnel)\n\n"
+            + "\n".join(f"{i}. {label}" for i, label in enumerate(
+                rag.SECTEURS_PAR_DOMAINE[DOMAIN] + ["Autre / Non spécifique"], 1
+            ))
+        )
+        intention_question = f"Quel est votre objectif principal dans ce domaine ?\n\n1. {INTENTION}"
         for streaming in (False, True):
             for forward_state in (False, True):
                 with self.subTest(streaming=streaming, forward_state=forward_state):
-                    expected_step = "Q1.5"
-                    generated = sector_question
-
-                    def answer_for_prompt(prompt):
-                        self.assertIn(f"prochaine question non résolue : {expected_step}.", prompt)
-                        return generated
-
                     def send(request):
                         if streaming:
                             events = [
@@ -143,10 +142,8 @@ class SyntheticRelevanceTests(unittest.TestCase):
 
                     with (
                         patch.object(rag, "_retrieve_docs_for_question", side_effect=AssertionError("Still qualifying")),
-                        patch.object(rag, "_get_generator", return_value=Mock(run=Mock(
-                            side_effect=lambda messages: {"replies": [answer_for_prompt(messages[0].text)]}
-                        ))),
-                        patch.object(routes, "stream_prompt", side_effect=lambda prompt: iter([answer_for_prompt(prompt)])),
+                        patch.object(rag, "_get_generator", side_effect=AssertionError("No LLM for resolved menu state")),
+                        patch.object(routes, "stream_prompt", side_effect=AssertionError("No LLM for resolved menu state")),
                     ):
                         history = [{"role": "assistant", "content": rag.WELCOME_MESSAGE}]
                         answer, payload = send(ChatRequest(message="13", history=history))
@@ -159,8 +156,6 @@ class SyntheticRelevanceTests(unittest.TestCase):
                             field: payload[field]
                             for field in ("selected_domain_code", "selected_sector", "selected_intention")
                         } if forward_state else {}
-                        expected_step = "Q2"
-                        generated = intention_question
                         answer, payload = send(ChatRequest(message="BTP", history=history, **client_state))
                         self.assertEqual(answer, intention_question)
                         self.assertEqual(payload["selected_domain_code"], DOMAIN)
@@ -271,7 +266,17 @@ class SyntheticRelevanceTests(unittest.TestCase):
                         self.assertTrue(any(event.get("done") for event in events))
                     else:
                         answer = routes.chat(request, SimpleNamespace(headers={})).answer
-                    self.assertEqual(answer, generated)
+                    if not request.selected_domain_code:
+                        self.assertEqual(answer, generated)
+                    elif not request.selected_sector:
+                        self.assertTrue(answer.startswith("Pour mieux cibler mes recommandations"))
+                        self.assertIn("1. BTP", answer)
+                        self.assertNotIn("objectif principal", answer)
+                    else:
+                        self.assertEqual(
+                            answer, f"Quel est votre objectif principal dans ce domaine ?\n\n1. {INTENTION}"
+                        )
+                    self.assertNotEqual(answer, rag.NO_MATCH_MESSAGE)
 
     def test_clarification_after_either_no_match_path_recovers_selectable_cases(self):
         clarification = "Je veux extraire les actions et responsables des notes de réunion."
@@ -411,8 +416,11 @@ class SyntheticRelevanceTests(unittest.TestCase):
         self.assertIn("sans minimum", prompt)
         self.assertNotIn("Cas identifiés (3 à 5)", prompt)
         self.assertNotIn("Tu ne supprimes rien", prompt)
-        for i, doc in enumerate(ranked, 1):
-            self.assertIn(f"{i}. {doc.meta['cas_utilisation']}\nDescription source : {doc.content}", prompt)
+        candidates = json.loads(prompt.rsplit("\n\n", 1)[1])["candidats"]
+        self.assertEqual(
+            [(c["numero"], c["titre"], c["description"]) for c in candidates],
+            [(i, doc.meta["cas_utilisation"], doc.content) for i, doc in enumerate(ranked, 1)],
+        )
 
     def test_reconciliation_handles_subset_reordering_hallucination_and_duplicates(self):
         source = [rag._doc_to_case_dict(doc, i) for i, doc in enumerate(self.docs)]

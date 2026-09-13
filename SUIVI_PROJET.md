@@ -1,5 +1,21 @@
 # Avoulia V2 — Suivi Projet & Décisions
 
+### 13 septembre 2026 — catalogue et parcours v461 déployés sur DEV
+
+**État courant :** `avoulia-backend--v461-20260913-r3`, Healthy,100% du trafic, mode Single. Le chatbot accessible depuis https://nricl.github.io/A-Vous-l-IA/ utilise désormais le catalogue v461 et ses parcours régénérés. Le classeur, les audits et le mapping restent privés ; leurs fichiers ne sont pas servis par la racine web.
+
+**Autorisation :** après présentation de la cible et du caractère public des textes, Eneric a confirmé à06:42 « Tout, avec les textes v461 ». Il s'agit du dev existant en France Central, pas de la production Simplon.
+
+**Livraison :** image `sha256:9c356b0643a3313709f434d73505b6c7e98b49fca735ad869983b0e835410c1b`, build ACR `dd2h`. Source parcours rapprochée dans le merge local `a500a22` : intégration sûre et évolutions distantes conservées. Les hashes publiés restent stables ; les pages historiques hors catalogue sont conservées.
+
+**Corrections issues des essais réels :** questions guidées produites par le backend, sans revalidation par le modèle ; prompt de sélection séparé et centré sur le problème concret. Le candidat r2 a été retiré du trafic après une réponse hors sujet intermittente ; r3 a ensuite passé les scénarios répétés avant et après bascule. Aucun seuil de pertinence lexical arbitraire ajouté.
+
+**Confidentialité :** le mapping CSV était téléchargeable dans l'ancienne version. Les exports hérités sont maintenant conservés hors du dossier web et les types de fichiers sources/export sont refusés par le serveur statique. Les contrôles publics retournent404.
+
+**Preuves :** 198 tests backend locaux,8 tests de rapprochement, puis mêmes suites dans l'image Python3.11 (un test nécessitant Node explicitement ignoré dans cette image). Essais HTTP/SSE, cas hôtelier, refus répétés hors sujet, pages et mobile390px réussis. Ces essais ne constituent pas une certification de pertinence sur toutes les formulations possibles.
+
+**Écart restant de publication :** les correctifs de déploiement et leur documentation sont encore locaux par rapport au dernier commit GitHub approuvé. Deux libellés de la vitrine sont corrigés localement : `1 025` → `1 021` et `Secteurs couverts` → `Domaines métier`. Le nouveau build frontend et ses20 tests passent, mais cette retouche n'est pas encore publiée sur Pages ni sur le frontend Azure. Le fonctionnement du chat et les pages métier sont, eux, déjà servis par r3.
+
 ### 12 septembre 2026 — base consolidée, intégration applicative engagée
 
 **État faisant foi :** la nouvelle version du classeur privé est sauvegardée après revue du catalogue et corrections tracées. Aucun de ses contenus, journaux ou exports n'est ajouté au dépôt public. La base sauvegardée n'est pas la preuve d'une version indexée ou déployée.

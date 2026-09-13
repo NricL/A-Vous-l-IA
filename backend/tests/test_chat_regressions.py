@@ -703,17 +703,41 @@ class IndexedSectorMenuTests(SyntheticRagTests):
             number = str(rag.get_q15_choices(self.domain).index("Atelier Alpha") + 1)
             for entry in (rag.get_rag_prompt_and_sources, rag.query_rag_haystack):
                 result = entry("13", [assistant(DOMAIN_QUESTION)])
-                prompt = result[0] if entry == rag.get_rag_prompt_and_sources else (
-                    rag._reply_to_text(generator.return_value.run.call_args.kwargs["messages"][0])
-                )
-                self.assertIn(menu, prompt)
-                self.assertIn("prochaine question non résolue : Q1.5", prompt)
+                response = result[8] if entry == rag.get_rag_prompt_and_sources else result[0]
+                self.assertIn(menu, response)
+                self.assertIn("dans quel secteur", response)
+                if entry == rag.get_rag_prompt_and_sources:
+                    self.assertIn("prochaine question non résolue : Q1.5", result[0])
                 result = entry(number, [
                     assistant(DOMAIN_QUESTION), user("13"), assistant(SECTOR_QUESTION + "\n" + menu),
                 ])
                 state = result[5:8] if entry == rag.get_rag_prompt_and_sources else result[8:11]
                 self.assertEqual(state, (self.domain, "Atelier Alpha", None))
+            generator.assert_not_called()
             retrieve.assert_not_called()
+
+    def test_indexed_sector_advances_to_objective_then_problem_without_model_revalidation(self):
+        with (
+            patch.object(rag, "_fetch_documents_for_domaine", return_value=[self.doc("Atelier Alpha")]),
+            patch.object(rag, "_get_generator", side_effect=AssertionError("No model for catalogue questions")),
+            patch.object(rag, "_retrieve_docs_for_question", side_effect=AssertionError("No retrieval before problem")),
+        ):
+            menu = rag._get_secteur_choices_affichage([], self.domain)
+            initial = [
+                assistant(DOMAIN_QUESTION), user("13"),
+                assistant(SECTOR_QUESTION + "\n" + menu),
+            ]
+            for entry in (rag.get_rag_prompt_and_sources, rag.query_rag_haystack):
+                result = entry("Atelier Alpha", initial)
+                question = result[8] if entry == rag.get_rag_prompt_and_sources else result[0]
+                self.assertTrue(question.startswith("Quel est votre objectif principal"))
+                self.assertIn(INTENTIONS[0], question)
+                self.assertNotIn("dans quel secteur", question)
+                history = initial + [user("Atelier Alpha"), assistant(question)]
+                result = entry("1", history)
+                question = result[8] if entry == rag.get_rag_prompt_and_sources else result[0]
+                self.assertIn("problème concret", question)
+                self.assertNotIn("objectif principal", question)
 
     def test_metadata_cache_reads_all_domain_aliases_and_reuses_results(self):
         docs = [self.doc("Atelier Alpha"), self.doc("Atelier Interdit", domain="production")]

@@ -243,12 +243,12 @@
         <div class="stats">
             <div class="stats-inner">
                 <div class="stat-item reveal">
-                    <div class="stat-number">1&nbsp;025</div>
+                    <div class="stat-number">1&nbsp;021</div>
                     <div class="stat-label">Cas d'usage v&eacute;rifi&eacute;s</div>
                 </div>
                 <div class="stat-item reveal">
                     <div class="stat-number">14</div>
-                    <div class="stat-label">Secteurs couverts</div>
+                    <div class="stat-label">Domaines m&eacute;tier</div>
                 </div>
                 <div class="stat-item reveal">
                     <div class="stat-number">71</div>
