@@ -2,7 +2,7 @@
 
 ## État déployé — 13 septembre 2026
 
-Le dev sert maintenant v461 via `avoulia-backend--v461-20260913-r3`,100% trafic, mode Single ; image `sha256:9c356b0643a3313709f434d73505b6c7e98b49fca735ad869983b0e835410c1b`. Le frontend de référence reste https://nricl.github.io/A-Vous-l-IA/. Les étapes de préparation ci-dessous sont historiques, pas des tâches à recommencer.
+Le dev sert v461 avec les cinq correctifs UX via `avoulia-backend--ux-20260913-d02ffad`,100% trafic, mode Single ; image `sha256:058fe52822fea24c4e52e17b27242480f3ab96771b883243d8bad7efb2aaaafb`. Le frontend de référence reste https://nricl.github.io/A-Vous-l-IA/. Les étapes de préparation ci-dessous sont historiques, pas des tâches à recommencer.
 
 Le mapping et le classeur sont sous `/app/private`, jamais sous la racine web. Les exports hérités sont conservés dans un sous-dossier privé et le serveur statique refuse leurs extensions. `INDEX_PATH` désigne le fichier explicite ; l'index utilise un répertoire/une collection propres à cette révision, sans effacement du précédent.
 
@@ -10,11 +10,13 @@ Le mapping et le classeur sont sous `/app/private`, jamais sous la racine web. L
 
 **Rollback :** anciennes images et définitions de révision conservées ; les anciennes répliques sont inactives pour éviter des coûts et des endpoints hérités inutiles. Une restauration doit remettre ensemble code, catalogue, index et pages. Le retour à0045 remettrait aussi ses anciens comportements de confidentialité : préférer une correction conservant la protection du webroot lorsque possible. Ne jamais vider le nouvel index pour improviser un retour arrière.
 
-**Sources / vitrine finalisées :** chatbot `24e145b` et parcours `a500a22` publiés ; Pages et frontend Azure affichent 1 021 cas, 14 domaines métier et 71 intentions. Frontend Azure `avoulia-frontend--v461-20260913`. Les mentions de préparation/non-publication plus bas sont historiques.
+**Sources / vitrine finalisées :** chatbot `d02ffad` et parcours inchangé `a500a22` publiés ; Pages et frontend Azure affichent 1 021 cas, 14 domaines métier et 71 intentions. Frontend Azure `avoulia-frontend--ux-20260913-d02ffad`, image `sha256:2ae5e263bb60ecf245c4ad59658de07323a902da858d60c42cb26c22d4cfee18`. Les mentions de préparation/non-publication plus bas sont historiques.
+
+**Rollback du lot UX :** r3 backend, image `sha256:9c356b0643a3313709f434d73505b6c7e98b49fca735ad869983b0e835410c1b`, et frontend v461, image `sha256:dd4598880ea05482eddf5795f81f97e30bfe6b21ff544ecdcfb38e1dadad1930`, conservés. Réactiver/restaurer explicitement l'image souhaitée et son trafic, sans effacer d'index. La reconstruction d'index d'une nouvelle réplique peut demander quelques minutes.
 
 ### Reprise du 13 septembre — lot UX-01 à UX-05
 
-Les cinq frictions post-livraison ont des correctifs locaux : sélection du cas unique, exemples Q3 trop denses avec pipes bruts, exemples hors contexte Cabinet & conseil, besoin initial du magasin redemandé et suggestion secondaire supposant une saisonnalité. Ces correctifs ne sont pas encore déployés.
+Les cinq frictions post-livraison ont été corrigées et livrées : sélection du cas unique, exemples Q3 trop denses avec pipes bruts, filtre d'exemples Cabinet & conseil, besoin initial du magasin redemandé et suggestion secondaire supposant une saisonnalité. Le classement et les formulations source restent inchangés ; le calibrage de pertinence général reste ouvert.
 
 La documentation a été rapprochée avant l'implémentation. Voir la table active de `ROADMAP.md`. Ne pas relancer l'intégration v461, régénérer les pages, modifier le classeur ou préparer Simplon. Le composant actif est `frontend/src/views/HomeView.vue` ; ses boutons utilisent `suggestedCases` conservé dans chaque message. La réponse détail peut contenir plusieurs candidats : la présence de candidats seule ne suffit pas, le CTA autoritaire `parcours_url` et le marqueur de détail restent prioritaires. Le retour à la liste restaure ces candidats, pas ceux du dernier détail.
 
@@ -24,7 +26,7 @@ Les exemples Q3 utilisent l'éligibilité sectorielle de Q2, conservent le filtr
 
 **Évaluer UX-05 :** `python scripts\evaluate_chat_relevance.py --suite stock-assumptions --repeats 2 --max-completion-tokens 6000` prépare les huit requêtes sans réseau. Ajouter `--live --subscription "<abonnement-dev>" --resource-group rg-avoulia-fr-dev --container-app avoulia-backend --interval-seconds 90 --output "<dossier-prive-existant>\ux05.json"` uniquement pour un passage autorisé. Aucun classeur n'est lu ; les rapports contiennent les réponses brutes fictives et les paramètres, pas les identifiants d'authentification. Ne pas transformer les attentes techniques en taux de précision utilisateurs.
 
-**Prochaine recette de déploiement, après confirmation :** utiliser `Dockerfile.dev-catalogue-code-fix` avec l'image r3 épinglée en tête et un contexte privé minimal. L'overlay doit comprendre **`app/haystack_rag.py` et `app/rag_constants.py`** ensemble ; inclure les tests et le banc à jour dans le paquet de validation. L'ancien `Dockerfile.dev-code-only` du 10 septembre ne copie pas `rag_constants.py` et ne suffit pas à ce lot. Hériter catalogue/pages/mapping, préserver les exports hors webroot, et valider dans l'image avant bascule. Pas de régénération ou d'effacement d'index ; un remplacement de réplique peut néanmoins reconstruire son index local au démarrage.
+**Recette utilisée pour ce lot :** `Dockerfile.dev-catalogue-code-fix` avec l'image r3 épinglée ci-dessus et un contexte privé minimal. L'overlay doit comprendre **`app/haystack_rag.py` et `app/rag_constants.py`** ensemble ; inclure les tests et le banc à jour dans le paquet de validation. L'ancien `Dockerfile.dev-code-only` du 10 septembre ne copie pas `rag_constants.py` et ne suffit pas à ce lot. Hériter catalogue/pages/mapping, préserver les exports hors webroot, et valider dans l'image avant bascule. Pas de régénération ou d'effacement d'index ; un remplacement de réplique peut néanmoins reconstruire son index local au démarrage.
 
 Préserver les changements préexistants du plan Azure et des worktrees parcours. Le reçu local Azure décrit la finalisation déjà effectuée ; sa présence modifiée n'indique pas un déploiement en attente. Les futures publications nécessitent leur aperçu et confirmation propres.
 

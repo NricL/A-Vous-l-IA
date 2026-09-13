@@ -2,7 +2,21 @@
 
 ## Status
 
-Deployed — frontend finalization completed (2026-09-13), following user approval at08:35. Frontend `avoulia-frontend--v461-20260913` is Healthy and serves100% traffic. Backend `avoulia-backend--v461-20260913-r3` remains unchanged. GitHub Pages and both repository main branches carry the approved finalization.
+Deployed — UX-01 through UX-05 completed (2026-09-13), following user approval at09:57. Backend `avoulia-backend--ux-20260913-d02ffad` and frontend `avoulia-frontend--ux-20260913-d02ffad` are Healthy and serve100% traffic. Backend mode is Single; previous r3 is inactive, its image and revision definition retained. GitHub Pages and chatbot main carry `d02ffad`; parcours source/payload are unchanged.
+
+## UX deployment receipt — 13 September
+
+- Source commit `d02ffad38720757f53d15b81519d4f282e1b07a5`; Pages34746510034 and CI34746509999 succeeded. No public workbook/mapping/audit was added.
+- Native validation used because the azure-validate skill was unavailable in this runtime. Existing dev subscription/resource group/region, current traffic, immutable base and private registry confirmed before build.
+- Code-only contexts exported from committed sources:62 files, approximately1.72MB, no workbook/mapping/secrets/bytecode. Runtime backend overlay contains only `haystack_rag.py` and `rag_constants.py`.
+- Backend build dd2k succeeded, digest `sha256:058fe52822fea24c4e52e17b27242480f3ab96771b883243d8bad7efb2aaaafb`;212 Python3.11 tests with one Node-only skip,8 parcours reconciliation tests, unchanged private payload1021 current pages plus4 historical pages.
+- Frontend build dd2m succeeded, digest `sha256:2ae5e263bb60ecf245c4ad59658de07323a902da858d60c42cb26c22d4cfee18`. Azure bundle `index-xp7O1gel.js`, Pages bundle `index-CuvdZJ9D.js`.
+- Candidate staged while r3 retained100% traffic. Version-specific replica-local index `/app/data/chroma-ux-20260913-d02ffad`, collection `documents-ux-20260913-d02ffad`, reconstructed1021 documents from the inherited private workbook. First health request was too early; promotion waited for Healthy and successful candidate checks.
+- Candidate and normal URL: four pipe-free consulting Q3 examples in HTTP/SSE, initial retail need reuse, correct source-verbatim detail and mapped URL, off-topic refusal and recovery,9 unchanged page digests,4 private-export404 responses.
+- Normal Pages flow at390px: unique selectable case, correct detail/parcours, no horizontal overflow. Rewinding restored a three-case list and selecting its third case opened the correct detail/URL. Azure frontend1280px exercised its real proxy and Q3 successfully.
+- Initial ACR invocations had an incorrect local Dockerfile cwd and started no builds. A CLI connection reset occurred after the mode change succeeded; ARM reads established actual state before continuing. Unicode CLI log rendering also failed; control-plane state and filtered startup logs were used instead. The smoke script's overly restrictive detail-ID assertion was corrected to match the existing full-candidate contract, with selected title/source/URL still asserted.
+- Prior backend r3 digest `9c356b0643a3313709f434d73505b6c7e98b49fca735ad869983b0e835410c1b` and frontend v461 digest `dd4598880ea05482eddf5795f81f97e30bfe6b21ff544ecdcfb38e1dadad1930` retained. No infrastructure/model/workbook/mapping/pages changes or Simplon package.
+- Subsequent sections describing local work or pending deployment are historical preparation, superseded by this receipt.
 
 ## New local UX work — 13 September, 09:27
 

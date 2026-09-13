@@ -1,5 +1,15 @@
 # Avoulia — Changelog v1 → v2 (synthèse d'onboarding)
 
+## 13 septembre — publication et déploiement du lot UX-01 à UX-05
+
+Commit `d02ffad`, Pages `34746510034` et CI `34746509999` réussies. Backend `avoulia-backend--ux-20260913-d02ffad` et frontend Azure de même suffixe Healthy, 100 % du trafic. Les entrées « locales » ci-dessous décrivent la préparation désormais livrée.
+
+Images construites depuis le commit approuvé : backend `058fe52822fea24c4e52e17b27242480f3ab96771b883243d8bad7efb2aaaafb` (ACR `dd2k`) et frontend `2ae5e263bb60ecf245c4ad59658de07323a902da858d60c42cb26c22d4cfee18` (`dd2m`). Overlay backend limité aux deux modules Python modifiés ; classeur, mapping et 1 021 pages actuelles plus quatre historiques hérités sans modification.
+
+Recette dans l'image Python 3.11 : 212 tests backend (un test Node ignoré), huit de rapprochement, contrôle du payload hérité. Candidate puis URL normale : quatre exemples Q3 sans pipes pour Cabinet & conseil, besoin magasin réutilisé, détail verbatim HTTP/SSE, refus hors sujet et reprise, neuf pages inchangées et quatre exports privés en404. Pages mobile390px : bouton unique puis bonne fiche/lien, retour à une liste de trois cas et choix du troisième ; frontend Azure desktop sans débordement. Les exemples restent les formulations de la base, pas une réécriture éditoriale.
+
+Mode Single rétabli, ancienne r3 inactive ; anciennes images et définitions conservées pour rollback. L'index local de la nouvelle réplique a été reconstruit depuis la v461 embarquée, sans effacer l'ancien. Pas de livraison Simplon ou de publication du classeur.
+
 ## 13 septembre — finalisation publiée ; corrections UX engagées
 
 **Livré :** chatbot `24e145b`, parcours `a500a22`, GitHub Pages et frontend Azure `avoulia-frontend--v461-20260913`. Vitrine : 1 021 cas, 14 domaines métier, 71 intentions ; backend r3 et catalogue v461 inchangés.

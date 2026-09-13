@@ -8,34 +8,34 @@ repo pour rester traçable côté Eneric **et** côté Simplon.
 
 ## État actif du 13 septembre — v461 servie sur DEV
 
-INT-01 et INT-02 sont intégrés au backend déployé ; INT-03 a passé la bascule contrôlée et les essais sur l'URL habituelle. Révision active `avoulia-backend--v461-20260913-r3`. Les comptes rendus du 12 septembre ci-dessous décrivent la préparation et sont historiques.
+INT-01/02/03 et UX-01 à UX-05 sont livrés sur le dev. Révision active `avoulia-backend--ux-20260913-d02ffad`, frontend Azure de même suffixe et Pages sur `d02ffad`. La v461 et les pages sont inchangées. Les comptes rendus de préparation ci-dessous sont historiques.
 
 | Suite | État |
 |---|---|
 | Catalogue, index isolé et parcours v461 | Déployés ; fichiers Excel/audit/mapping non servis, hashes conservés. |
 | Questions guidées et sélection des cas | Correctifs réels intégrés, questions déterministes et prompt de sélection distinct ; scénarios répétés passés. |
-| Sources du dernier déploiement | Publiées : chatbot `24e145b`, parcours `a500a22`. |
+| Sources du dernier déploiement | Publiées : chatbot `d02ffad`, parcours inchangé `a500a22`. |
 | Chiffres et libellés de la vitrine | Publiés sur Pages et frontend Azure : `1 021`, `Domaines métier`. |
 | Calibrage métier à plus grande échelle | Ouvert ; les essais de livraison ne garantissent pas toutes les formulations. |
 | Package et production Simplon | Toujours différés. |
 
 ### Lot actif — fluidité après livraison, autorisé le 13 septembre
 
-La finalisation frontend est terminée ; les états de préparation et « à publier » dans l'historique sont remplacés par l'état ci-dessus. La présente remise à jour documentaire est locale tant qu'elle n'est pas publiée.
+La finalisation frontend et les cinq corrections UX sont livrées après confirmation du 13 septembre à 09:57. Pages `34746510034` et CI `34746509999` réussies ; backend et frontend Azure Healthy, 100 % du trafic. Les états « locaux » plus bas décrivent la préparation.
 
 | Ordre | Lot | Résultat attendu | État |
 |---|---|---|---|
-| 1 | UX-01 — cas unique | Bouton « Choisir ce cas » issu des identités serveur ; liste et ordre restaurés lors du retour depuis une fiche. | Implémenté localement |
-| 2 | UX-02 — lisibilité Q3 | Au plus quatre situations individuelles, dédoublonnées après séparation des pipes ; source inchangée. | Implémenté localement |
-| 3 | UX-03 — pertinence des exemples | Même éligibilité sectorielle pour Q2/Q3, filtre objectif conservé, aucun remplissage par un autre secteur. | Implémenté localement |
-| 4 | UX-04 — besoin initial | Objectifs et constats explicites français reconnus ; présentations seules exclues, nouvelle précision prioritaire, ancien Q3 invalidé après changement de choix. | Implémenté localement |
-| 5 | UX-05 — hypothèses non exprimées | Prompt de sélection excluant les conditions métier non établies, sans interdire les garde-fous conditionnels légitimes. | Implémenté localement ; huit réponses réelles conformes aux scénarios fictifs |
+| 1 | UX-01 — cas unique | Bouton « Choisir ce cas » issu des identités serveur ; liste et ordre restaurés lors du retour depuis une fiche. | Livré sur dev et Pages |
+| 2 | UX-02 — lisibilité Q3 | Au plus quatre situations individuelles, dédoublonnées après séparation des pipes ; source inchangée. | Livré sur dev |
+| 3 | UX-03 — pertinence des exemples | Même éligibilité sectorielle pour Q2/Q3, filtre objectif conservé, aucun remplissage par un autre secteur. | Livré sur dev |
+| 4 | UX-04 — besoin initial | Objectifs et constats explicites français reconnus ; présentations seules exclues, nouvelle précision prioritaire, ancien Q3 invalidé après changement de choix. | Livré sur dev |
+| 5 | UX-05 — hypothèses non exprimées | Prompt de sélection excluant les conditions métier non établies, sans interdire les garde-fous conditionnels légitimes. | Livré ; calibrage général toujours ouvert |
 
 Arbitrages techniques délégués. Pas de changement de base, de schéma métier, d'ordre des six étapes, de modèle ni d'instrumentation. La qualification, les pré-filtres et le détail verbatim restent les contrats de référence. Publication du code et documentation après aperçu exact confirmé ; Azure et Pages sont des livraisons distinctes.
 
 Contrôles locaux : 171 tests backend ciblés, 31 tests frontend, types/build et composants actifs ; navigateur sur le frontend construit à 390/1280 px avec SSE fictif. Ces contrôles ne sont ni un déploiement, ni une mesure exhaustive de pertinence du catalogue. Le banc existant dispose de `--suite stock-assumptions` pour l'évaluation bornée de UX-05 avec des cas entièrement fictifs.
 
-Évaluation UX-05 terminée sur le modèle existant : quatre scénarios dans les deux ordres de candidats, huit réponses complètes, aucune divergence aux attentes techniques, aucune troncature ni erreur de transport. Saisonnalité exclue lorsqu'absente du besoin, retenue lorsqu'explicite ; garde-fou conditionnel conservé et refus sans cas adapté. Cette mesure ciblée n'est pas un taux de précision utilisateurs. Les cinq correctifs restent locaux ; publication GitHub/Pages et mise à jour Azure à confirmer sur leur aperçu exact.
+Évaluation UX-05 terminée sur le modèle existant : quatre scénarios dans les deux ordres de candidats, huit réponses complètes, aucune divergence aux attentes techniques, aucune troncature ni erreur de transport. Saisonnalité exclue lorsqu'absente du besoin, retenue lorsqu'explicite ; garde-fou conditionnel conservé et refus sans cas adapté. Cette mesure ciblée n'est pas un taux de précision utilisateurs. Les cinq correctifs ont ensuite été publiés et déployés, avec recette de la candidate puis de l'URL normale.
 
 ## Historique de préparation du 12 septembre — intégrer la base consolidée
 

@@ -1,5 +1,17 @@
 # Avoulia V2 — Suivi Projet & Décisions
 
+### 13 septembre 2026 — lot UX publié et déployé, état faisant foi
+
+Publication approuvée à09:57 et effectuée par `d02ffad38720757f53d15b81519d4f282e1b07a5`. Pages `34746510034` et CI `34746509999` réussies. Backend et frontend Azure `--ux-20260913-d02ffad` Healthy, 100 % du trafic. Les cinq correctifs UX-01 à UX-05 sont en ligne ; les paragraphes « locaux » ci-dessous sont historiques.
+
+Backend ACR `dd2k`, digest `058fe52822fea24c4e52e17b27242480f3ab96771b883243d8bad7efb2aaaafb` ; frontend `dd2m`, digest `2ae5e263bb60ecf245c4ad59658de07323a902da858d60c42cb26c22d4cfee18`. Sources exportées depuis le commit exact ; deux modules applicatifs superposés à r3. Aucun nouveau classeur, mapping, page ou secret dans le contexte de build.
+
+Validation de l'image Python3.11 :212 tests backend avec un test Node ignoré,8 de rapprochement et payload privé inchangé. Recette réelle candidate puis URL normale : qualification Cabinet & conseil HTTP/SSE, quatre exemples sans pipes, besoin magasin non redemandé, détail source et URL corrects, hors sujet refusé puis reprise. Pages390px : sélection unique cliquable et retour au troisième cas d'une liste ; Azure desktop1280px : même Q3, sans débordement. Neuf empreintes de pages et quatre refus404 de fichiers privés confirmés.
+
+Une première commande ACR utilisait un mauvais répertoire courant, sans build lancé ; relance depuis les contextes dédiés. La CLI Azure a perdu une réponse réseau après le changement de mode et a échoué sur l'affichage Unicode d'un log : l'état réel a été relu via ARM avant toute action suivante. Premier contrôle santé trop tôt, pendant la reconstruction d'index ; aucune promotion avant Healthy. Le smoke test avait supposé à tort que le détail ne pouvait renvoyer que l'ID sélectionné, alors que son contrat conserve parfois la liste : assertion corrigée sur le titre/description et l'URL autoritaire, sans modification du produit.
+
+Mode Single restauré, seule la nouvelle révision backend reste active ; r3 et ses images sont conservées, inactives. La v461 et ses parcours sont inchangés ; l'index de la nouvelle réplique a été reconstruit sans effacer celui de la précédente. Package Simplon différé. Pertinence universelle non garantie ; les exemples restent tributaires du classement et du vocabulaire de la base.
+
 ### 13 septembre 2026 — finalisation publiée et reprise UX
 
 La finalisation est terminée : chatbot `24e145b` et parcours `a500a22` publiés sur leurs branches `main`. Pages `34743193980` et CI `34743193992` terminées ; frontend Azure `avoulia-frontend--v461-20260913`, backend r3 inchangé. Les deux frontends affichent 1 021 cas, 14 domaines métier et 71 intentions. Aucun classeur, audit ou mapping ajouté à cette publication.
