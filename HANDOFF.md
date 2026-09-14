@@ -2,8 +2,7 @@
 
 ## Valeur et expérience — réalisation autorisée à19:09,14septembre
 
-Implémentation et tests locaux terminés ; la publication effective sera consignée
-séparément après validation des candidates. Le socle conservé reste le bot Q3/v463 :
+**Livré et vérifié à19:56.** Le socle conservé reste le bot Q3/v463 :
 aucun changement de sélection, filtre, prompt, modèle, quota, base ou taxonomie.
 
 - `app/value_contract.py` : présentation additive `source-value-1`, construite depuis
@@ -42,6 +41,33 @@ et du manifeste actif ; différence technique connue CRLF→LF dans le nouveau r
 Les limites restantes sont éditoriales et d'observation réelle : bénéfices/horizons
 propres à chaque cas, essais utilisateurs et réserves métier pris en charge par Eneric.
 Le packaging Simplon reste différé. Aucun test mécanique ne vaut preuve d'adoption.
+
+### Reçu de livraison valeur/expérience
+
+- Source publique `332a9b7f669427f5aefe503eb71b41af78461944`, gabarits privés
+  `013201763a25db318a30505c67b9edf2997c7975` ; allowlists exactes1032/6fichiers.
+  Aucun brouillon de l'atelier ni classeur dans cette publication.
+- Backend `avoulia-backend--v463-value-20260914-r1`, image
+  `b4858d073a15cb4d54d9e02ee870989738279bb656fb51ae42a5f6dc18b11fd6`.
+  Build `dd33` réussi au premier essai,137tests dans l'image.
+- Frontend Azure `avoulia-frontend--v463-value-20260914-r2`, image
+  `d21e2e6ada1831c1ca799940ec8c70f71fc16c5639e3cd58113de4279e4bfb0a`,
+  build `dd32`. Candidate r1 remplacée pour finaliser les mentions de vitrine,
+  jamais promue, puis désactivée.
+- Deux révisions saines à100%. Retour arrière backend Q3
+  `v463-q3-20260914-r2` / image `407403ae…`, frontend `ux-20260913-d02ffad`
+  / image `2ae5e263…`, tous deux conservés actifs et sains.
+- GitHub Pages `34877371015` et CI `34877370929` réussis. Parcours réel final
+  sur Pages :14domaines, choix clavier, BTP/objectif explicite, deux propositions
+  pour le même besoin, sélection du bon lien et ouverture du parcours en six étapes.
+  Source intégrale, retour sans contexte et affichage390/1280px vérifiés.
+-18chemins HTTP/SSE de qualification comparés au Q3, inchangés. Deux essais réels
+  catalogue→détail→parcours :1et3propositions, champs de valeur identiques dans
+  API et page, détail HTTP/SSE lié au bon cas. La première recette BTP avait choisi
+  l'objectif1 au lieu de4 ; corrigé dans le test seulement, sans taxonomie modifiée.
+-9pages distantes rapprochées des hashes avant/après promotion, dont4historiques ;
+  cinq chemins privés en404. Les quatre fichiers frontend servis correspondent
+  au contexte testé. Les preuves exhaustives de source/overlay restent hors dépôt.
 
 ## VAL-01 — contrat et atelier locaux, demande du14septembre à18:23
 

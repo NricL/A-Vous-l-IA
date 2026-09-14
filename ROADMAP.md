@@ -8,14 +8,15 @@ repo pour rester traçable côté Eneric **et** côté Simplon.
 
 ## Programme actif — valeur visible et expérience de choix, accord à18:15
 
-**Statut à19:36 : réalisation et déploiement autorisés à19:09 ; implémentation testée, candidates en préparation.**
+**Statut à19:56 : socle valeur et expérience livré sur Azure et GitHub Pages après accord de19:09.**
 Le périmètre reste affichage/enrichissement d'expérience, sans modifier le bot,
 la base ni la taxonomie. Le socle valeur couvre les1 021cas par leurs sources exactes ;
 **zéro enrichissement éditorial riche validé à l'échelle du catalogue**. Ne pas
 confondre couverture de présentation et création de bénéfices/horizons par cas.
 Ce programme complète le cap80/20, sans relancer un moteur parallèle. Objectif :
 comprendre tôt l'intérêt d'un cas, choisir une piste et commencer un essai utile.
-La révision Q3 `v463-q3-20260914-r2` reste la référence en ligne.
+La révision backend `v463-value-20260914-r1` et le frontend `v463-value-20260914-r2`
+reçoivent100% du trafic. Q3 reste disponible pour retour arrière.
 
 **Répartition confirmée à18:10 :** Eneric prend en charge les essais d'usage complets,
 les corrections qui en découlent et les cinq réserves de classement métier. Ces
@@ -28,15 +29,15 @@ restent différés ; le présent cadrage n'autorise pas leur lancement.
 | Ordre / ID | Lot | Livrable attendu | Critère de réussite / limite | État |
 |---|---|---|---|---|
 | 1 — VAL-01 | Bénéfice visible dès la découverte | Gain recherché, premier résultat, horizon de première valeur et conditions d'intérêt ; présentation courte dans les propositions, la fiche et l'entrée du parcours | Un utilisateur comprend pourquoi essayer, ce qu'il obtiendra et l'effort à mettre en balance ; aucun chiffre ou délai de rentabilité inventé | Socle source seul raccordé aux1 021cas ; hypothèses éditoriales riches non généralisées |
-| 1 — VAL-02 | Promesse suivie dans le parcours | Relier le bénéfice visé aux entrées nécessaires, au résultat de l'étape4, au bilan simple de l'étape5 et à la réutilisation en6 | Distinguer temps gagné/perdu, qualité perçue et intérêt à recommencer ; « non évalué » possible ; pas de score d'adoption déduit des cases cochées | Après VAL-01 |
-| 2 — CHOIX-01 | Comparer les pistes | Cartes compactes avec titre source, gain recherché, résultat et effort disponible ; bouton explicite par cas au lieu des seuls « Cas1/2 » | Jusqu'à cinq pistes restent possibles ; identité cas/détail/lien inchangée ; pas de classement par ROI supposé ni de nouveau tour de dialogue | Après contrat VAL-01 |
-| 3 — ENTREE-01 | Démarrage évident | Afficher immédiatement la première question et les domaines, sans devoir deviner un premier message ; conserver la possibilité de saisir un besoin initial | Domaine toujours confirmé explicitement, aucune classification silencieuse ; démarrage utilisable au clic et au clavier, sans tour vide | Planifié |
-| 3 — CONTEXTE-01 | Contexte lisible | Résumé des valeurs domaine/secteur/objectif et accès aux corrections déjà disponibles | Comprendre le périmètre choisi et l'effet d'un retour arrière ; aucune incohérence entre libellés, état serveur et choix dépendants | Planifié |
-| 4 — REPRISE-01 | Attente et récupération | État d'attente compréhensible, message d'erreur unique, reprise explicite sans ressaisie ni double soumission | Ne pas simuler des étapes de calcul, un pourcentage ou une annulation serveur inexistants ; conserver besoin et choix | Planifié |
-| 4 — PASSAGE-01 | Passage vers l'outil d'exécution | Expliquer où utiliser le prompt et la différence entre orientation AVIA et exécution dans l'assistant autorisé choisi | Parcours générique conservé, aucun transfert automatique du besoin ni connexion imposée à un outil | Planifié |
-| 5 — RETOUR-01 | Refaire un cas | Conservation volontaire du lien et accès court aux éléments utiles lors d'une utilisation suivante | Sans compte obligatoire, stockage de conversation ou partage automatique ; ne pas présenter les cases locales comme une sauvegarde complète | À préciser après les lots précédents |
-| Transversal — CONFIANCE-01 | Promesse cohérente | Revoir « personnalisé », « cas vérifiés », « RGPD », efforts et délais affichés | Distinguer contenu relu, bénéfice potentiel, résultat observé et obligations de l'opérateur ; pas de certification implicite | À intégrer aux surfaces modifiées |
-| Transversal — ACC-01 | Accessibilité pratique | Clavier, focus, annonces des réponses/erreurs, lisibilité des listes et confort mobile | Contrôles ciblés sur chaque nouvelle surface, sans revendiquer une conformité globale non auditée | Avant livraison Simplon |
+| 1 — VAL-02 | Promesse suivie dans le parcours | Relier le bénéfice visé aux entrées nécessaires, au résultat de l'étape4, au bilan simple de l'étape5 et à la réutilisation en6 | Distinguer temps gagné/perdu, qualité perçue et intérêt à recommencer ; « non évalué » possible ; pas de score d'adoption déduit des cases cochées | Livré : bilan facultatif non stocké et continuité2/4/5/6 |
+| 2 — CHOIX-01 | Comparer les pistes | Cartes compactes avec titre source, gain recherché, résultat et effort disponible ; bouton explicite par cas au lieu des seuls « Cas1/2 » | Jusqu'à cinq pistes restent possibles ; identité cas/détail/lien inchangée ; pas de classement par ROI supposé ni de nouveau tour de dialogue | Livré : cartes source, gain riche non inventé |
+| 3 — ENTREE-01 | Démarrage évident | Afficher immédiatement la première question et les domaines, sans devoir deviner un premier message ; conserver la possibilité de saisir un besoin initial | Domaine toujours confirmé explicitement, aucune classification silencieuse ; démarrage utilisable au clic et au clavier, sans tour vide | Livré :14choix canoniques immédiats |
+| 3 — CONTEXTE-01 | Contexte lisible | Résumé des valeurs domaine/secteur/objectif et accès aux corrections déjà disponibles | Comprendre le périmètre choisi et l'effet d'un retour arrière ; aucune incohérence entre libellés, état serveur et choix dépendants | Livré, corrections existantes conservées |
+| 4 — REPRISE-01 | Attente et récupération | État d'attente compréhensible, message d'erreur unique, reprise explicite sans ressaisie ni double soumission | Ne pas simuler des étapes de calcul, un pourcentage ou une annulation serveur inexistants ; conserver besoin et choix | Livré, interruption et reprise exacte testées |
+| 4 — PASSAGE-01 | Passage vers l'outil d'exécution | Expliquer où utiliser le prompt et la différence entre orientation AVIA et exécution dans l'assistant autorisé choisi | Parcours générique conservé, aucun transfert automatique du besoin ni connexion imposée à un outil | Livré dans les1 021parcours |
+| 5 — RETOUR-01 | Refaire un cas | Conservation volontaire du lien et accès court aux éléments utiles lors d'une utilisation suivante | Sans compte obligatoire, stockage de conversation ou partage automatique ; ne pas présenter les cases locales comme une sauvegarde complète | Livré : copie volontaire du lien sans contexte |
+| Transversal — CONFIANCE-01 | Promesse cohérente | Revoir « personnalisé », « cas vérifiés », « RGPD », efforts et délais affichés | Distinguer contenu relu, bénéfice potentiel, résultat observé et obligations de l'opérateur ; pas de certification implicite | Vitrine et nouvelles surfaces corrigées ; texte du bot conservé |
+| Transversal — ACC-01 | Accessibilité pratique | Clavier, focus, annonces des réponses/erreurs, lisibilité des listes et confort mobile | Contrôles ciblés sur chaque nouvelle surface, sans revendiquer une conformité globale non auditée | Contrôles ciblés passés, pas d'audit global |
 
 ### VAL-01 — cadre de valeur et de « ROI potentiel »
 

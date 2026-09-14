@@ -1,5 +1,17 @@
 # Avoulia V2 — Suivi Projet & Décisions
 
+### 14 septembre à19:56 — valeur source et expérience livrées
+
+Backend `v463-value-20260914-r1` et frontend Azure `v463-value-20260914-r2`,
+sains à100% ; retour arrière Q3/backend et UX/frontend conservé et vérifié.
+Sources `332a9b7` / `0132017`, Pages `34877371015` et CI `34877370929` réussis.
+137tests dans l'image,38tests frontend,18chemins de qualification comparés,
+recette réelle finale Pages→plusieurs cartes→fiche→parcours.1 021présentations
+sourcées et quatre historiques conservées ; zéro enrichissement éditorial riche
+généralisé. Base/prompts/filtres et comportement de sélection inchangés.
+Le bilan n'est pas stocké et la copie du lien exclut le contexte personnel.
+Les essais d'adoption, réserves métier et le packaging Simplon restent distincts.
+
 ### 14 septembre à19:09 — réalisation/tests/déploiement autorisés, expérience uniquement
 
 Implémentation locale : contrat valeur source seul commun au bot et aux1 021parcours,
