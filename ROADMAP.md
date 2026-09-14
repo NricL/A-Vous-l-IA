@@ -14,6 +14,10 @@ explicite à12:13, candidate exercée avant bascule, retour arrière conservé.
 Les notes de préparation privée ci-dessous sont historiques. La publication porte
 sur les fiches/parcours, jamais sur le classeur complet, ses audits ou le mapping.
 
+Clôture : sources `830d2b0` / `e61e487`, Pages `34835285869` et CI `34835285888`
+réussis ; anciennes préversions backend/frontend désactivées. Le frontend Azure
+stable reste inchangé et utilise le backend v463 par son proxy habituel.
+
 **Avancement après accord du 14 septembre à 11:29 : candidate privée v463 prête à relire.**
 La revue complète v462 et ses370corrections de contenu sont réutilisées ; quatre
 ajustements ciblés supplémentaires clarifient les entrées et les premières actions.
@@ -68,7 +72,7 @@ exprimées et l'utilité des autres pistes, plutôt qu'exiger une liste d'IDs ex
 | Priorité | Livrable | Périmètre et limite |
 |---|---|---|
 | P1 — bot existant, lot technique limité | Corriger la coupure prématurée, sans changer la sélection | Livré avec v463 : pool complet avant sélection, cinq après rapprochement. Prompt inchangé ; aucun second juge, mot-clé spécial ou personnalisation de fiche. |
-| P0 — nettoyage | Retirer l'expérimentation parallèle | Supprimer son code, ses flags, routes, dépendances et recettes de build. Conserver les cinq corrections UX livrées, le banc du moteur existant et les preuves archivées. Les mécanismes asynchrones expérimentaux restent récupérables, pas une migration imposée. |
+| P0 — nettoyage | Retirer l'expérimentation parallèle | Livré : code/flags/routes/recettes retirés, anciennes révisions Azure désactivées. Cinq correctifs UX, banc existant et archives conservés ; aucune migration asynchrone imposée. |
 | P0 — contenu complet | Améliorer les 1 021 cas dans les colonnes existantes | V463 adoptée sur le backend après autorisation : première action claire, entrées réalistes, validation humaine. Sources v461/v462 conservées, audits privés, cinq réserves de classement documentées sans reclassement automatique. |
 | P0 — parcours génériques | Rendre les six étapes praticables, sans changer leur ordre | Garder données/prérequis, premier livrable, contrôles métier, comparaison et réutilisation. Retirer le contexte injecté depuis le chat. Les prompts restent génériques et complétés par l'usager. |
 | P0 — premier essai honnête | Séparer brouillon, analyse et automatisation déployée | Indiquer données, droits et outil nécessaires. Données fictives annoncées comme telles ; ne pas inventer d'historique, de résultat ou de gain. Informations à préparer dans le parcours, pas questionnaire d'admission au cas. |
@@ -85,8 +89,8 @@ effacement de son sens. Les documents à réunir et la relecture ne sont pas sup
 
 Les cinq correctifs UX restent en ligne, avec le catalogue et les parcours v463.
 L'ancien stable `d02ffad` reste la référence de retour arrière. Le code preview est
-retiré des sources ; la désactivation des anciennes révisions expérimentales est suivie
-séparément de la bascule. Aucune ancienne image ni aucun mapping n'est détruit.
+retiré des sources ; les anciennes révisions expérimentales sont désactivées.
+Aucune ancienne image ni aucun mapping privé n'est détruit.
 Le périmètre de cette livraison a reçu son aperçu et sa confirmation à12:13.
 Il utilise un contexte neuf du bot existant et conserve les images/index/mappings de retour arrière.
 

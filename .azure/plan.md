@@ -19,6 +19,11 @@ New index directory `/app/data/chroma-v463-20260914-r1`, collection
 image2ae5e263 remains in use. Retire only the old experimental qual-20260913-r1 revisions
 after cleaned Pages publication; preserve images and stable rollback.
 
+Retirement completed: both qual-20260913-r1 revisions are inactive. Backend main
+traffic remains100%v463; frontend100%ux-20260913-d02ffad. Public source830d2b0,
+private renderer e61e487; Pages34835285869 and CI34835285888 succeeded.
+No old image or private mapping removed. Do not use latestRevision traffic routing.
+
 ### Approved rollout sequence (applied)
 
 User explicitly approved public1021Sheet1case fields and generic six-step parcours,

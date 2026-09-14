@@ -2,6 +2,14 @@
 
 ## Livraison v463 — backend déployé le 14 septembre
 
+Sources de livraison : public `830d2b0976d99a1622fc373437c873d1d90c7e1c`,
+parcours privé `e61e4873a6d714aae24eb67003123d73a74def26`.
+Pages `34835285869` et CI `34835285888` réussis. Bundle Pages `index-CI2eR9Mu.js`,
+sans le moteur preview ; les révisions backend/frontend `qual-20260913-r1` sont
+confirmées inactives. Le frontend Azure reste sur `ux-20260913-d02ffad` à100%.
+Les mentions « candidate privée/non publiée » dans les onglets d'audit sont les états
+historiques de préparation ; le présent reçu établit la livraison du périmètre autorisé.
+
 Révision `avoulia-backend--v463-20260914-r1`,100% du trafic principal, image
 `sha256:5de8ca8cc8f46828b8a62ddf83b7a47f0c9afb767b2d75720f6558a6e0c95182`.
 Construction privée `dd2u`, Python3.11.16 :239contrôles backend et17parcours,

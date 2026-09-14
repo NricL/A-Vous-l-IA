@@ -8,6 +8,11 @@ private labelled workbook/audits excluded from public Git/webroot. Public HTML i
 synchronized and the old mapping CSV removed from HEAD, not Git history. Existing
 frontend image and selector wording retained; old stable remains the rollback.
 
+Source release commits: public830d2b0976d99a1622fc373437c873d1d90c7e1c,
+privatee61e4873a6d714aae24eb67003123d73a74def26. Pages34835285869 and
+CI34835285888 succeeded. Old backend/frontend preview revisions are inactive;
+Pages root and Azure frontend proxy use the current v463 backend.
+
 **The following milestones are historical**, not the current delivery status.
 
 **Content milestone after14September11:29:** private v463 prepared from preserved v462

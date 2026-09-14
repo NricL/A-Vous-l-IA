@@ -9,6 +9,11 @@ l’IA.
 Le classeur complet, ses audits/commentaires et le mapping restent privés.
 Les pages HTML autorisées sont synchronisées avec les sources ; aucun classeur n'est publié.
 
+Livraison source : chatbot `830d2b0`, parcours `e61e487`. Pages `34835285869` et
+CI `34835285888` terminés avec succès. Les deux anciennes révisions expérimentales
+`qual-20260913-r1` sont désactivées ; le lien de référence reste
+https://nricl.github.io/A-Vous-l-IA/.
+
 **Recentrage 80/20 :** le bot existant Haystack/Chroma reste le socle, avec ses consignes
 de sélection inchangées. Seule la coupure prématurée des candidats est corrigée.
 L'usager adapte lui-même son parcours générique. Qualification

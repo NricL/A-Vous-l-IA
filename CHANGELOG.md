@@ -8,6 +8,9 @@ sans exposer classeur/audits/mapping. Révision `v463-20260914-r1` à100% après
 ancienne révision stable conservée. HTML autorisés synchronisés, CSV retiré du HEAD public,
 pas de réécriture de l'historique. Pas de nouveau moteur, modèle ou identité visuelle.
 
+Sources `830d2b0` / `e61e487` publiées ; Pages `34835285869` et CI `34835285888`
+réussis. Préversion Azure backend/frontend désactivée ; retour arrière stable conservé.
+
 ## 14 septembre après 11:29 — finalisation privée du contenu et aperçus
 
 Réutilisation de la revue complète v462, sans nouvel audit général ni réglage du bot.

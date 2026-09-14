@@ -1,6 +1,20 @@
 # Avoulia V2 — Suivi Projet & Décisions
 
-### 14 septembre — v463 servie, publication des sources en cours
+### 14 septembre — livraison v463 clôturée
+
+Sources publiées : `830d2b0976d99a1622fc373437c873d1d90c7e1c` (chatbot/HTML)
+et `e61e4873a6d714aae24eb67003123d73a74def26` (parcours privé).
+Pages `34835285869` et CI `34835285888` réussis ; les avertissements de lint
+informatif préexistants ne sont pas modifiés dans ce lot.
+Les anciennes révisions expérimentales backend/frontend sont confirmées inactives.
+Le backend principal est v463 à100%, le frontend Azure stable garde son image et son
+trafic ; son proxy et le vrai parcours ouvert depuis Pages utilisent la nouvelle base.
+La seule modification utilisateur du classeur historique privé v453 reste non stagée.
+
+Trace privée complète : `../_local-trace/2026-09-14-v463-publication/deployment-receipt.json`.
+Les nouvelles pages sont byte-identiques à l'image ; l'indentation des lignes vides
+générées est conservée, plutôt que réécrire les sorties pour une règle de whitespace.
+Le contrôle de diff des sources manuscrites reste appliqué.
 
 La candidate `avoulia-backend--v463-20260914-r1` a été créée depuis le template
 du stable, avec références de secrets et index distinct. Image privée `dd2u`,
