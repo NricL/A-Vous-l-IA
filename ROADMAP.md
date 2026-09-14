@@ -6,6 +6,139 @@ repo pour rester traçable côté Eneric **et** côté Simplon.
 
 **Dernière mise à jour :** 2026-09-14
 
+## Programme actif — valeur visible et expérience de choix, accord à18:15
+
+**Statut à19:36 : réalisation et déploiement autorisés à19:09 ; implémentation testée, candidates en préparation.**
+Le périmètre reste affichage/enrichissement d'expérience, sans modifier le bot,
+la base ni la taxonomie. Le socle valeur couvre les1 021cas par leurs sources exactes ;
+**zéro enrichissement éditorial riche validé à l'échelle du catalogue**. Ne pas
+confondre couverture de présentation et création de bénéfices/horizons par cas.
+Ce programme complète le cap80/20, sans relancer un moteur parallèle. Objectif :
+comprendre tôt l'intérêt d'un cas, choisir une piste et commencer un essai utile.
+La révision Q3 `v463-q3-20260914-r2` reste la référence en ligne.
+
+**Répartition confirmée à18:10 :** Eneric prend en charge les essais d'usage complets,
+les corrections qui en découlent et les cinq réserves de classement métier. Ces
+trois chantiers ne sont pas relancés par ce programme. Les tests techniques propres
+aux nouveaux lots restent nécessaires. Le packaging et la production Simplon
+restent différés ; le présent cadrage n'autorise pas leur lancement.
+
+### Ordre de réalisation et critères de réussite
+
+| Ordre / ID | Lot | Livrable attendu | Critère de réussite / limite | État |
+|---|---|---|---|---|
+| 1 — VAL-01 | Bénéfice visible dès la découverte | Gain recherché, premier résultat, horizon de première valeur et conditions d'intérêt ; présentation courte dans les propositions, la fiche et l'entrée du parcours | Un utilisateur comprend pourquoi essayer, ce qu'il obtiendra et l'effort à mettre en balance ; aucun chiffre ou délai de rentabilité inventé | Socle source seul raccordé aux1 021cas ; hypothèses éditoriales riches non généralisées |
+| 1 — VAL-02 | Promesse suivie dans le parcours | Relier le bénéfice visé aux entrées nécessaires, au résultat de l'étape4, au bilan simple de l'étape5 et à la réutilisation en6 | Distinguer temps gagné/perdu, qualité perçue et intérêt à recommencer ; « non évalué » possible ; pas de score d'adoption déduit des cases cochées | Après VAL-01 |
+| 2 — CHOIX-01 | Comparer les pistes | Cartes compactes avec titre source, gain recherché, résultat et effort disponible ; bouton explicite par cas au lieu des seuls « Cas1/2 » | Jusqu'à cinq pistes restent possibles ; identité cas/détail/lien inchangée ; pas de classement par ROI supposé ni de nouveau tour de dialogue | Après contrat VAL-01 |
+| 3 — ENTREE-01 | Démarrage évident | Afficher immédiatement la première question et les domaines, sans devoir deviner un premier message ; conserver la possibilité de saisir un besoin initial | Domaine toujours confirmé explicitement, aucune classification silencieuse ; démarrage utilisable au clic et au clavier, sans tour vide | Planifié |
+| 3 — CONTEXTE-01 | Contexte lisible | Résumé des valeurs domaine/secteur/objectif et accès aux corrections déjà disponibles | Comprendre le périmètre choisi et l'effet d'un retour arrière ; aucune incohérence entre libellés, état serveur et choix dépendants | Planifié |
+| 4 — REPRISE-01 | Attente et récupération | État d'attente compréhensible, message d'erreur unique, reprise explicite sans ressaisie ni double soumission | Ne pas simuler des étapes de calcul, un pourcentage ou une annulation serveur inexistants ; conserver besoin et choix | Planifié |
+| 4 — PASSAGE-01 | Passage vers l'outil d'exécution | Expliquer où utiliser le prompt et la différence entre orientation AVIA et exécution dans l'assistant autorisé choisi | Parcours générique conservé, aucun transfert automatique du besoin ni connexion imposée à un outil | Planifié |
+| 5 — RETOUR-01 | Refaire un cas | Conservation volontaire du lien et accès court aux éléments utiles lors d'une utilisation suivante | Sans compte obligatoire, stockage de conversation ou partage automatique ; ne pas présenter les cases locales comme une sauvegarde complète | À préciser après les lots précédents |
+| Transversal — CONFIANCE-01 | Promesse cohérente | Revoir « personnalisé », « cas vérifiés », « RGPD », efforts et délais affichés | Distinguer contenu relu, bénéfice potentiel, résultat observé et obligations de l'opérateur ; pas de certification implicite | À intégrer aux surfaces modifiées |
+| Transversal — ACC-01 | Accessibilité pratique | Clavier, focus, annonces des réponses/erreurs, lisibilité des listes et confort mobile | Contrôles ciblés sur chaque nouvelle surface, sans revendiquer une conformité globale non auditée | Avant livraison Simplon |
+
+### VAL-01 — cadre de valeur et de « ROI potentiel »
+
+Le bénéfice existe actuellement dans la description et « Ce que ça vous apporte »,
+mais sa lisibilité est secondaire face aux étapes/prérequis/précautions. Ne pas
+ajouter une promesse marketing identique à tous les cas : exprimer la valeur propre
+à la tâche, en langage PME, comme une hypothèse compréhensible et non une mesure.
+
+- **Gain recherché :** temps, qualité/cohérence, réduction des oublis, traçabilité,
+  aide à la décision ou autre bénéfice réellement soutenu par le cas.
+- **Premier résultat :** livrable tangible obtenu à l'essai, distinct d'un processus
+  automatisé ou déployé.
+- **Horizon :** distinguer temps de préparation, délai avant un résultat utilisable
+  et répétitions nécessaires pour amortir la mise en place. Employer des repères
+  conditionnels lorsqu'ils sont justifiables ; ne pas convertir le repère actuel
+  uniforme de2h12 en délai de ROI.
+- **Conditions et contreparties :** fréquence/volume, données disponibles, outil
+  autorisé, effort initial, relecture et corrections. Un usage ponctuel peut rester
+  intéressant pour la qualité sans faire gagner de temps.
+
+La conformité n'est jamais acquise par le seul usage d'IA : privilégier réduction
+des oublis, cohérence ou traçabilité selon la source. Aucun pourcentage, montant
+économisé, durée précise d'amortissement ou garantie non étayés. Un éventuel calcul
+ultérieur resterait un scénario fondé sur les hypothèses déclarées par l'usager,
+pas un ROI validé ; aucun calculateur financier n'est requis pour ce premier lot.
+
+### Premier chantier concret
+
+**Avancement du lot lancé à18:23 :** inventaire des champs servis réalisé dans le code,
+sans lecture de classeur. Description, première action, effort, prérequis, guardrails
+et mode existent dans le contrat courant ; aucun champ dédié gain/ROI/horizon n'est
+transmis. Cela ne prouve pas l'absence de colonnes supplémentaires dans les classeurs.
+Choix de prototype : propositions éditoriales séparées des champs source, pas de
+déduction au runtime ni de génération de promesses par domaine.
+
+`backend/scripts/value_preview.py` valide un contrat versionné de brouillon avec
+identité du cas, hash de page publique et citations exactes ; il rend un atelier
+HTML autonome pour liste, fiche et entrée du parcours. Quatre cas publiés couvrent
+temps, qualité, traçabilité et aide à la décision. Les extraits et hashes sont
+rapprochés des pages publiques ; titres/descriptions/actions restent intacts.
+Les hypothèses de valeur ne sont pas des mesures et leur ancrage textuel n'est
+pas une validation sémantique. Aucun de ces textes n'est adopté dans la base.
+
+**Ajustement validé à18:43 :** remplacer la galerie par un scénario à la fois :
+besoin fictif → cas illustratif associé → fiche → entrée du parcours individuel.
+Changer de scénario revient au besoin ; aucune liste mélangeant les quatre cas.
+Le prototype ne rejoue pas la qualification ni une recherche RAG et ne limite pas
+le vrai bot à une seule proposition. Validation du déroulé local seulement,
+pas adoption des textes pour tout le catalogue ou autorisation de publication.
+
+Aperçu local : `http://127.0.0.1:4191/`, fichier `avia-valeur-apercu-2.html` dans
+le dossier Microsoft Scout, actualisé au même emplacement. Navigation séquentielle, provenance
+consultable et liens vers les parcours actuels. Habillage d'atelier, pas nouvelle
+identité AVIA ; aucun appel IA, formulaire de bilan, stockage ou exécution simulée.
+14 tests synthétiques et navigation sur4scénarios/4étapes à390/1280px, clair/sombre.
+Le raccordement API/frontend/générateur et la couverture des1021cas restent à faire
+après validation du format et de la méthode éditoriale. Détails dans `HANDOFF.md`.
+
+Commencer par l'inventaire des champs déjà disponibles et la définition d'un contrat
+de présentation commun à la liste, la fiche et le parcours. Définir la provenance
+de chaque information : texte métier source inchangé, information éditoriale dérivée
+explicitement distincte, ou hypothèse laissée à l'utilisateur. Une valeur absente
+n'autorise pas une invention au runtime ni une déduction du bénéfice depuis le seul
+domaine. Réutiliser les champs existants si leur contenu suffit.
+
+Préparer quelques aperçus contrastés (temps, qualité, traçabilité, aide à la décision)
+pour arrêter le format, sans confondre ces aperçus avec une couverture des1021cas.
+Le contrat vise l'ensemble du catalogue ; si des données nouvelles sont nécessaires,
+définir leur schéma, leur validation et leur versionnement avant toute extension.
+Ne pas modifier en masse les classeurs ni leur classement au titre d'un changement UI.
+
+### Invariants et sortie vers Simplon
+
+Conserver qualification explicite, filtres métier avant retrieval, sources verbatim,
+identités/liens autoritaires, cas et parcours génériques, six étapes dans le même
+ordre et arrêt du dialogue après la fiche/bouton. Pas de coach bavard, nouveau
+modèle, moteur de sélection parallèle ou refonte visuelle gratuite.
+
+Chaque lot a un aperçu, des contrôles ciblés et un état local/déployé explicite ;
+l'accord sur cette roadmap n'est pas un accord de publication. Avant packaging :
+surfaces retenues stabilisées, confiance/accessibilité examinées, documentation
+et reprise cohérentes, puis décision distincte d'engager la livraison Simplon.
+Les critères ci-dessus sont des objectifs de conception, pas des résultats acquis.
+
+### Réalisation après accord de19:09
+
+VAL-02 : première action visible à l'entrée, renvoi aux étapes2/4/5, bilan facultatif
+temps total/qualité/suite, sans score ni sauvegarde des réponses. CHOIX-01 : cartes
+liées aux identités serveur, titre/description/effort source, sélection dans la même
+liste. ENTREE-01 : question et14domaines canoniques fournis par l'accueil, aucun
+classement implicite. CONTEXTE-01 : résumé des choix et corrections existantes.
+REPRISE-01 : attente honnête, erreur unique, requête conservée et reprise explicite ;
+fin de flux sans confirmation traitée comme erreur. PASSAGE-01 : guide AVIA distinct
+de l'assistant d'exécution. RETOUR-01 : copie volontaire du lien sans paramètres,
+sans conservation de conversation. CONFIANCE-01 : retrait des absolus de vitrine ;
+inconnus et contreparties visibles. ACC-01 : contrôles ciblés clavier, focus,
+statuts et affichage390/1280px, pas de revendication de conformité globale.
+
+Les1021pages sont enrichies uniquement depuis le HTML déjà public, avec quatre pages
+historiques intactes ; prompts et champs métier conservés. Aucun classeur lu,
+modifié, versionné ou envoyé. Tests et recette dans `HANDOFF.md`.
+
 ## Cap actif — efficacité et pertinence, règle 80/20
 
 **Correctif Q3 livré après accord à17:10 :** règle commune aux14domaines,

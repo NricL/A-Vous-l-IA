@@ -15,6 +15,7 @@ from app.parcours_util import build_parcours_info, get_parcours_pitch, PARCOURS_
 from app.rag_constants import Q1_DOMAINS_LIST, CHOIX_Q1_TO_DOMAINE_CODE
 from app.telemetry import track_backend_chat_event
 from app import stats
+from app.value_contract import value_presentation
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 _UC_CODE_RE = re.compile(r"\bUC-\d{3,5}\b", re.IGNORECASE)
@@ -77,7 +78,11 @@ def _strip_repeated_welcome(text: str) -> str:
 @router.get("/welcome")
 def chat_welcome():
     """Retourne le premier message que l'agent affiche au chargement du chat."""
-    return {"message": WELCOME_MESSAGE}
+    return {
+        "message": WELCOME_MESSAGE,
+        "initial_question": "Dans quel domaine souhaitez-vous agir en priorité ?\n\n"
+        + "\n".join(f"{i}. {label}" for i, label in enumerate(Q1_DOMAINS_LIST, 1)),
+    }
 
 
 @router.post("/parcours-click")
@@ -154,6 +159,7 @@ def _build_suggested_cases(
             SuggestedCase(
                 id=ids[i],
                 content=full_contents[i],
+                value_presentation=value_presentation(ex),
                 case_hash=parcours_info.get("case_hash"),
                 parcours_url=parcours_info.get("parcours_url"),
                 parcours_cta_label=parcours_info.get("cta_label"),

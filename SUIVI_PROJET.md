@@ -1,5 +1,53 @@
 # Avoulia V2 — Suivi Projet & Décisions
 
+### 14 septembre à19:09 — réalisation/tests/déploiement autorisés, expérience uniquement
+
+Implémentation locale : contrat valeur source seul commun au bot et aux1 021parcours,
+cartes identifiées, domaine initial explicite, contexte lisible, attente/reprise
+honnêtes, passage vers l'assistant choisi, bilan facultatif et lien réutilisable.
+Sources, prompts, filtres, classement, IDs, six étapes, modèles et base inchangés ;
+aucun classeur lu ou modifié. Les quatre pages historiques restent intactes.
+Pas de généralisation fictive des quatre brouillons : couverture éditoriale riche0,
+couverture de présentation sourcée1 021. Tests locaux et contrôles navigateur
+passés, candidates Azure en cours de préparation ; publication à confirmer par reçu.
+Rôles d'Eneric et périmètre Simplon inchangés. Détails dans `HANDOFF.md`.
+
+### 14 septembre à18:43 — aperçu VAL-01 par scénario validé
+
+Demande de retirer la galerie : besoin fictif → cas illustratif → fiche → entrée
+du parcours, un seul scénario visible. Changement de scénario réinitialisant l'étape,
+navigation avant/arrière sans mélange des cas. Même artefact local et URL4191.
+14 tests synthétiques et navigation clair/sombre à390/1280px. Ancienne galerie
+archivée dans la trace VAL-01. Aucun raccordement API, édition de base ou déploiement ;
+validation limitée au déroulé de l'aperçu, pas aux1021cas.
+
+### 14 septembre à18:23 — VAL-01 lancé, quatre aperçus locaux
+
+Inventaire du contrat servi : pas de champ gain/ROI/horizon dédié, sans conclure
+sur des colonnes Excel non inspectées. Prototype séparant hypothèses éditoriales
+et sources exactes, avec identité/hash/citations et refus des données manquantes.
+Atelier liste/fiche/entrée du parcours pour quatre cas publics contrastés ; aucune
+généralisation aux1021cas, modification de classeur, API, frontend ou parcours actif.
+Aperçu `http://127.0.0.1:4191/`, artefact `avia-valeur-apercu-2.html` dans Microsoft Scout.
+12 tests et navigation mobile/desktop clair/sombre. Format à valider avant raccordement.
+Détails de provenance, limites et reprise dans `HANDOFF.md`.
+Aucun commit, push ou déploiement ; les travaux précédents de roadmap restent locaux.
+
+### 14 septembre à18:15 — roadmap valeur et expérience de choix
+
+Cadrage consigné dans `ROADMAP.md`, section « Programme actif — valeur visible et
+expérience de choix ». Ordre : bénéfice/horizon de valeur et continuité dans le
+parcours, comparaison des cas, démarrage/contexte, attente/reprise et passage vers
+l'outil ; retour ultérieur, confiance et accessibilité également cadrés.
+Premier lot VAL-01 : inventorier les champs et définir leur provenance avant
+aperçus communs liste/fiche/parcours. ROI potentiel qualitatif et conditionnel,
+aucun gain chiffré ni conformité garantie inventés. Catalogue source inchangé.
+
+Eneric garde les essais d'usage, leurs corrections et les cinq réserves métier.
+Packaging Simplon différé. Mise à jour documentaire locale uniquement ; aucun
+changement applicatif, classeur, commit, push ou déploiement dans ce jalon.
+La révision Q3 `v463-q3-20260914-r2` reste celle en ligne.
+
 ### 14 septembre à13:56 — préparation explicite et étapes complémentaires
 
 **Publié après confirmation à14:48.** Révision `v463-preparation-20260914-r1` à100%,

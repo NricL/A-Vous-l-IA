@@ -1,5 +1,130 @@
 # Avoulia V2 — Implementation Handover Guide for Simplon
 
+## Valeur et expérience — réalisation autorisée à19:09,14septembre
+
+Implémentation et tests locaux terminés ; la publication effective sera consignée
+séparément après validation des candidates. Le socle conservé reste le bot Q3/v463 :
+aucun changement de sélection, filtre, prompt, modèle, quota, base ou taxonomie.
+
+- `app/value_contract.py` : présentation additive `source-value-1`, construite depuis
+  description, première action et effort exacts ; elle n'entre pas dans les champs
+  renvoyés au moteur. Horizon non établi, contreparties et conditions explicites.
+- Cartes Vue : même liste de cas serveur, sans double affichage du texte de liste ;
+  contenu conservé dans l'historique, sélection et lien détail autoritaires. Aucun HTML
+  source exécuté. Résumé des choix et première question canonique immédiate.
+- Reprise : erreur unique, réponse partielle retirée, requête exacte conservée,
+  nouvelle tentative sans doublon. Un flux sans `done` n'est plus un succès.
+  Réessayer ne prétend pas avoir annulé le travail précédent côté serveur.
+- Parcours : première action source entière, bilan facultatif en5 et copie du lien
+  sans query/fragment en6. Le bilan n'est ni envoyé ni stocké ; le suivi des cases
+  existant reste distinct d'une sauvegarde des résultats. Six étapes/prompts inchangés.
+- `scripts/publish_value_pages.py` applique les fragments des gabarits du dépôt parcours
+  actif aux HTML déjà publics. La parité API/gabarits est testée ; toute modification
+  des textes communs exige ce contrôle. Pas de copie de classeur ni de mapping.
+
+**Couverture exacte :**1 021présentations source seules, quatre pages historiques
+inchangées ; **0/1 021 enrichissements éditoriaux riches validés**. Les quatre brouillons
+de l'atelier restent locaux et ne sont pas des textes de production. Le livrable
+tangible se lit dans la première action source, pas dans une reformulation automatique.
+Les durées de parcours existantes ne sont pas des horizons de rentabilité.
+
+**Validation locale :**38tests frontend, type-check et build ;131tests bot/qualification/
+gabarits,42tests valeur/routes/atelier,5tests après correction du cas multiligne,
+17tests parcours/static/publication. Invocations recouvrantes, pas une somme de tests
+uniques. Recette UI explicitement fictive : deux propositions pour un même besoin,
+requête de reprise identique, un lien sélectionné, texte échappé. Quatre vraies pages
+publiques testées localement : action verbatim, six étapes, bilan non stocké, copie
+refusée avec sélection manuelle/focus, largeurs390/1280sans débordement.
+La revue de code a identifié puis fait corriger une troncature possible des actions
+multilignes avant toute écriture des pages. Les sources sont rapprochées du commit Q3
+et du manifeste actif ; différence technique connue CRLF→LF dans le nouveau rendu.
+
+Les limites restantes sont éditoriales et d'observation réelle : bénéfices/horizons
+propres à chaque cas, essais utilisateurs et réserves métier pris en charge par Eneric.
+Le packaging Simplon reste différé. Aucun test mécanique ne vaut preuve d'adoption.
+
+## VAL-01 — contrat et atelier locaux, demande du14septembre à18:23
+
+**Révision de présentation validée à18:43 :** galerie retirée de l'aperçu. Un seul
+scénario visible : besoin fictif, proposition illustrative, fiche puis entrée du
+parcours. Chaque brouillon possède un `scenario.kind=fictional_need` et un besoin
+de démonstration distinct des citations du catalogue. Aucun rapprochement RAG
+ni saisie de besoin réel ; la qualification du produit n'est pas modifiée.
+Le sélecteur de scénario revient au besoin et referme les détails de provenance.
+Les boutons avancent/reculent dans le même cas, avec focus sur le titre. Une seule
+section est visible même sans JavaScript ; les autres scénarios ne forment plus
+une galerie de remplacement.14 tests et64combinaisons scénario/étape/largeur/thème,
+avec parcours avant/arrière et retour au besoin lors d'un changement de scénario.
+Même fichier `avia-valeur-apercu-2.html` et même URL4191 ; ancienne galerie archivée
+dans la trace locale. L'accord porte sur ce déroulé d'aperçu, pas sur une livraison.
+
+**Prototype uniquement, non raccordé et non publié.** Le runtime Q3, le catalogue
+v463, les classeurs, le mapping et les six étapes restent inchangés. Les modifications
+de roadmap précédentes sont conservées. Aucun fichier du dépôt parcours n'est modifié.
+
+### Inventaire et choix de provenance
+
+Inspection de `rag_constants.CASE_EXTRA_FIELD_ALIASES`, `services/ingest.py`,
+`models.py`, `build_niveau2_block` et des gabarits parcours :
+
+| Information | Disponible dans les champs servis | Traitement dans VAL-01 |
+|---|---|---|
+| Nom / description du cas | Oui | Texte source exact, sans remplacer la description par un résumé éditorial |
+| Première action / prérequis / guardrails | Oui | Références du livrable, des conditions et de l'effort à fournir |
+| Effort / mode / sensibilité | Oui | Ne pas convertir en durée, prix, ROI ou niveau de fiabilité |
+| Gain dominant / bénéfice court | Pas de champ dédié dans le contrat servi | Brouillon éditorial distinct, ancré dans la description/action |
+| Délai avant valeur / amortissement | Pas de champ dédié dans le contrat servi | Horizon qualitatif conditionnel ; inconnu explicite, pas de nombre déduit |
+
+L'inventaire du code n'est pas un audit exhaustif des colonnes Excel. Aucun classeur
+cloud n'a été ouvert ou exporté pour ce prototype. Quatre HTML déjà publics sont
+lus dans le checkout et leurs hashes rapprochés des URLs publiées.
+
+### Prototype reproductible
+
+Sources : `backend/scripts/value_preview.py`, `scripts/fixtures/value_drafts.json`,
+`scripts/templates/value_preview.html`, `tests/test_value_preview.py`.
+Ces modules sont des outils de conception ; ils ne sont importés par aucune route,
+ne changent pas les modèles de réponse ni le schéma d'ingestion.
+
+Le contrat Pydantic strict interdit les champs inconnus et les statuts autres que
+`editorial_draft`. Chaque proposition contient des citations exactes de description
+ou première action ; l'ID et le hash doivent correspondre à la page source. Une source
+modifiée, un champ absent ou une citation introuvable bloque le rendu, sans substitution.
+Le garde-fou de texte qualitatif refuse les chiffres/symboles de gains et formulations
+de garantie/certification ; ce filtre simple ne remplace pas une revue sémantique.
+La provenance textuelle ne prouve ni le gain ni le délai proposé.
+
+Les quatre cas illustrent des motivations contrastées, pas les résultats d'une recherche :
+UC-0725/temps, UC-0706/qualité, UC-0734/traçabilité, UC-1003/aide à la décision.
+Un même contrat alimente carte courte, fiche et entrée du parcours ; la provenance
+est repliable dans la fiche. Les six étapes ne sont pas simulées : lien explicite
+vers le parcours actuel. Aucune saisie enregistrée, appel modèle ou calcul financier.
+Le futur schéma éditorial général et la couverture des1021cas ne sont pas arrêtés.
+
+Depuis `backend`, avec les dépendances existantes :
+`python -B scripts/value_preview.py --output "<nouveau-chemin>.html"`.
+Le rendu refuse l'écrasement. `--cards` et `--public-pages` permettent des sources
+explicites ; les noms de page sont validés, jamais des chemins de classeur ou des URLs libres.
+Les fichiers HTML générés restent hors du dépôt ; ne pas les publier comme produit.
+
+Artefact : `avia-valeur-apercu-2.html` dans le dossier Microsoft Scout.
+Serveur d'aperçu `http://127.0.0.1:4191/`, loopback uniquement, un seul fichier servi,
+pas de listing ni d'accès aux fichiers du projet. Script dans la trace locale
+`../_local-trace/2026-09-14-value-preview/`. Habillage Scout pour cet atelier seulement.
+
+Validation :12 tests synthétiques sur identité, source, champs absents, provenance,
+texte qualitatif, échappement HTML, refus d'écrasement, CR/LF et entités littérales.
+Navigation sur4cas/3surfaces aux largeurs390/1280, thèmes clair/sombre, focus de titre
+après navigation, provenance et six étapes visibles. Aucun débordement observé.
+L'accès navigateur file:// étant bloqué, le serveur local a été utilisé ; les
+préconnexions navigateur nécessitent un serveur multithread. Le parseur initial
+attendait LF seul ; corrigé pour CR/LF sans altérer le contenu source. Un sélecteur
+de contrôle a été limité à la section visible pour ne pas confondre les quatre fiches.
+
+**Suite :** valider le format et les formulations, puis décider où maintenir les
+informations éditoriales et comment les fournir aux trois surfaces actives. Ne pas
+présenter ce prototype comme VAL-01 généralisé ni comme une livraison.
+
 ## Q3 généralisé et déployé — accord du 14 septembre à17:10
 
 Backend `avoulia-backend--v463-q3-20260914-r2`, Healthy,100% du trafic principal.

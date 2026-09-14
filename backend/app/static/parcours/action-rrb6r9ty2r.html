@@ -156,9 +156,27 @@ input:focus-visible,summary:focus-visible,textarea:focus-visible,select:focus-vi
   </div>
   <a class="tester-rapidement" href="#prompt-demarrage">Tester rapidement</a>
 </header>
+<!-- value-entry:source-value-1 -->
+<section class="carte" aria-labelledby="valeur-titre">
+  <h2 id="valeur-titre">Ce que vous pouvez essayer</h2>
+  <p><b>Première action — source :</b></p>
+  <p class="source">Exporter votre liste de factures en attente (référence client pseudonymisée, montant, date d&#39;émission, date d&#39;échéance, paiements reçus, litiges et relances déjà effectuées). Ouvrir un assistant IA autorisé par votre organisation et lui fournir ces données (anonymisées), puis lui demander de structurer un plan de relance par ancienneté avec modèles de messages. Astuce : dans votre demande à l&#39;IA, précisez (1) votre rôle et contexte — ex. « Je suis dirigeant d&#39;une PME de 25 salariés, 15% de nos factures ont plus de 60 jours de retard » (2) la tâche exacte attendue (3) le format de sortie souhaité — ex. « exemple de plan de relance en 4 étapes après l’échéance vérifiée (J+15, J+30, J+45, J+60), à adapter aux contrats et litiges avec modèle d&#39;email pour chaque étape » (4) les contraintes — ex. « ton ferme mais cordial, préserver la relation commerciale ». Vérifier : valider le plan avec le service comptable. Livrable : plan de relance structuré avec 4 modèles d&#39;emails.</p>
+  <details>
+    <summary>Valeur et effort : ce qui reste à vérifier</summary>
+    <div class="contenu">
+      <p><b>Horizon de valeur :</b> Non établi pour ce cas. Évaluez l'intérêt après un premier résultat relu, puis plusieurs usages si nécessaire.</p>
+      <p>À essayer si cette tâche correspond à votre besoin, avec les éléments nécessaires et un outil autorisé. Comparez ensuite à votre pratique habituelle.</p>
+      <p>Mettez en balance la préparation, la relecture et les corrections avec l'utilité du résultat. Un effort faible n'est pas une preuve de gain.</p>
+      <p class="note">Description et première action issues du catalogue, sans promesse de gain mesuré. Aucun délai de rentabilité établi.</p>
+    </div>
+  </details>
+  <p class="note">Préparez les entrées à l'étape 2, produisez à l'étape 4, puis comparez le résultat à votre pratique à l'étape 5.</p>
+</section>
+<!-- /value-entry -->
 
 <section class="carte">
   <h2>Commencez par un petit essai</h2>
+  <p>AVIA vous oriente et fournit un guide ; l'exécution se fait dans l'assistant IA autorisé que vous choisissez. Copier un prompt ne l'envoie pas et ne lance aucun travail dans cet assistant.</p>
   <p>Choisissez une tâche limitée. À l'étape 4, préparez un premier résultat à relire, pas un déploiement complet.</p>
   <ul>
     <li>Utilisez un assistant IA autorisé, avec des données autorisées ou un exemple clairement fictif.</li>
@@ -451,6 +469,24 @@ Termine le livrable par : « À faire valider en interne avant usage. »</pre>
 <div class="coche"><input type="checkbox" id="auto5" data-suivi><label for="auto5">Décidez : utilisable sur ce périmètre, à ajuster puis retester, ou à arrêter ; notez pourquoi</label></div>
 </ul>
 <p><strong>C'est fait quand</strong> : la comparaison réelle est documentée et vous avez choisi la suite. Un test fictif, un essai incomplet ou une case cochée ne prouve pas l'efficacité.</p>
+        <!-- value-review:source-value-1 -->
+<fieldset class="choix" aria-describedby="bilan-note">
+  <legend>Votre bilan facultatif du premier essai</legend>
+  <p id="bilan-note" class="note">Comparez le résultat relu à votre pratique habituelle. Incluez préparation, relecture et corrections. Aucun score ni ROI n'est calculé. Ces réponses ne sont ni envoyées ni enregistrées par AVIA ; copiez vos observations dans votre espace autorisé si vous souhaitez les conserver.</p>
+  <label for="bilan-temps">Temps total comparé</label>
+  <select id="bilan-temps" data-bilan>
+    <option>Non évalué</option><option>Moins de temps</option><option>Autant de temps</option><option>Plus de temps</option>
+  </select>
+  <label for="bilan-qualite">Qualité du résultat après relecture</label>
+  <select id="bilan-qualite" data-bilan>
+    <option>Non évaluée</option><option>Meilleure</option><option>Comparable</option><option>Moins bonne</option>
+  </select>
+  <label for="bilan-suite">Intérêt à recommencer</label>
+  <select id="bilan-suite" data-bilan>
+    <option>Non décidé</option><option>Recommencer</option><option>Ajuster avant de recommencer</option><option>Ne pas poursuivre</option>
+  </select>
+</fieldset>
+<!-- /value-review -->
         <div class="valider"><input type="checkbox" id="fin-5" data-fin="5"><label for="fin-5">Étape terminée — comparaison faite et suite décidée</label></div>
       </div>
     </details>
@@ -478,6 +514,17 @@ Termine le livrable par : « À faire valider en interne avant usage. »</pre>
             <p class="note">Transmission manuelle et facultative : ce parcours ne crée aucun compte, n'envoie aucun email et ne notifie personne.</p>
           </div>
         </details>
+        <!-- value-return:source-value-1 -->
+<div class="carte">
+  <h3>Revenir volontairement à ce cas</h3>
+  <p>Gardez ce lien dans vos favoris ou copiez-le dans votre espace autorisé. Il ouvre ce même parcours générique, pas une conversation sauvegardée.</p>
+  <label for="lien-retour">Lien de ce parcours, sans contexte personnel</label>
+  <input id="lien-retour" type="text" readonly style="width:100%;min-height:44px;font:inherit">
+  <button type="button" id="copier-lien" style="min-height:44px;padding:10px;font:inherit">Copier le lien du parcours</button>
+  <p id="retour-statut" role="status"></p>
+  <p class="note">Seules les cases cochées sont conservées dans ce navigateur par le suivi existant. Ni vos entrées, ni votre bilan, ni vos résultats ne sont sauvegardés ici. Aucun compte, envoi ou partage automatique.</p>
+</div>
+<!-- /value-return -->
         <div class="valider"><input type="checkbox" id="fin-6" data-fin="6"><label for="fin-6">Étape terminée — recette et suite documentées, ou arrêt consigné</label></div>
       </div>
     </details>
@@ -624,5 +671,27 @@ Termine chaque livrable par : « À faire valider en interne avant usage. »</pr
   maj();
 })();
 </script>
+<!-- value-script:source-value-1 -->
+<script>
+(function(){
+  var champ=document.getElementById('lien-retour');
+  var bouton=document.getElementById('copier-lien');
+  var statut=document.getElementById('retour-statut');
+  champ.value=location.origin+location.pathname;
+  document.querySelectorAll('[data-bilan]').forEach(function(select){select.selectedIndex=0;});
+  bouton.addEventListener('click',function(){
+    function secours(){
+      statut.textContent="Copie automatique indisponible. Le lien est sélectionné : copiez-le manuellement.";
+      champ.focus();champ.select();
+    }
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(champ.value).then(function(){
+        statut.textContent="Lien copié. Aucune conversation ni réponse de bilan n'est incluse.";
+      },secours);
+    }else{secours();}
+  });
+})();
+</script>
+<!-- /value-script -->
 </body>
 </html>

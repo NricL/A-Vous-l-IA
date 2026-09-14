@@ -14,6 +14,7 @@ class SuggestedCase(BaseModel):
 
     id: str = Field(..., description="Identifiant du cas")
     content: str = Field(..., description="Contenu du cas (complet pour le détail)")
+    value_presentation: Optional[dict] = Field(default=None, description="Présentation source seule, sans effet sur la sélection")
     case_hash: Optional[str] = Field(default=None, description="Hash URL du cas (pour parcours)")
     parcours_url: Optional[str] = Field(default=None, description="URL parcours (si applicable)")
     parcours_cta_label: Optional[str] = Field(

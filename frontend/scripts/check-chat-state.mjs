@@ -18,7 +18,8 @@ const setup = parse(homeSource).descriptor.scriptSetup.content
   .replace(/import \{([^}]+)\} from '@\/api\/chat'/, 'const {$1} = api')
 const expose = `
 return { submit, goBackToStep, messages, loading, currentPhase, showStepper, steps, selectedDomainCode,
-  selectedSector, selectedIntention, lastSuggestedCases, pendingAction, pendingUseCaseId, choicesFor, lastAssistantIndex }
+  selectedSector, selectedIntention, lastSuggestedCases, pendingAction, pendingUseCaseId, choicesFor, lastAssistantIndex,
+  failedTurn, error, retryLastRequest, selectedValue }
 `
 const createSetup = new Function('vue', 'api', setup + expose)
 
@@ -284,6 +285,70 @@ const apiSource = readFileSync(new URL('../src/api/chat.ts', import.meta.url), '
 const compiledApi = ts.transpileModule(apiSource, {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
 }).outputText
+
+test('retry preserves the exact failed request without duplicating conversation turns', async t => {
+  const f = fixture(t)
+  const before = f.home.messages.value.length
+  const pending = f.home.submit('Besoin à conserver')
+  await vue.nextTick()
+  const request = JSON.stringify(f.requests[0])
+  f.token('Réponse partielle')
+  f.error('Connexion interrompue')
+  await pending
+  assert.equal(f.home.messages.value.length, before + 1)
+  assert.equal(f.home.messages.value.at(-1).role, 'user')
+  assert.equal(f.home.failedTurn.value.request.message, 'Besoin à conserver')
+  const retry = f.home.retryLastRequest()
+  await vue.nextTick()
+  await f.home.retryLastRequest()
+  assert.equal(f.requests.length, 2)
+  assert.equal(JSON.stringify(f.requests[1]), request)
+  f.token('Réponse confirmée')
+  f.done({})
+  await retry
+  assert.equal(f.home.messages.value.length, before + 2)
+  assert.equal(f.home.error.value, null)
+  assert.equal(f.home.failedTurn.value, null)
+})
+
+test('rewind discards retry and selected value follows the authoritative URL only', async t => {
+  const f = fixture(t)
+  const pending = f.home.submit('Besoin')
+  await vue.nextTick()
+  f.error('Échec')
+  await pending
+  f.home.goBackToStep(0)
+  assert.equal(f.home.failedTurn.value, null)
+  const value = { version: 'source-value-1', description: '<script>source non HTML</script>' }
+  assert.equal(f.home.selectedValue({ suggestedCases: [{ ...stockCase, value_presentation: value }] }), null)
+  assert.deepEqual(f.home.selectedValue({
+    parcoursUrl: stockCase.parcours_url, suggestedCases: [{ ...stockCase, value_presentation: value }],
+  }), value)
+  assert.doesNotMatch(homeSource, /v-html/)
+  assert.match(homeSource, /v-for="\(c, ci\) in msg.suggestedCases"/)
+})
+
+for (const body of ['', 'data: {"t":"partiel"}\n\n', 'data: {"bad":true}', 'data: invalid']) {
+  test(`incomplete SSE is never acknowledged as success: ${body}`, async () => {
+    const exports = {}
+    runInNewContext(compiledApi, { exports, TextDecoder, fetch: async () => new Response(body) })
+    let errors = 0
+    await exports.sendMessageStream({ message: 'synthetic', history: [] }, {
+      onToken: () => {},
+      onDone: () => assert.fail('incomplete stream cannot succeed'),
+      onError: () => { errors++ },
+    })
+    assert.equal(errors, 1)
+  })
+}
+
+test('welcome adds only the canonical server question; fallback invents no choices', async () => {
+  const exports = {}
+  runInNewContext(compiledApi, { exports, TextDecoder, fetch: async () => Response.json({
+    message: 'Bonjour', initial_question: 'Dans quel domaine ?\n1. Domaine exact\n2. Autre domaine',
+  }) })
+  assert.equal(await exports.getWelcomeMessage(), 'Bonjour\n\nDans quel domaine ?\n1. Domaine exact\n2. Autre domaine')
+})
 
 for (const trailingNewline of [true, false]) {
   for (const payload of [

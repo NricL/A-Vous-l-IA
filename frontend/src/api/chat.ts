@@ -34,6 +34,7 @@ export const WELCOME_MESSAGE_FALLBACK =
 
 export interface WelcomeResponse {
   message: string
+  initial_question?: string
 }
 
 export async function getWelcomeMessage(): Promise<string> {
@@ -42,7 +43,7 @@ export async function getWelcomeMessage(): Promise<string> {
     const res = await fetch(url)
     if (!res.ok) throw new Error('Impossible de charger le message d\'accueil')
     const data: WelcomeResponse = await res.json()
-    return data.message ?? WELCOME_MESSAGE_FALLBACK
+    return [data.message ?? WELCOME_MESSAGE_FALLBACK, data.initial_question].filter(Boolean).join('\n\n')
   } catch {
     return WELCOME_MESSAGE_FALLBACK
   }
@@ -62,6 +63,20 @@ export interface SuggestedCase {
   case_hash?: string
   /** Titre verbatim du cas (base) — sert de libellé propre pour le feedback 👍/👎. */
   cas_utilisation?: string
+  description_cas_utilisation?: string
+  premiere_action_48h?: string
+  effort?: string
+  value_presentation?: {
+    version: string
+    status: 'source_only'
+    description: string | null
+    first_action: string | null
+    effort: string | null
+    horizon: string
+    tradeoff: string
+    useful_when: string
+    limit: string
+  }
 }
 
 export interface ChatRequest {
@@ -225,13 +240,13 @@ export async function sendMessageStream(
             parcours_cta_label: data.parcours_cta_label ?? null,
           })
         } else {
-          callbacks.onDone({ sources: [] })
+          callbacks.onError('Réponse interrompue avant confirmation. Vous pouvez réessayer.')
         }
       } catch {
-        callbacks.onDone({ sources: [] })
+        callbacks.onError('Réponse interrompue avant confirmation. Vous pouvez réessayer.')
       }
     } else {
-      callbacks.onDone({ sources: [] })
+      callbacks.onError('Réponse interrompue avant confirmation. Vous pouvez réessayer.')
     }
   } catch (e) {
     callbacks.onError(e instanceof Error ? e.message : 'Erreur stream')

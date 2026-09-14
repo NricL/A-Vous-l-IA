@@ -41,7 +41,13 @@
                             <span v-if="si < steps.length - 1" class="stepper-sep"></span>
                         </template>
                     </div>
-                    <div class="chat-messages" id="chatMessages" ref="messagesBox">
+                    <div v-if="selectedDomainCode" class="context-summary" aria-label="Vos choix confirmés">
+                        <strong>Périmètre :</strong> {{ contextLabel(selectedDomainCode, 0) }}
+                        <span v-if="selectedSector"> · {{ selectedSector }}</span>
+                        <span v-if="selectedIntention"> · {{ contextLabel(selectedIntention, 2) }}</span>
+                        <small>Les étapes cochées ci-dessus permettent de corriger vos choix et de refaire la suite.</small>
+                    </div>
+                    <div class="chat-messages" id="chatMessages" ref="messagesBox" role="log" aria-label="Conversation" :aria-busy="loading">
                         <template v-if="!messages.length">
                             <div class="msg msg-bot">Chargement…</div>
                         </template>
@@ -51,9 +57,40 @@
                                 :key="`${i}-${msg.role}`"
                                 :class="['msg', msg.role === 'user' ? 'msg-user' : 'msg-bot']"
                             >
-                                <span class="msg-text">{{ msg.content }}</span>
+                                <template v-if="messagePhase(msg) === 4 && msg.suggestedCases?.length">
+                                    <p>Voici les pistes proposées pour votre besoin. Choisissez celle à approfondir.</p>
+                                    <article v-for="(c, ci) in msg.suggestedCases" :key="c.id" class="case-card">
+                                        <h3>{{ c.cas_utilisation || `Piste ${ci + 1}` }}</h3>
+                                        <p class="source-text">{{ c.value_presentation?.description || c.description_cas_utilisation || c.content }}</p>
+                                        <p><strong>Effort indiqué :</strong> {{ c.effort || 'Non précisé' }}</p>
+                                        <details v-if="c.value_presentation" class="value-notes">
+                                            <summary>Premier essai et conditions d'intérêt</summary>
+                                            <p><strong>Première action — source :</strong></p>
+                                            <p class="source-text">{{ c.value_presentation.first_action || 'Non précisée dans les informations servies.' }}</p>
+                                            <p><strong>Horizon de valeur :</strong> {{ c.value_presentation.horizon }}</p>
+                                            <p>{{ c.value_presentation.useful_when }}</p>
+                                            <p>{{ c.value_presentation.tradeoff }}</p>
+                                            <small>{{ c.value_presentation.limit }}</small>
+                                        </details>
+                                        <button v-if="i === lastAssistantIndex" type="button" class="chip choice-chip"
+                                            :disabled="loading" @click="submit(String(ci + 1))"
+                                            :aria-label="`Choisir : ${c.cas_utilisation || `piste ${ci + 1}`}`">
+                                            Choisir cette piste
+                                        </button>
+                                    </article>
+                                </template>
+                                <span v-else class="msg-text">{{ msg.content }}</span>
+                                <details v-if="selectedValue(msg)" class="value-notes">
+                                    <summary>Valeur à vérifier lors de votre essai</summary>
+                                    <p><strong>Première action — source :</strong></p>
+                                    <p class="source-text">{{ selectedValue(msg).first_action || 'Non précisée dans les informations servies.' }}</p>
+                                    <p><strong>Horizon de valeur :</strong> {{ selectedValue(msg).horizon }}</p>
+                                    <p>{{ selectedValue(msg).useful_when }}</p>
+                                    <p>{{ selectedValue(msg).tradeoff }}</p>
+                                    <small>{{ selectedValue(msg).limit }}</small>
+                                </details>
                                 <div
-                                    v-if="msg.role !== 'user' && i === lastAssistantIndex && !loading && choicesFor(msg).length"
+                                    v-if="msg.role !== 'user' && messagePhase(msg) !== 4 && i === lastAssistantIndex && !loading && choicesFor(msg).length"
                                     class="choice-chips"
                                 >
                                     <button
@@ -103,11 +140,15 @@
                             </div>
                         </template>
 
-                        <div v-if="loading" class="typing" id="typing">
-                            <span></span><span></span><span></span>
+                        <div v-if="loading" class="waiting-status" role="status">
+                            Réponse en cours. Vous pourrez poursuivre dès sa réception.
                         </div>
 
-                        <div v-if="error" class="msg msg-bot">Désolé, une erreur s'est produite : {{ error }}</div>
+                        <div v-if="error" class="msg msg-bot" role="alert">
+                            <p>La réponse n'a pas pu être confirmée : {{ error }}</p>
+                            <button v-if="failedTurn" type="button" class="chip choice-chip" :disabled="loading" @click="retryLastRequest">Réessayer la même demande</button>
+                            <small>Vos choix sont conservés. Réessayer envoie une nouvelle requête ; une précédente exécution peut avoir continué côté serveur.</small>
+                        </div>
                     </div>
                     <form class="chat-input-bar" @submit.prevent="submit()">
                         <input
@@ -117,9 +158,9 @@
                             type="text"
                             aria-label="Votre réponse"
                             placeholder="Sélectionnez ou écrivez votre réponse…"
-                            :disabled="loading"
+                            :disabled="loading || !messages.length"
                         >
-                        <button class="chat-send" type="submit" aria-label="Envoyer la réponse" :disabled="loading || !input.trim()">
+                        <button class="chat-send" type="submit" aria-label="Envoyer la réponse" :disabled="loading || !messages.length || !input.trim()">
                             <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                 <line x1="22" y1="2" x2="11" y2="13" />
                                 <polygon points="22 2 15 22 11 13 2 9 22 2" />
@@ -181,7 +222,7 @@
 
                 <div class="hero-badge">
                     <span class="hero-badge-dot"></span>
-                    Agent disponible &nbsp;&middot;&nbsp; Open Source &nbsp;&middot;&nbsp; RGPD
+                    Assistant IA &nbsp;&middot;&nbsp; Open Source &nbsp;&middot;&nbsp; R&eacute;sultats &agrave; v&eacute;rifier
                 </div>
 
             </div>
@@ -208,7 +249,7 @@
                                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                                 </svg>
                             </div>
-                            <p>Une d&eacute;couverte guid&eacute;e et personnalis&eacute;e sous forme de conversation
+                            <p>Une d&eacute;couverte guid&eacute;e selon vos choix sous forme de conversation
                                 naturelle</p>
                         </div>
                         <div class="feature-item">
@@ -245,7 +286,7 @@
             <div class="stats-inner">
                 <div class="stat-item reveal">
                     <div class="stat-number">1&nbsp;021</div>
-                    <div class="stat-label">Cas d'usage v&eacute;rifi&eacute;s</div>
+                    <div class="stat-label">Cas d'usage du catalogue</div>
                 </div>
                 <div class="stat-item reveal">
                     <div class="stat-number">14</div>
@@ -427,7 +468,28 @@
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { sendMessageStream, getWelcomeMessage, trackParcoursClick, sendCaseFeedback } from '@/api/chat'
 
-const DEFAULT_PARCOURS_CTA_LABEL = '🚀 Voir mon parcours personnalisé'
+const DEFAULT_PARCOURS_CTA_LABEL = '🚀 Ouvrir le parcours de ce cas'
+
+function readableChoice(value) {
+    return String(value || '').replaceAll('_', ' ')
+}
+
+function contextLabel(value, phase) {
+    for (let i = messages.value.length - 1; i >= 0; i--) {
+        const question = messages.value[i]
+        if (question.role !== 'assistant' || messagePhase(question) !== phase) continue
+        const choices = parseSimpleChoices(question.content)
+        const answer = phase === 2 ? String(value) : messages.value[i + 1]?.content
+        const choice = choices.find(c => String(c.num) === answer || c.label === answer)
+        if (choice) return choice.label
+    }
+    return readableChoice(value)
+}
+
+function selectedValue(msg) {
+    if (!msg.parcoursUrl) return null
+    return msg.suggestedCases?.find(c => c.parcours_url === msg.parcoursUrl)?.value_presentation || null
+}
 
 /**
  * Résout le bouton "parcours" à afficher après une réponse.
@@ -509,6 +571,7 @@ const messages = ref([])
 const input = ref('')
 const loading = ref(false)
 const error = ref(null)
+const failedTurn = ref(null)
 const messagesBox = ref(null)
 const chatInputRef = ref(null)
 
@@ -597,6 +660,7 @@ function goBackToStep(stepIndex) {
     pendingAction.value = null
     pendingUseCaseId.value = null
     error.value = null
+    failedTurn.value = null
     loading.value = false
     nextTick(() => { scrollToBottom(); chatInputRef.value?.focus() })
 }
@@ -642,10 +706,40 @@ Dans quel domaine travaillez-vous principalement ?`,
     nextTick(() => chatInputRef.value?.focus())
 })
 
-async function submit(forcedText = null) {
+async function retryLastRequest() {
+    if (loading.value || !failedTurn.value) return
+    const turn = failedTurn.value
+    messages.value = turn.messages
+    failedTurn.value = null
+    await submit(turn.request.message, turn.request)
+}
+
+async function submit(forcedText = null, retryRequest = null) {
     const text = String(forcedText ?? input.value).trim()
     if (!text || loading.value) return
 
+    if (failedTurn.value) {
+        messages.value = failedTurn.value.messages
+        failedTurn.value = null
+    }
+    const previousMessages = [...messages.value]
+    const request = retryRequest || {
+        message: text,
+        history: previousMessages.map(({ role, content }) => ({ role, content })),
+        last_suggested_cases: lastSuggestedCases.value ?? undefined,
+        pending_action: pendingAction.value ?? undefined,
+        pending_use_case_id: pendingUseCaseId.value ?? undefined,
+        selected_domain_code: selectedDomainCode.value ?? undefined,
+        selected_sector: selectedSector.value ?? undefined,
+        selected_intention: selectedIntention.value ?? undefined,
+    }
+    function fail(message) {
+        error.value = message
+        failedTurn.value = { request, messages: previousMessages }
+        messages.value = [...previousMessages, userMessage]
+        loading.value = false
+        nextTick(() => { scrollToBottom(); chatInputRef.value?.focus() })
+    }
     loading.value = true
     input.value = ''
     error.value = null
@@ -659,16 +753,7 @@ async function submit(forcedText = null) {
 
     try {
         await sendMessageStream(
-            {
-                message: text,
-                history: messages.value.slice(0, -2).map(({ role, content }) => ({ role, content })),
-                last_suggested_cases: lastSuggestedCases.value ?? undefined,
-                pending_action: pendingAction.value ?? undefined,
-                pending_use_case_id: pendingUseCaseId.value ?? undefined,
-                selected_domain_code: selectedDomainCode.value ?? undefined,
-                selected_sector: selectedSector.value ?? undefined,
-                selected_intention: selectedIntention.value ?? undefined,
-            },
+            request,
             {
                 onToken(token) {
                     const idx = messages.value.length - 1
@@ -723,35 +808,29 @@ async function submit(forcedText = null) {
                     })
                 },
                 onError(msg) {
-                    error.value = msg
-                    const idx = messages.value.length - 1
-                    if (idx >= 0 && messages.value[idx]?.role === 'assistant') {
-                        messages.value = [
-                            ...messages.value.slice(0, idx),
-                            { role: 'assistant', content: `Désolé, une erreur s'est produite : ${msg}` },
-                        ]
-                    }
-                    loading.value = false
-                    nextTick(() => chatInputRef.value?.focus())
+                    fail(msg)
                 },
             }
         )
     } catch (e) {
-        error.value = e instanceof Error ? e.message : 'Erreur inconnue'
-        const idx = messages.value.length - 1
-        if (idx >= 0 && messages.value[idx]?.role === 'assistant') {
-            messages.value = [
-                ...messages.value.slice(0, idx),
-                { role: 'assistant', content: `Désolé, une erreur s'est produite : ${error.value}` },
-            ]
-        }
-        loading.value = false
-        nextTick(() => chatInputRef.value?.focus())
+        fail(e instanceof Error ? e.message : 'Erreur inconnue')
     }
 }
 </script>
 
 <style>
+    .context-summary { padding: 10px 16px; background: var(--blue-light); font-size: 13px; overflow-wrap: anywhere; }
+    .context-summary small, .msg small { display: block; margin-top: 6px; }
+    .case-card { border: 1px solid var(--gray-200); border-radius: 10px; padding: 14px; margin-top: 12px; background: var(--white); }
+    .case-card h3 { font-size: 16px; line-height: 1.4; margin-bottom: 8px; }
+    .case-card p, .value-notes p { margin: 8px 0; }
+    .source-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .value-notes { margin: 10px 0; }
+    .value-notes summary { cursor: pointer; padding: 10px 0; min-height: 44px; font-weight: 600; }
+    .case-card .choice-chip { margin-top: 10px; }
+    .waiting-status { padding: 12px; color: var(--gray-600); }
+    .chat-window .choice-chip { min-height: 44px; }
+    .chat-window :focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
     *,
     *::before,
     *::after {
