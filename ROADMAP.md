@@ -17,6 +17,8 @@ de zéro. Les3 774blocs sont régénérés et contrôlés ; quatre parcours repr
 été ouverts localement sur mobile. Le bot et les cellules de la base v463 sont inchangés.
 La révision `v463-preparation-20260914-r1` reçoit100% du trafic après contrôle de
 la candidate. V463 précédente conservée pour retour arrière ; mêmes données et liens.
+Sources `3f7bf8b` / `8989942` publiées, CI `34849464018` réussie. Pas de nouvelle
+version Excel pour un changement de gabarit ; le serveur d'aperçu local est arrêté.
 
 **Livraison v463 initiale, désormais référence de retour arrière** :
 1 021fiches/parcours actuels et quatre pages historiques conservées. Autorisation

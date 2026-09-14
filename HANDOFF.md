@@ -7,6 +7,14 @@ Image `sha256:a8a6cf7cde6cb48f59ffe4e15e1943229f962fcbbb084d434bc2447426917ff8`,
 build `dd2v`. Précédent `v463-20260914-r1` / image `5de8ca8c…` conservé pour rollback.
 Le frontend Azure et GitHub Pages gardent leur code ; les liens pointent sur les pages actualisées.
 
+Sources publiées : `3f7bf8b1499989f99c7fedbd434793fad217fb7f` (chatbot/HTML),
+`8989942a53690b4901e2a6216059f06ca1692671` (générateur privé).
+CI `34849464018` réussie. Aucune modification frontend, donc pas de nouveau run Pages
+nécessaire ; les routes habituelles utilisent le backend mis à jour.
+Le serveur local4180 utilisé pour l'aperçu a été arrêté après ouverture de la page
+publique UC-1007 actualisée. La modification utilisateur du classeur historique
+v453 reste non stagée et intacte.
+
 La soumission CLI avait échoué avant tout run (archive lente puis reset10054).
 Reprise via APIs ARM documentées et transfert HTTPS natif de l'archive exactement
 vérifiée, sans URL signée persistée. Build réussi :239contrôles backend et20parcours,

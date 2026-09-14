@@ -10,6 +10,8 @@ Base v463, IDs, mapping, six étapes, source verbatim et bot inchangés.
 Toutes les pages sont régénérées et servies sur `v463-preparation-20260914-r1` à100%,
 image `a8a6cf7c…`, build privé `dd2v`. V463 précédente conservée pour rollback,
 aucune nouvelle version Excel ni changement de moteur.
+Sources `3f7bf8b` / `8989942` publiées ; CI `34849464018` réussie. Frontend inchangé,
+liens habituels conservés et serveur d'aperçu local arrêté.
 
 ## 14 septembre — backend v463 déployé après accord à12:13
 

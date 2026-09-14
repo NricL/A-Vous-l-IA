@@ -11,12 +11,16 @@ La base métier v463 et le bot ne changent pas. Révision Azure
 `sha256:a8a6cf7cde6cb48f59ffe4e15e1943229f962fcbbb084d434bc2447426917ff8`.
 Les mêmes liens restent utilisables ; le précédent v463 est conservé pour rollback.
 
+Sources de cette révision : chatbot/HTML `3f7bf8b`, générateur `8989942`.
+CI `34849464018` réussie. Le frontend GitHub Pages n'a pas changé et ne nécessite
+pas de nouveau build : son lien habituel ouvre les pages mises à jour sur Azure.
+
 **La v463 est servie sur le backend personnel**, avec cette révision de préparation :
 1 021fiches et parcours génériques en six étapes, quatre anciennes pages conservées.
 Le classeur complet, ses audits/commentaires et le mapping restent privés.
 Les pages HTML autorisées sont synchronisées avec les sources ; aucun classeur n'est publié.
 
-Livraison source : chatbot `830d2b0`, parcours `e61e487`. Pages `34835285869` et
+Première livraison v463 : chatbot `830d2b0`, parcours `e61e487`. Pages `34835285869` et
 CI `34835285888` terminés avec succès. Les deux anciennes révisions expérimentales
 `qual-20260913-r1` sont désactivées ; le lien de référence reste
 https://nricl.github.io/A-Vous-l-IA/.

@@ -25,6 +25,11 @@ and native HTTPS transfer succeeded on the same verified context. Signed URLs an
 access tokens remain in memory only. Candidate page/browser evidence preceded promotion;
 main page hashes and private404 boundaries were confirmed afterward.
 
+Source publication completed: public3f7bf8b/private8989942, CI34849464018 succeeded.
+Frontend code/image unchanged; no Pages rebuild or frontend revision required.
+Local preview4180 stopped. Current user URL and five representative current/four
+historical page hashes confirmed against the approved manifest after promotion.
+
 ## Historical initial v463 deployment — 14 September
 
 Main traffic100% on `avoulia-backend--v463-20260914-r1`, private builddd2u, image

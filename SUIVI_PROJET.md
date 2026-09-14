@@ -7,6 +7,13 @@ image `a8a6cf7cde6cb48f59ffe4e15e1943229f962fcbbb084d434bc2447426917ff8`.
 Le bot, la base métier v463, les URLs et les quatre pages historiques restent inchangés.
 La révision v463 précédente et son image sont conservées.
 
+Clôture de publication : sources `3f7bf8b1499989f99c7fedbd434793fad217fb7f`
+et `8989942a53690b4901e2a6216059f06ca1692671`, CI `34849464018` réussie.
+Le frontend n'a pas changé ; aucun nouveau build Pages/Azure frontend requis.
+La page publique du retour utilisateur expose bien les prompts révisés, les six
+étapes et le passage à la production, sans débordement mobile. Aperçu local arrêté.
+Reçu détaillé : `../_local-trace/2026-09-14-preparation-prompts/deployment-receipt.json`.
+
 Le retour utilisateur valide le déroulé du bot mais demande de revoir tous les prompts
 de préparation. Inventaire des seuls champs v463 déjà publiés :1 021cas,3 774prérequis,
 3 677libellés distincts. Quatre relectures sémantiques disjointes couvrent tout le lot ;

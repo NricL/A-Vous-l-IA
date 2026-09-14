@@ -9,6 +9,11 @@ private builddd2v. Workbook/IDs/mapping/bot unchanged; old v463 kept as rollback
 Initial CLI submission failed before a run; documented ARM/native HTTPS transport
 resumed the same verified archive successfully. The deployment below is historical.
 
+Published source commits: `3f7bf8b1499989f99c7fedbd434793fad217fb7f` and
+`8989942a53690b4901e2a6216059f06ca1692671`; CI `34849464018` succeeded.
+Frontend unchanged, existing Pages/Azure frontend links use the revised pages.
+The local preview server was stopped; private workbook and user edits remain untouched.
+
 **V463 backend deployed,14September:** user approved1021Sheet1fiches and generic six-step
 parcours at12:13. Revision `v463-20260914-r1` serves100% after isolated acceptance;
 image `5de8ca8cc8f46828b8a62ddf83b7a47f0c9afb767b2d75720f6558a6e0c95182`,
