@@ -1,5 +1,67 @@
 # Avoulia — Changelog v1 → v2 (synthèse d'onboarding)
 
+## 14 septembre — backend v463 déployé après accord à12:13
+
+Publication des fiches et parcours explicitement confirmée après relecture des exemples.
+Base/index/pages cohérents,1 021parcours courants et quatre historiques préservés,
+sans exposer classeur/audits/mapping. Révision `v463-20260914-r1` à100% après recette ;
+ancienne révision stable conservée. HTML autorisés synchronisés, CSV retiré du HEAD public,
+pas de réécriture de l'historique. Pas de nouveau moteur, modèle ou identité visuelle.
+
+## 14 septembre après 11:29 — finalisation privée du contenu et aperçus
+
+Réutilisation de la revue complète v462, sans nouvel audit général ni réglage du bot.
+Candidate v463 distincte : quatre ajustements ciblés, journal avant/après et quatre
+aperçus des six étapes/prompts génériques, tous conservés dans le classeur labellisé.
+1 021IDs, taxonomie, modes,6 158formules et source v462 préservés ; cinq réserves
+taxonomiques restent documentées. Aucun contenu privé, classeur ou audit publié.
+Les aperçus sont textuels, pas un nouveau site. Stable/v461 inchangés.
+
+## 14 septembre à 10:59 — priorité aux fiches et parcours
+
+Restauration à l'identique des consignes du sélecteur existant ; seul le correctif
+de coupure prématurée reste dans le moteur. Jusqu'à cinq pistes utiles ne constituent
+pas un échec ; aucune amélioration des nouvelles consignes n'était démontrée en comparaison.
+Arrêt des réglages et des builds supplémentaires sur ce chantier.
+
+Le gabarit privé des six étapes reçoit une introduction plus courte, des choix de
+préparation en langage courant et trois contrôles avant usage du premier livrable :
+utile, fiable, utilisable. Champs source, ordre, prompts génériques et copie intacte
+conservés ; aucun ajout au dialogue du bot.
+
+Travail local non publié. L'image privée dd2s est antérieure à la restauration du prompt
+et n'est plus une candidate à déployer. Aucun classeur ni page servie modifié.
+
+## 14 septembre à 10:21 — recentrage 80/20, local non publié
+
+- Retrait du bot parallèle `/preview`, de son vérificateur exhaustif, de la recherche
+  secondaire et des mécanismes de contexte automatique, ainsi que de leurs routes,
+  flags, dépendances et recettes de build. Les sources retirées restent archivées.
+- Retour des sept fichiers d'intégration frontend/CI/Pages à la configuration stable
+  `d02ffad`, sans modification de `HomeView.vue`, des cinq correctifs UX ou du lockfile.
+- Conservation du correctif intrafiltre : pool complet avant sélection, cinq résultats
+  maximum après rapprochement. Précision du prompt existant : action/objet/livrable,
+  contexte d'audience non bloquant, exclusions et spécialisation réelle préservées.
+- Ajout de la suite synthétique bornée `generic-intent` au banc existant ; pas de nouvelle
+  inférence dans le produit, ni règle spéciale liée à un ID ou à GenZ.
+- Parcours privé : six étapes et bénéfices de l'audit conservés, sans injection du besoin
+  dans le prompt. Roadmap priorisée bot → contenu/parcours → aides complémentaires.
+
+R2 est abandonnée, pas livrée. Aucun commit/push, changement Azure ou modification
+de catalogue dans ce lot local. Les constats et échecs ci-dessous sont historiques.
+
+## Archive du 14 septembre — fiabilité de la candidate r2 retirée
+
+**Non livré : recette sémantique encore en échec.** Les changements ci-dessous sont locaux et expérimentaux ; les révisions en ligne ne sont pas remplacées. Un schéma conforme ne résout pas à lui seul les erreurs de jugement du modèle.
+
+Ajout d'opérations HTTP asynchrones, de polling et d'annulation, avec état validé distinct du brouillon et des erreurs. Travail d'inférence hors du verrou de transition, lecture et qualification d'autres sessions disponibles, garde de révision avant validation, expiration et arrêt bornés. Les endpoints preview synchrones refusent les inférences en cloud ; le bot stable n'est pas modifié.
+
+Vérification par schéma JSON strict et références vers le besoin/source réellement fournis ; citations retrouvées par le code et verdict dérivé des contrôles. Le schéma interdit un jugement positif sans preuve référencée ; seules les restrictions fonctionnelles doivent être inventoriées, pas les simples données à préparer ou règles de relecture. Quotas conservés, attente annulable, réservations concurrentes suivies, vecteur de requête isolé par recherche. Vérification finalement `medium`/3000 après abandon de l'essai `low`/1800 ; sélection maintenue à `medium`/2200. Pas de repli vers des cas non vérifiés ni de changement de catalogue.
+
+Interface prévue pour suivi/reprise de l'opération, annulation et conservation du besoin sur échec. Libellés des parcours adaptés à l'hébergement réel ; entrée statique Pages `/preview/` au lieu du seul fallback404. La fiche reste courte avec un seul bouton parcours. Cette entrée décrit le lot en intégration, pas son reçu de mise en ligne.
+
+La candidate r1 `812aa94` est déjà publiée, mais ses erreurs504 et502 empêchent sa promotion. Les images/source privées et la v462 restent hors de la publication de données ; la version stable est conservée.
+
 ## Candidate de test Azure — préparation du 13 septembre
 
 Hébergement cloud explicite pour PUBLIC_PAGES, distinct du bot stable : origines/HTTPS/pairs proxy contrôlés, authentification Azure par configuration existante sans CLI/fallback, requêtes bornées et sessions monoréplique. Packaging en liste blanche et image finale sans payload privé hérité ; dépendance du lecteur public déclarée, contrôles Python 3.11 et démarrage sous utilisateur non privilégié.

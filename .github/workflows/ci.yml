@@ -34,7 +34,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt -r requirements-preview.txt
+          pip install -r requirements.txt
       - name: Compile (py_compile)
         run: python -m compileall -q app
       - name: Unit tests
@@ -57,8 +57,8 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Type-check
         run: npm run type-check
-      - name: Chat and preview state regressions
-        run: node --test scripts/check-chat-state.mjs scripts/check-preview-state.mjs
+      - name: Chat state regressions
+        run: npm run check:chat
       - name: Détection de composants morts
         run: npm run check:dead
       - name: Build

@@ -1,5 +1,140 @@
 # Avoulia V2 — Implementation Handover Guide for Simplon
 
+## Livraison v463 — backend déployé le 14 septembre
+
+Révision `avoulia-backend--v463-20260914-r1`,100% du trafic principal, image
+`sha256:5de8ca8cc8f46828b8a62ddf83b7a47f0c9afb767b2d75720f6558a6e0c95182`.
+Construction privée `dd2u`, Python3.11.16 :239contrôles backend et17parcours,
+un contrôle Node ignoré dans chaque suite Python. `dd2t` avait échoué sur un ancien
+libellé de titre attendu par un test ; l'assertion suit le gabarit approuvé, comportement inchangé.
+
+Le payload contient le classeur labellisé dans `/app/private/catalogue.xlsx`, le mapping
+et le manifeste privés,1 021pages v4.6.3 et quatre pages historiques byte-identiques.
+Seul `Sheet1` alimente l'index ; aucune feuille d'audit ne devient document RAG.
+Le mapping CSV est retiré du HEAD public et reste dans le payload privé ; son ancienne
+présence dans l'historique Git n'est pas effacée. Les hashes de parcours ne sont pas des secrets.
+
+Recette avant/après bascule : pages exactes et exports privés404, GenZ avec cas attendu
+présent parmi les propositions, détail HTTP/SSE fidèle et lien correct, demande domestique
+hors sujet sans cas. Navigateur : quatre parcours à390px sans débordement, prompt accessible,
+progression conservée après rechargement ; vrai flux Pages → cas → popup v463 générique.
+La zone de saisie historique du bot est conservée ; aucune question de coaching n'est ajoutée.
+
+Rollback rapide : remettre100% sur `avoulia-backend--ux-20260913-d02ffad` (image
+`058fe528…`), sans toucher à ses données/mapping. L'index v463 utilise
+`/app/data/chroma-v463-20260914-r1`, collection `documents-v463-20260914-r1`,
+locale à la réplique. Le frontend Azure conserve sa révision et son image stables.
+
+### Autorisation et périmètre
+
+Autorisation explicite : publier les1 021fiches `Sheet1` et les six étapes génériques,
+en gardant classeur/audits/commentaires/mapping privés. La base du dossier de référence
+réenregistrée par Excel a une autre empreinte binaire, mais toutes ses cellules,
+formules et valeurs en cache sont identiques à la copie relue.
+
+La nouvelle image part du stable `058fe528…`, utilise `app.main` et les consignes
+de sélection existantes ; seul le correctif de pool est ajouté. Ne pas utiliser
+`dd2s`, le moteur preview, ni le template Azure de la dernière révision expérimentale.
+Cloner le template de `ux-20260913-d02ffad`, conserver les références de secrets,
+préparer un index local à la réplique distinct et garder100% du trafic stable pendant
+la recette. Cette séquence a été appliquée avant la bascule ; le frontend Azure est réutilisé sans changement visuel.
+
+Trace de cette livraison : `../_local-trace/2026-09-14-v463-publication/`.
+Les jalons « privé/non autorisé » ci-dessous sont historiques, pas une interdiction
+du périmètre précisément autorisé à12:13. Le classeur complet reste exclu du public.
+
+## Historique de préparation du contenu et du nettoyage
+
+**Jalon contenu du 14 septembre à11:29 :** v463 privée, construite depuis la v462
+inchangée par Excel natif, avec étiquette préservée. Quatre corrections éditoriales,
+1 021IDs/modes/taxonomie identiques,6 158formules et24feuilles d'origine conservées.
+Trois nouvelles feuilles : journal exact,32lignes d'aperçus pour quatre parcours,
+bilan de validation. Les valeurs avant/après restent dans le classeur, pas dans ce dépôt.
+Les aperçus sont textuels et protégés, non des HTML interactifs publiables.
+Trace metadata : `../_local-trace/2026-09-14-content-finalization/journal.json`.
+Ne pas utiliser le pipeline de génération pour exporter ce contenu privé avant validation
+de publication ; aucune source/index/page courante n'a changé.
+
+**Trace de reprise locale :** le dossier frère `../_local-trace/2026-09-14-8020/`
+contient le journal du recentrage. L'archive immuable `../_local-trace/2026-09-14-r2/`
+conserve décisions, commentaires, échecs et patches exacts antérieurs. Ces dossiers
+restent hors de ce dépôt public et des contextes Docker, sans classeur ni secret.
+
+## Reprise active — 80/20, décision du 14 septembre à 10:21
+
+**Mise à jour à 10:59 : priorité aux fiches et parcours.** Le sélecteur retrouve
+exactement ses consignes antérieures ; les ajouts expérimentaux de prompt et leurs
+assertions sont retirés, faute de bénéfice comparatif démontré. Le correctif intrafiltre
+reste seul dans le moteur. L'image privée `dd2s` contient encore les consignes retirées :
+elle est historique, ne pas la déployer comme cette version minimale.
+
+Le générateur de parcours conserve les apports d'adoption et allège maintenant son
+introduction ; étape2 en langage courant et étape4 avec contrôles utile/fiable/utilisable.
+Pas de modification de classeur ni de régénération des pages dans ce travail de gabarit.
+Trace courante hors dépôt : `../_local-trace/2026-09-14-parcours-priority/journal.json`.
+
+Le moteur conservé est `app.main` / `haystack_rag.py`, interface `HomeView.vue`.
+L'expérimentation parallèle `/preview` est retirée du code et des recettes actives,
+pas réparée ni promue. Ne pas recréer un vérificateur LLM ni un second moteur pour
+résoudre les faux rejets qu'elle avait introduits. Les correctifs asynchrones retirés
+restent récupérables dans l'archive, sans imposer leur protocole au bot existant.
+
+Le correctif de sélection déjà présent dans `812aa94` reste : tous les candidats du
+pool récupéré sont visibles avant le plafond de cinq résultats après rapprochement.
+Le stable Azure `d02ffad` ne contient pas encore ce correctif. Le prompt existant
+reste inchangé. Les exclusions, filtres et identités sont préservés ; jusqu'à cinq
+pistes utiles sont acceptées, pas une liste imposée d'un seul ID. Les documents à réunir
+se traitent dans le parcours, sans supposer leur disponibilité.
+
+Le détail conserve le titre/texte source et le lien générique autoritaire, sans nouvel
+appel de pertinence ni texte du besoin dans le lien ou le prompt copié. Le générateur
+privé conserve les six étapes et les améliorations d'adoption ; il retire son champ
+de contexte automatique et les overrides réservés au moteur d'essai.
+
+Contrôles ciblés : `test_case_selection_prompt`, `test_infilter_retrieval`,
+`test_chat_relevance`, `test_chat_regressions`, `test_relevance_evaluation` ;
+suite opt-in `evaluate_chat_relevance --suite generic-intent`, au maximum seize
+appels et aucun par défaut. Les fixtures ne prouvent pas une recette du catalogue réel.
+Définir `PARCOURS_SOURCE_ROOT` vers le dépôt privé actif pour les contrôles croisés ;
+ne pas lire le classeur utilisateur modifié ni régénérer les données pour ces essais.
+
+Publication suivante : contexte neuf du bot existant, sans source privée dans le dépôt
+public, aperçu exact puis confirmation. Aucun commit, push ou déploiement dans le
+nettoyage local. La r1 distante n'est pas arrêtée par la suppression des fichiers ;
+son retrait cloud devra être explicite, en conservant images et trafic stable.
+
+## Archive r1/r2 — historique, commandes et cibles retirées
+
+Les instructions de préversion ci-dessous sont conservées pour comprendre et
+reconstituer les essais passés, jamais pour relancer le développement ou déployer
+des modules désormais supprimés. Le cadrage actif ci-dessus et ROADMAP les remplacent.
+
+### Correctif de fiabilité r2 — passe antérieure du 14 septembre
+
+**État final de cette passe : bloqué, non déployé.** Le transport asynchrone et la reprise ont été exercés, mais le vérificateur expérimental ne passe pas la recette sémantique élargie : faux rejet du cas GenZ et réponse tronquée sur un contrôle spécialisé. La validité des références ne prouve pas la vérité du jugement. Le build privé `dd2r` a aussi échoué sur une assertion de langue du prompt, corrigée ensuite localement ; aucune image r2 validée n'a été produite. Ne pas pousser/promouvoir ce lot comme terminé.
+
+La candidate r1 a été publiée (`812aa94`, gabarits privés `5c748ef`) ; le site habituel et son trafic principal restent sur les révisions `ux-20260913-d02ffad`. Une réorientation a dépassé la limite HTTP Azure de 240s ; le calcul continuait et retenait le verrou global. Un autre essai a produit une erreur de vérification 502. Ces échecs restent consignés, même si une relance a réussi.
+
+Le prochain backend reçoit les actions via `POST /api/preview/v1/sessions/{sid}/operations`, avec l'enveloppe Action existante. Réponse `{protocol_version:1,state,operation}` : HTTP202 si l'opération est en attente/en cours, 200 pour une transition courte terminée. `operation` contient `id`, `request_id`, `status`, `error` et `draft`. Les états sont `queued`, `running`, `succeeded`, `failed`, `cancelled`. Le dernier résultat ou échec peut être retrouvé par `GET .../operations/current` ; `GET .../operations/{id}` suit une opération connue. `POST .../operations/{id}/cancel` accepte `{protocol_version:1}` et annule uniquement cette opération.
+
+Les appels HTTP restent courts pendant le calcul. Une réponse perdue doit conduire à lire l'opération courante et rapprocher son `request_id`, jamais à resoumettre aveuglément avec un nouvel identifiant. L'état validé, le brouillon soumis et le statut d'échec restent distincts. Les anciens endpoints preview `/actions` et `/actions/stream` refusent explicitement les actions nécessitant une inférence en hébergement cloud (`async_required`, 409) ; le bot stable `/api/v1` n'est pas modifié.
+
+`preview_operations.py` borne l'admission à deux travaux d'inférence, sans file d'attente, et à 64 opérations par session. Les actions de qualification sans inférence ne patientent pas derrière ces travaux. `preview_execution.py` fournit échéance monotone et annulation coopérative ; maximum 600s par opération, limites SDK bornées par le temps restant. Une annulation invalide immédiatement le droit de valider le résultat ; un appel distant déjà engagé peut encore terminer, mais ne peut ni appliquer un ancien résultat ni déclencher la suite du pipeline. Sa place reste occupée jusqu'à son retour, pour ne pas contourner la limite de capacité.
+
+Les transitions utilisent un verrou court ; aucun appel modèle ni attente de quota ne le retient. Avant validation finale : mêmes session, révision, question et catalogue, même opération active. Annulation, expiration, redémarrage ou changement concurrent interdisent toute validation tardive. Les activités utilisateur renouvellent le délai d'inactivité d'une heure ; la tâche de nettoyage ne le renouvelle pas. Sessions et opérations restent en mémoire d'un seul processus/réplique, sans données utilisateur persistées.
+
+Le vérificateur interne `avia_verification_v5` demande des références énumérées vers les segments du besoin original et de la source, avec schéma JSON strict. Le code retrouve les citations et calcule le verdict à partir de la couverture et des restrictions fonctionnelles ; pas de citation fabriquée ni d'acceptation en cas de contrat invalide. Le schéma interdit un jugement positif sans référence au besoin. La liste des restrictions doit rester vide quand il n'y en a pas ; les données à réunir, garde-fous de relecture, bénéfices et positionnement générique PME ne sont pas des activités supplémentaires à demander. Les véritables spécialisations de canal/population et les exclusions restent bloquantes.
+
+La sélection conserve `medium`/2200 ; la vérification conserve finalement `medium`, avec un plafond de3000 par cas. L'essai `low`/1800 a été abandonné après des erreurs sémantiques et de références sur des contrôles élargis. Ces observations ne prouvent pas que l'effort de raisonnement était leur cause unique. Les verdicts sémantiques restent ceux d'un modèle et peuvent se tromper malgré des références valides ; ne pas confondre conformité structurelle et pertinence universelle. Erreurs, refus ou troncatures restent explicites : aucun faux résultat vide, aucune liste noire de cas ni limite artificielle à un seul résultat.
+
+Le budget 10k TPM conserve les réservations en cours et les fenêtres de consommation observée. L'attente est annulable ; le verrou de budget ne couvre pas le réseau. Chaque recherche utilise son propre vecteur de requête ; le cache partagé ne doit jamais lui substituer celui d'une autre session. Aucune hausse de modèle, quota ou infrastructure de données.
+
+Pour la recette HTTP réelle : `python -B -m scripts.smoke_preview_operations --origin <origine explicite de la candidate> --stage genz --live-consent`, puis `negative` et `orientation`. Ce script réutilise les scénarios existants, mesure les temps de soumission/polling, borne chaque requête HTTP à 20s et ne confond pas calcul long et HTTP bloquant. Il conserve les échecs ; les contrôles unitaires utilisent des attentes simulées, pas des appels Azure.
+
+La cible r2 est `qual-20260914-r2` pour les deux images/révisions. Reprendre la recette de contexte public en liste blanche, le snapshot et les références de secrets existants ; inclure les nouveaux modules/tests. Le frontend Pages reçoit l'API r2 et un vrai fichier `preview/index.html`, pour que l'URL canonique `/A-Vous-l-IA/preview/` ne dépende plus du fallback404. Les libellés distinguent explicitement hébergement Azure et essais locaux. Aucun texte privé v462 n'entre dans cette livraison.
+
+Déployer la candidate corrigée séparément, conserver le site stable à100%, puis éprouver recherche/réorientation, annulation pendant une recherche, deuxième session, rechargement, erreurs et parcours sur mobile. Conserver les anciennes images ; retirer l'ancienne candidate seulement après bascule du frontend de test. Les accords et reçus historiques ci-dessous ne prouvent pas que r2 est déjà livrée.
+
 ## État déployé — 13 septembre 2026
 
 Le dev sert v461 avec les cinq correctifs UX via `avoulia-backend--ux-20260913-d02ffad`,100% trafic, mode Single ; image `sha256:058fe52822fea24c4e52e17b27242480f3ab96771b883243d8bad7efb2aaaafb`. Le frontend de référence reste https://nricl.github.io/A-Vous-l-IA/. Les étapes de préparation ci-dessous sont historiques, pas des tâches à recommencer.

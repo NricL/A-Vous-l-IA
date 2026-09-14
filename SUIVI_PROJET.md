@@ -1,5 +1,123 @@
 # Avoulia V2 — Suivi Projet & Décisions
 
+### 14 septembre — v463 servie, publication des sources en cours
+
+La candidate `avoulia-backend--v463-20260914-r1` a été créée depuis le template
+du stable, avec références de secrets et index distinct. Image privée `dd2u`,
+digest `5de8ca8cc8f46828b8a62ddf83b7a47f0c9afb767b2d75720f6558a6e0c95182`.
+Elle a été exercée avec le stable à100%, puis le trafic principal est passé à100%v463.
+L'ancien stable et son image restent conservés. Aucun nouveau modèle ou quota.
+
+1 021pages générées depuis le contenu explicitement autorisé et quatre historiques
+préservées ; mêmes associations ID/hash. Les HTML publiables sont synchronisés dans
+les sources, le CSV de mapping est retiré du HEAD public (historique non réécrit).
+Le classeur complet, sa protection et les audits restent hors du dépôt/public webroot.
+
+La recette réelle retrouve le cas produit, accepte plusieurs propositions utiles et
+ouvre le bon parcours via HTTP/SSE et Pages. Sur quatre parcours, six étapes,
+navigation au prompt et progression fonctionnent à390px sans débordement. Le besoin
+initial est réutilisé et n'est pas injecté dans le prompt générique de la page.
+
+Incidents tracés : premier build `dd2t` arrêté sur un ancien titre attendu, corrigé
+sans affaiblir le contrôle ; réponse PATCH Azure asynchrone sans objet applicatif,
+puis état relu sans renvoyer la création ; copie PowerShell lente reprise par copie
+native idempotente avec vérification des1 025empreintes. Aucun échec masqué par une
+nouvelle règle de sélection ou un faux résultat vide.
+
+### 14 septembre à12:13 — publication v463 autorisée
+
+Après relecture positive des quatre exemples, Eneric confirme la publication du
+périmètre exact :1 021fiches `Sheet1`, parcours génériques, bot existant avec seul
+correctif de coupure et suppression du moteur expérimental. Classeur complet,
+audits/commentaires/arbitrages et mapping restent privés.
+
+La copie canonique a été réenregistrée, mais une comparaison de toutes les cellules,
+formules et caches confirme l'identité de contenu avec la version relue. Un nouveau
+staging est préparé :1021pages actuelles, quatre historiques et mapping conservés,
+image privée issue du stable, candidate sans trafic avant recette et bascule.
+Une erreur de connexion Azure CLI en lecture est contournée par des appels ARM bornés ;
+aucun changement de compte, de modèle ou de quota.
+
+### 14 septembre après 11:29 — candidate de contenu v463 préparée
+
+La v462 et sa revue complète ont été rapprochées :370cellules métier corrigées dans
+la passe précédente,547propositions arbitrées et couverture1 021cas. La dernière
+passe applique seulement quatre ajustements de premières actions/prérequis, puis
+ajoute quatre aperçus protégés dans une nouvelle version v463. Aucun contenu privé
+ne figure dans ce journal public.
+
+Enregistrement/recalcul par Excel natif, étiquette conservée ; le convertisseur
+LibreOffice n'est pas utilisé pour éviter de perdre la protection. Un défaut du
+vérificateur sur cellule vide a été corrigé avant la relecture finale, sans réappliquer
+les changements. Contrôle final : source inchangée,24feuilles conservées,6 158formules,
+zéro erreur de cache, quatre modifications exactes et32lignes d'aperçus.
+Les cinq réserves de classement existantes restent inchangées.
+
+Les aperçus reprennent réellement les six étapes et prompts générés en mémoire,
+mais sous forme de texte dans Excel ; aucun HTML non protégé créé. La publication
+reste en attente de validation explicite du contenu, sans nouveau build/déploiement.
+Trace hors dépôt : `../_local-trace/2026-09-14-content-finalization/journal.json`.
+
+### 14 septembre à 10:59 — passer aux améliorations de valeur d'usage
+
+Eneric estime les recommandations suivantes plus importantes que poursuivre la sélection.
+Le prompt du bot est revenu à l'identique de la source existante ; seul le correctif
+intrafiltre reste. L'évaluation à ID unique était trop stricte pour la découverte
+de cinq pistes. Le lot public interrompu conserve aussi une vraie limite observée sur
+la recette de gâteau (propositions de contenus marketing) ; ni ce défaut ni la présence
+du bon cas dans les trois demandes produit ne mesurent le stable avant/après.
+Pas de nouveau modèle, filtre, vérificateur ou essai de formulation.
+
+Les gabarits de parcours sont maintenant le chantier actif : accueil raccourci en une
+carte, prérequis en langage courant et trois contrôles concrets à l'étape4.
+24contrôles ciblés bot/parcours et9contrôles synthétiques du générateur passent.
+Cela porte sur les sources du générateur, pas les1 021pages publiques ou le classeur.
+Nouvelle trace : `../_local-trace/2026-09-14-parcours-priority/journal.json`.
+
+La construction privée dd2s avait réussi, mais son prompt a été retiré depuis :
+aucune activation de cette image. La livraison du bot est différée ; stabilité et
+contenu réellement servi restent inchangés.
+
+### 14 septembre à 10:21 — efficacité et pertinence, recentrage 80/20
+
+Eneric confirme : intention = action/objet/livrable ; cas et parcours génériques,
+adaptation par l'usager. Le bot existant est conservé. Nettoyage effectif des37fichiers
+du moteur parallèle et de ses interfaces/tests/recettes spécifiques ; sept fichiers
+d'intégration frontend/CI/Pages remis au fonctionnement stable. Les27fichiers R2 ont
+été rapprochés par SHA256 de l'archive immuable avant toute suppression.
+
+Le correctif de pool intrafiltre est conservé ; le prompt de sélection existant distingue
+contexte facultatif et activité réellement différente, sans ajouter de modèle ni de
+personnalisation. Le générateur privé garde les six étapes, prérequis, contrôles et
+réutilisation, mais retire le contexte ajouté au presse-papiers et les overrides de test.
+Le classeur utilisateur modifié n'est ni lu, ni écrit, ni indexé.
+
+La roadmap actualisée remplace les instructions R2 : priorité au correctif du bot,
+puis aux1 021fiches et parcours génériques. Réorientation, relais humains et bilan
+volontaire sont différés. Pas de refonte graphique, taxonomie, nouveau modèle ou quota.
+Sources locales seulement, aucune livraison distante ; la r1 distante reste inchangée.
+Trace détaillée hors dépôt : `../_local-trace/2026-09-14-8020/journal.json`.
+
+Clôture locale :132contrôles du bot existant,39contrôles croisés parcours/publication,
+31contrôles frontend avec types/build,11contrôles synthétiques du générateur.
+Le banc existant a réalisé huit appels modèle sur fixtures : huit résultats conformes,
+dont les trois formulations produit, cible sans vidéo imposée, données à préparer,
+vidéo explicitement demandée, traduction seule et absence de correspondance.
+Zéro erreur de transport/troncature sur ce lot borné ; ce n'est pas une recette de
+récupération sur le catalogue réel ni une preuve de performance utilisateur.
+La revue indépendante des deux diffs n'a trouvé aucun problème significatif.
+Les anciens serveurs locaux de préversion ont été arrêtés ; aucune action cloud.
+
+### Historique — publication r1 puis correction de fiabilité abandonnée
+
+**Fin de passe : r2 non livrée.** Les opérations courtes, sessions concurrentes, reprise/annulation et récupération réseau sont implémentées et exercées. La validation sémantique ne passe pas : le dernier vérificateur rejette encore un cas GenZ adapté et a épuisé son budget sur un contrôle spécialisé. Le code reste local ; aucun nouveau push ou endpoint Azure. Le build privé `dd2r` n'a pas produit d'image finale. Les serveurs r2 temporaires ont été arrêtés ; le stable et r1 restent inchangés.
+
+Le lot exact approuvé à07:20 a été publié : chatbot `812aa94`, gabarits privés `5c748ef`, Pages `34809713720` et CI `34809713718` réussis. Révisions backend/frontend `qual-20260913-r1` saines à0% du trafic principal, révisions stables à100%. Source PUBLIC_PAGES v4.6.1 uniquement.
+
+Le chemin nominal GenZ a retrouvé UC-0706 sans réorientation ; le parcours réel s'est ouvert depuis Pages avec besoin conservé et six étapes, sans débordement à390px. Mais une réorientation a expiré après242s ; une recherche bloquait aussi la création d'une autre session. Un essai navigateur a renvoyé502 du vérificateur, avant succès d'une seule relance. Les bandeaux « NON DÉPLOYÉ » étaient obsolètes et Pages utilisait un fallback404. Aucun de ces constats n'est effacé du bilan.
+
+À08:03, Eneric demande de corriger puis déployer. Trois scopes séparés : serveur asynchrone/atomicité, vérification référencée/quotas, interface polling/annulation/reprise. Le parent intègre gabarits, packaging, documentation et recette. R2 utilise un protocole d'opération additif, un budget partagé borné et des références déterministes vers les preuves fournies ; modèles, filtres, source et six étapes inchangés. Les contrôles sémantiques ciblés ne valent pas validation exhaustive de tous les besoins.
+
 ### 13 septembre à 20:47 — livraison de test GitHub/Azure demandée
 
 Changement de séquence demandé : héberger une candidate isolée puis poursuivre les essais, plutôt que terminer les essais en local. La version stable garde son trafic principal ; pas de promotion automatique. La candidate reste PUBLIC_PAGES v4.6.1, sans la v462 privée, avec identité AVIA et fiche terminale courte suivie du parcours.

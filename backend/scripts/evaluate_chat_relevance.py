@@ -43,6 +43,7 @@ DIAGNOSTIC_VERSION = "2.0-numbered-clarifications"
 SUITE_CONTEXTS = {
     "chantier": (DOMAIN, "BTP", INTENTION),
     "stock-assumptions": ("logistique_stocks", "Commerce & retail", "Réduire les stocks invendus"),
+    "generic-intent": ("marketing_visibilite", "Autre", "Créer des contenus marketing"),
 }
 
 _NUMBERED_LINE = re.compile(r"(?m)^[ \t]*(?:#{1,6}[ \t]*)?(?:[-+*][ \t]+)?[*_`]*\d+")
@@ -79,6 +80,28 @@ def _numbered_clarifications_only(raw, headings):
 
 
 def synthetic_documents(suite="chantier"):
+    if suite == "generic-intent":
+        domain, sector, intention = SUITE_CONTEXTS[suite]
+        rows = [
+            ("product-rewrite", "Réécrire des fiches produit",
+             "Reformuler les descriptions existantes pour clarifier les caractéristiques, les bénéfices "
+             "et les arguments commerciaux. Fournir les fiches et faire relire les textes avant utilisation."),
+            ("product-video", "Préparer des scripts vidéo de présentation produit",
+             "Écrire des scripts TikTok de trente secondes : séquences à filmer et texte à prononcer "
+             "pour présenter les produits."),
+            ("website-analysis", "Analyser la conversion du site web",
+             "Analyser les statistiques de navigation, identifier les pages où les visiteurs abandonnent "
+             "et recommander des changements de structure et d'appels à l'action."),
+            ("product-translation", "Traduire des fiches produit",
+             "Traduire fidèlement les descriptions produit dans une autre langue en conservant "
+             "les caractéristiques et le sens du texte source."),
+        ]
+        return [
+            SimpleNamespace(id=f"synthetic-{key}", content=description, meta={
+                "domaine": domain, "secteur": sector, "intention": intention,
+                "cas_utilisation": title, "description_cas_utilisation": description,
+            }) for key, title, description in rows
+        ]
     if suite == "stock-assumptions":
         domain, sector, intention = SUITE_CONTEXTS[suite]
         rows = [
@@ -121,6 +144,35 @@ def synthetic_documents(suite="chantier"):
 
 
 def scenarios(suite="chantier"):
+    if suite == "generic-intent":
+        return [
+            {"id": "product-genz", "query":
+             "améliorer la pertinence des description produit pour l'adapter à la GenZ",
+             "expected_ids": ["synthetic-product-rewrite"]},
+            {"id": "product-new-clients", "query":
+             "Je veux réécrire mes fiches produits pour cibler de nouveaux clients.",
+             "expected_ids": ["synthetic-product-rewrite"]},
+            {"id": "product-generic", "query":
+             "Je veux améliorer mes descriptions produit.",
+             "expected_ids": ["synthetic-product-rewrite"]},
+            {"id": "product-no-video", "query":
+             "Je veux réécrire mes fiches produit pour la GenZ, pas faire de vidéo ni analyser mon site.",
+             "expected_ids": ["synthetic-product-rewrite"]},
+            {"id": "product-manual-preparation", "query":
+             "Je veux réécrire mes fiches produit pour mieux expliquer les bénéfices. "
+             "Je rassemblerai les textes à retravailler plus tard.",
+             "expected_ids": ["synthetic-product-rewrite"]},
+            {"id": "product-explicit-video", "query":
+             "Je veux préparer les scripts de vidéos TikTok pour présenter mes produits.",
+             "expected_ids": ["synthetic-product-video"]},
+            {"id": "product-translation-only", "query":
+             "Je veux uniquement traduire mes fiches produit du français à l'allemand, "
+             "sans reformuler les arguments commerciaux.",
+             "expected_ids": ["synthetic-product-translation"]},
+            {"id": "product-zero-match", "query":
+             "Je veux une recette de gâteau au chocolat.",
+             "expected_ids": []},
+        ]
     if suite == "stock-assumptions":
         return [
             {"id": "stock-no-seasonality", "query":

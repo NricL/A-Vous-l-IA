@@ -25,10 +25,19 @@ body{font-family:'Public Sans',system-ui,sans-serif;background:var(--papier);col
 h1{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:clamp(26px,5vw,38px);
   line-height:1.12;margin:10px 0 12px;letter-spacing:-.01em}
 .resume{color:var(--sourdine);font-size:17px;max-width:60ch}
+.carte{margin-top:22px;padding:18px;background:var(--carte);border:1px solid var(--ligne);border-radius:12px}
+.carte h2{font-family:'Bricolage Grotesque',sans-serif;font-size:20px;margin-bottom:8px}
+.carte ul{padding-left:22px}
 .puces{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
 .puce{font-size:12.5px;font-weight:600;background:var(--carte);border:1px solid var(--ligne);
   border-radius:999px;padding:5px 12px;color:var(--encre)}
 .puce.sensible{border-color:#C9A227;background:#FBF6E5}
+.tester-rapidement{display:inline-block;margin-top:18px;padding:10px 16px;border-radius:8px;
+  background:var(--action);color:#fff;font-weight:700;text-decoration:none}
+.tester-rapidement:hover{background:var(--action-fonce)}
+#prompt-demarrage{scroll-margin-top:90px}
+#prompt-demarrage:focus{outline:3px solid var(--action);outline-offset:4px}
+a:focus-visible{outline:2px solid var(--action);outline-offset:4px}
 
 /* ---------- quick win (accordion en bas) ---------- */
 .quickwin-accordion{margin-top:26px;background:var(--carte);border:1px solid var(--ligne);border-radius:12px;overflow:hidden}
@@ -71,6 +80,32 @@ details[open] summary .chevron{transform:rotate(90deg)}
 .contenu{padding:2px 18px 18px;border-top:1px solid var(--ligne)}
 .contenu p{margin:12px 0;max-width:62ch}
 .contenu p.note{font-size:14px;color:var(--sourdine)}
+.source{white-space:pre-wrap;overflow-wrap:anywhere}
+.reflexion{padding-left:22px}
+.reflexion li{padding:6px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.choix{border:0;margin:16px 0}
+.choix legend{font-weight:700;margin-bottom:8px}
+.choix label{display:flex;gap:10px;align-items:baseline;margin:8px 0;cursor:pointer}
+.choix input{accent-color:var(--action)}
+.preparation{margin:10px 0 18px}
+.preparation label{display:block;font-size:14px;margin-bottom:5px}
+select,textarea{font:inherit;color:var(--encre);background:var(--carte);border:1px solid var(--ligne);
+  border-radius:8px;padding:9px;max-width:100%;width:100%}
+.aide-element summary{font-size:14px;color:var(--action-fonce);padding:10px 12px}
+.aide-element .ticket{margin:0 10px 10px}
+.resume,.coche label,summary .titre{overflow-wrap:anywhere;min-width:0}
+@media(max-width:480px){
+  .page{padding:24px 14px 60px}
+  .etape{padding-left:42px}
+  .marqueur{width:32px;height:32px;font-size:14px}
+  .parcours::before{left:15px}
+  summary{padding:14px 12px;flex-wrap:wrap;gap:5px 8px}
+  summary .titre{flex-basis:100%;font-size:17px}
+  summary .chevron{margin-left:auto}
+  .contenu{padding:2px 12px 14px}
+  .ticket .bandeau{gap:8px;letter-spacing:.03em}
+  .ticket pre{padding:12px;font-size:12.5px}
+}
 
 /* ---------- cases à cocher ---------- */
 .coche{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px dashed var(--ligne)}
@@ -103,25 +138,35 @@ details[open] summary .chevron{transform:rotate(90deg)}
 footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--ligne);
   font-size:13px;color:var(--sourdine)}
 footer a{color:var(--action)}
-input:focus-visible,summary:focus-visible{outline:2px solid var(--action);outline-offset:2px}
+input:focus-visible,summary:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--action);outline-offset:2px}
 </style>
 </head>
 <body>
 <div class="page">
-  <a id="avoulia-back" href="https://avoulia-frontend.purpleocean-980317d1.francecentral.azurecontainerapps.io" style="display:inline-block;margin-bottom:16px;color:#2B59C3;text-decoration:none;font-weight:600;font-size:14px">&larr; Retour à Avoulia</a>
-
 
 <header>
   <p class="eyebrow">Parcours de mise en œuvre · Avoulia</p>
   <h1>Structurer l’analyse des candidatures</h1>
-  <p class="resume">Vous évaluez objectivement chaque candidature sans y passer des heures. L'IA analyse les CV reçus selon vos critères (formation, expérience, compétences clés) et produit une grille comparative structurée pour faciliter la pré-sélection et les discussions en équipe.</p>
+  <p class="resume source">Vous comparez les éléments factuels des candidatures selon des critères de poste explicites. L&#39;IA analyse les CV reçus selon vos critères (formation, expérience, compétences clés) et produit une grille comparative structurée pour faciliter la pré-sélection et les discussions en équipe.</p>
   <div class="puces">
-    <span class="puce">RH & gestion des équipes</span>
-    <span class="puce">Développer les compétences et talents</span>
+    <span class="puce">RH &amp; gestion des équipes</span>
+    <span class="puce">Recruter et intégrer</span>
     <span class="puce">Effort : Moyen</span>
     <span class="puce sensible">Données : Données personnelles</span>
   </div>
+  <a class="tester-rapidement" href="#prompt-demarrage">Tester rapidement</a>
 </header>
+
+<section class="carte">
+  <h2>Commencez par un petit essai</h2>
+  <p>Choisissez une tâche limitée. À l'étape 4, préparez un premier résultat à relire, pas un déploiement complet.</p>
+  <ul>
+    <li>Utilisez un assistant IA autorisé, avec des données autorisées ou un exemple clairement fictif.</li>
+    <li>Copiez le prompt et remplacez les [crochets] par vos informations, sans données personnelles identifiables.</li>
+    <li>Vérifiez le résultat avant usage. S'il est utile, gardez votre méthode pour la prochaine fois.</li>
+  </ul>
+  <p>Le parcours reste générique : vous l'adaptez vous-même. Aucun besoin échangé dans le chatbot n'est repris automatiquement.</p>
+</section>
 
 <!-- ================= ÉTAPE 1 (validation d'abord) ================= -->
 <div class="parcours">
@@ -130,34 +175,37 @@ input:focus-visible,summary:focus-visible{outline:2px solid var(--action);outlin
     <details open>
       <summary><span class="titre">Vérifiez que c'est le bon moment</span><span class="duree">2 min</span><span class="chevron">▶</span></summary>
       <div class="contenu">
-        <p>Trois questions pour confirmer que ce cas d'usage répond à un vrai besoin chez vous :</p>
+        <p>Ces questions de la fiche sont des pistes de réflexion, pas un score d'adéquation. Comparez le cas à votre besoin et à vos contraintes.</p>
         
-        <div class="coche">
-          <input type="checkbox" id="e1q1" data-suivi>
-          <label for="e1q1">Recevez-vous plus de 20 CV par poste ?</label>
-        </div>
+        <ul class="reflexion">
         
-        <div class="coche">
-          <input type="checkbox" id="e1q2" data-suivi>
-          <label for="e1q2">Utilisez-vous des critères écrits ?</label>
-        </div>
+          <li>Recevez-vous plus de 20 CV par poste ?</li>
         
-        <div class="coche">
-          <input type="checkbox" id="e1q3" data-suivi>
-          <label for="e1q3">Le tri prend-il trop de temps ?</label>
-        </div>
+          <li>Utilisez-vous des critères écrits ?</li>
         
-        <p class="note">Vous avez répondu « non » ou « pas vraiment » à une de ces questions ? C'est justement le signe que ce parcours va vous être utile.</p>
-        <div class="valider"><input type="checkbox" id="fin-1" data-fin="1"><label for="fin-1">Étape terminée — c'est le bon moment</label></div>
+          <li>Le tri prend-il trop de temps ?</li>
+        
+        </ul>
+        
+        <p class="note">Aucune réponse, y compris « non », ne suffit à conclure. Vous pouvez clarifier le besoin avant d'aller plus loin ou choisir un essai limité.</p>
+        <fieldset class="choix">
+          <legend>Votre décision pour maintenant</legend>
+          <label><input type="radio" name="adequation" value="essai">Ce cas me semble adapté : je choisis un essai limité</label>
+          <label><input type="radio" name="adequation" value="plus-tard">Pas maintenant : je mets ce parcours de côté</label>
+          <label><input type="radio" name="adequation" value="incertain">Je ne sais pas encore : je clarifie avec la personne concernée</label>
+        </fieldset>
+        <p class="note" id="decision-aide" aria-live="polite">La décision vous appartient ; aucune adéquation n'est calculée automatiquement.</p>
+        <div class="valider"><input type="checkbox" id="fin-1" data-fin="1"><label for="fin-1">Étape terminée — j'ai pris ma décision</label></div>
       </div>
     </details>
   </section>
 </div>
 
-<p class="transition">✓ OK, c'est pour vous. Voici votre plan d'action en 6 étapes — environ 2,5 h au total, en cochant au fur et à mesure. Votre avancement est enregistré sur cet appareil.</p>
+<p class="transition">Si vous choisissez de poursuivre, voici votre plan d'action en 6 étapes — 2h12 de travail actif estimé, hors test terrain de l'étape 5. Ce repère est indicatif : préparation, complexité du cas et corrections peuvent faire varier le temps réel. Les durées des étapes sont des estimations, pas une promesse.</p>
+<p class="note">Les cases servent uniquement à votre suivi, pas à mesurer l'adoption ou les résultats. Elles sont enregistrées sur cet appareil si le stockage du navigateur est disponible. Les décisions et choix de préparation ne sont pas enregistrés par cette page.</p>
 
 <div class="progression">
-  <div class="texte"><span id="prog-label">Votre avancement</span><span id="prog-count">1 étape sur 6</span></div>
+  <div class="texte"><span id="prog-label">Votre avancement</span><span id="prog-count">0 étape sur 6</span></div>
   <div class="barre"><div id="prog-fill"></div></div>
 </div>
 
@@ -169,45 +217,150 @@ input:focus-visible,summary:focus-visible{outline:2px solid var(--action);outlin
     <details>
       <summary><span class="titre">Rassemblez vos éléments</span><span class="duree">30 min</span><span class="chevron">▶</span></summary>
       <div class="contenu">
-        <p>Voici ce dont vous aurez besoin. Un élément vous manque ? Pas bloquant : l'IA peut vous aider à le construire — utilisez le prompt sous chaque élément.</p>
+        <p>Repérez ce que vous avez déjà et ce qu'il vous manque. Pour chaque élément, choisissez « disponible », « à préparer » ou « fictif ». Cochez quand il est prêt pour votre essai.</p>
+        <p class="note">L'IA peut proposer une trame ou un exemple clairement fictif, pas fabriquer un historique de ventes, des résultats observés ou des preuves. Sans données réelles nécessaires, l'essai reste fictif : il ne démontre pas l'efficacité du cas.</p>
         
         <div class="coche">
           <input type="checkbox" id="e2p1" data-suivi>
-          <label for="e2p1">Fiche de poste avec critères de sélection hiérarchisés</label>
+          <label class="source" for="e2p1">Fiche de poste avec critères professionnels de sélection hiérarchisés</label>
         </div>
-        <div class="ticket mini">
-          <div class="bandeau"><span>Si vous ne l'avez pas encore</span><button type="button" data-copie>Copier</button></div>
-          <pre>Je suis dirigeant d'une PME/TPE française. Aide-moi à préparer l'élément suivant : Fiche de poste avec critères de sélection hiérarchisés. Pose-moi les questions nécessaires une par une, puis produis un premier document simple et directement utilisable.</pre>
+        <div class="preparation">
+          <label for="voie-1">Où en êtes-vous pour cet élément ?</label>
+          <select id="voie-1">
+            <option value="">À préciser</option>
+            <option value="disponible">Disponible et autorisé</option>
+            <option value="preparer">À préparer ou à obtenir</option>
+            <option value="fictif">Exemple fictif uniquement</option>
+          </select>
         </div>
+        <details class="aide-element">
+          <summary>Besoin d'aide pour préparer cet élément ?</summary>
+          <div class="ticket mini">
+          <div class="bandeau"><span>Prompt de préparation</span><button type="button" data-copie>Copier</button></div>
+          <pre>Mon rôle : [votre fonction ou rôle dans l'entreprise].
+Domaine métier du cas : RH &amp; gestion des équipes.
+Mon objectif prioritaire est : Recruter et intégrer.
+Contexte secteur : Multi-sectoriel.
+Cas d&#39;usage cible : Structurer l’analyse des candidatures.
+
+
+Élément source à préparer : Fiche de poste avec critères professionnels de sélection hiérarchisés.
+Pars du cas et de l'élément source ci-dessus. Demande uniquement les informations indispensables manquantes.
+Distingue ce qui doit venir de mes données réelles de ce que tu peux préparer : une trame vide, un format de collecte ou un exemple explicitement fictif.
+N'invente jamais d'historique de ventes, de résultats observés ni de preuves. Si la source réelle manque, indique où la demander en interne, sans prétendre l'avoir obtenue.
+Produis un premier support limité à cet élément ; sépare faits, hypothèses et champs à compléter. Vérifie les faits, sources et calculs disponibles, signale les contrôles impossibles.
+Utilise uniquement un outil autorisé et des exemples fictifs ou des données dont le partage est autorisé, sans données personnelles identifiables. Aucun envoi ni aucune action automatique.
+Règles à respecter impérativement : Utiliser uniquement des critères professionnels nécessaires au poste ; exclure les caractéristiques protégées et leurs proxys. Ne pas inférer personnalité, état mental, santé ou loyauté. Citer les éléments explicites du CV, signaler l&#39;inconnu et faire vérifier par le recruteur. Pas de rejet, de décision ni de classement de candidatures automatisés ; la comparaison reste une aide factuelle sous contrôle humain. Utiliser un outil validé pour ces données et ne partager que les éléments nécessaires dont l&#39;utilisation dans cet outil est autorisée. Retirer les noms ne garantit pas l&#39;anonymat ; les données pseudonymisées restent des données personnelles.
+Termine le livrable par : « À faire valider en interne avant usage. »</pre>
+          </div>
+        </details>
         
         <div class="coche">
           <input type="checkbox" id="e2p2" data-suivi>
-          <label for="e2p2">CV des candidats (anonymisés si possible)</label>
+          <label class="source" for="e2p2">CV dont l&#39;analyse par l&#39;outil est autorisée, minimisés et pseudonymisés avant partage</label>
         </div>
-        <div class="ticket mini">
-          <div class="bandeau"><span>Si vous ne l'avez pas encore</span><button type="button" data-copie>Copier</button></div>
-          <pre>Je suis dirigeant d'une PME/TPE française. Aide-moi à préparer l'élément suivant : CV des candidats (anonymisés si possible). Pose-moi les questions nécessaires une par une, puis produis un premier document simple et directement utilisable.</pre>
+        <div class="preparation">
+          <label for="voie-2">Où en êtes-vous pour cet élément ?</label>
+          <select id="voie-2">
+            <option value="">À préciser</option>
+            <option value="disponible">Disponible et autorisé</option>
+            <option value="preparer">À préparer ou à obtenir</option>
+            <option value="fictif">Exemple fictif uniquement</option>
+          </select>
         </div>
+        <details class="aide-element">
+          <summary>Besoin d'aide pour préparer cet élément ?</summary>
+          <div class="ticket mini">
+          <div class="bandeau"><span>Prompt de préparation</span><button type="button" data-copie>Copier</button></div>
+          <pre>Mon rôle : [votre fonction ou rôle dans l'entreprise].
+Domaine métier du cas : RH &amp; gestion des équipes.
+Mon objectif prioritaire est : Recruter et intégrer.
+Contexte secteur : Multi-sectoriel.
+Cas d&#39;usage cible : Structurer l’analyse des candidatures.
+
+
+Élément source à préparer : CV dont l&#39;analyse par l&#39;outil est autorisée, minimisés et pseudonymisés avant partage.
+Pars du cas et de l'élément source ci-dessus. Demande uniquement les informations indispensables manquantes.
+Distingue ce qui doit venir de mes données réelles de ce que tu peux préparer : une trame vide, un format de collecte ou un exemple explicitement fictif.
+N'invente jamais d'historique de ventes, de résultats observés ni de preuves. Si la source réelle manque, indique où la demander en interne, sans prétendre l'avoir obtenue.
+Produis un premier support limité à cet élément ; sépare faits, hypothèses et champs à compléter. Vérifie les faits, sources et calculs disponibles, signale les contrôles impossibles.
+Utilise uniquement un outil autorisé et des exemples fictifs ou des données dont le partage est autorisé, sans données personnelles identifiables. Aucun envoi ni aucune action automatique.
+Règles à respecter impérativement : Utiliser uniquement des critères professionnels nécessaires au poste ; exclure les caractéristiques protégées et leurs proxys. Ne pas inférer personnalité, état mental, santé ou loyauté. Citer les éléments explicites du CV, signaler l&#39;inconnu et faire vérifier par le recruteur. Pas de rejet, de décision ni de classement de candidatures automatisés ; la comparaison reste une aide factuelle sous contrôle humain. Utiliser un outil validé pour ces données et ne partager que les éléments nécessaires dont l&#39;utilisation dans cet outil est autorisée. Retirer les noms ne garantit pas l&#39;anonymat ; les données pseudonymisées restent des données personnelles.
+Termine le livrable par : « À faire valider en interne avant usage. »</pre>
+          </div>
+        </details>
         
         <div class="coche">
           <input type="checkbox" id="e2p3" data-suivi>
-          <label for="e2p3">Grille d'évaluation utilisée actuellement (si existante)</label>
+          <label class="source" for="e2p3">Grille d&#39;évaluation actuelle</label>
         </div>
-        <div class="ticket mini">
-          <div class="bandeau"><span>Si vous ne l'avez pas encore</span><button type="button" data-copie>Copier</button></div>
-          <pre>Je suis dirigeant d'une PME/TPE française. Aide-moi à préparer l'élément suivant : Grille d'évaluation utilisée actuellement (si existante). Pose-moi les questions nécessaires une par une, puis produis un premier document simple et directement utilisable.</pre>
+        <div class="preparation">
+          <label for="voie-3">Où en êtes-vous pour cet élément ?</label>
+          <select id="voie-3">
+            <option value="">À préciser</option>
+            <option value="disponible">Disponible et autorisé</option>
+            <option value="preparer">À préparer ou à obtenir</option>
+            <option value="fictif">Exemple fictif uniquement</option>
+          </select>
         </div>
+        <details class="aide-element">
+          <summary>Besoin d'aide pour préparer cet élément ?</summary>
+          <div class="ticket mini">
+          <div class="bandeau"><span>Prompt de préparation</span><button type="button" data-copie>Copier</button></div>
+          <pre>Mon rôle : [votre fonction ou rôle dans l'entreprise].
+Domaine métier du cas : RH &amp; gestion des équipes.
+Mon objectif prioritaire est : Recruter et intégrer.
+Contexte secteur : Multi-sectoriel.
+Cas d&#39;usage cible : Structurer l’analyse des candidatures.
+
+
+Élément source à préparer : Grille d&#39;évaluation actuelle.
+Pars du cas et de l'élément source ci-dessus. Demande uniquement les informations indispensables manquantes.
+Distingue ce qui doit venir de mes données réelles de ce que tu peux préparer : une trame vide, un format de collecte ou un exemple explicitement fictif.
+N'invente jamais d'historique de ventes, de résultats observés ni de preuves. Si la source réelle manque, indique où la demander en interne, sans prétendre l'avoir obtenue.
+Produis un premier support limité à cet élément ; sépare faits, hypothèses et champs à compléter. Vérifie les faits, sources et calculs disponibles, signale les contrôles impossibles.
+Utilise uniquement un outil autorisé et des exemples fictifs ou des données dont le partage est autorisé, sans données personnelles identifiables. Aucun envoi ni aucune action automatique.
+Règles à respecter impérativement : Utiliser uniquement des critères professionnels nécessaires au poste ; exclure les caractéristiques protégées et leurs proxys. Ne pas inférer personnalité, état mental, santé ou loyauté. Citer les éléments explicites du CV, signaler l&#39;inconnu et faire vérifier par le recruteur. Pas de rejet, de décision ni de classement de candidatures automatisés ; la comparaison reste une aide factuelle sous contrôle humain. Utiliser un outil validé pour ces données et ne partager que les éléments nécessaires dont l&#39;utilisation dans cet outil est autorisée. Retirer les noms ne garantit pas l&#39;anonymat ; les données pseudonymisées restent des données personnelles.
+Termine le livrable par : « À faire valider en interne avant usage. »</pre>
+          </div>
+        </details>
         
         <div class="coche">
           <input type="checkbox" id="e2p4" data-suivi>
-          <label for="e2p4">Contraintes du poste (localisation, disponibilité, salaire)</label>
+          <label class="source" for="e2p4">Contraintes professionnelles justifiées du poste</label>
         </div>
-        <div class="ticket mini">
-          <div class="bandeau"><span>Si vous ne l'avez pas encore</span><button type="button" data-copie>Copier</button></div>
-          <pre>Je suis dirigeant d'une PME/TPE française. Aide-moi à préparer l'élément suivant : Contraintes du poste (localisation, disponibilité, salaire). Pose-moi les questions nécessaires une par une, puis produis un premier document simple et directement utilisable.</pre>
+        <div class="preparation">
+          <label for="voie-4">Où en êtes-vous pour cet élément ?</label>
+          <select id="voie-4">
+            <option value="">À préciser</option>
+            <option value="disponible">Disponible et autorisé</option>
+            <option value="preparer">À préparer ou à obtenir</option>
+            <option value="fictif">Exemple fictif uniquement</option>
+          </select>
         </div>
+        <details class="aide-element">
+          <summary>Besoin d'aide pour préparer cet élément ?</summary>
+          <div class="ticket mini">
+          <div class="bandeau"><span>Prompt de préparation</span><button type="button" data-copie>Copier</button></div>
+          <pre>Mon rôle : [votre fonction ou rôle dans l'entreprise].
+Domaine métier du cas : RH &amp; gestion des équipes.
+Mon objectif prioritaire est : Recruter et intégrer.
+Contexte secteur : Multi-sectoriel.
+Cas d&#39;usage cible : Structurer l’analyse des candidatures.
+
+
+Élément source à préparer : Contraintes professionnelles justifiées du poste.
+Pars du cas et de l'élément source ci-dessus. Demande uniquement les informations indispensables manquantes.
+Distingue ce qui doit venir de mes données réelles de ce que tu peux préparer : une trame vide, un format de collecte ou un exemple explicitement fictif.
+N'invente jamais d'historique de ventes, de résultats observés ni de preuves. Si la source réelle manque, indique où la demander en interne, sans prétendre l'avoir obtenue.
+Produis un premier support limité à cet élément ; sépare faits, hypothèses et champs à compléter. Vérifie les faits, sources et calculs disponibles, signale les contrôles impossibles.
+Utilise uniquement un outil autorisé et des exemples fictifs ou des données dont le partage est autorisé, sans données personnelles identifiables. Aucun envoi ni aucune action automatique.
+Règles à respecter impérativement : Utiliser uniquement des critères professionnels nécessaires au poste ; exclure les caractéristiques protégées et leurs proxys. Ne pas inférer personnalité, état mental, santé ou loyauté. Citer les éléments explicites du CV, signaler l&#39;inconnu et faire vérifier par le recruteur. Pas de rejet, de décision ni de classement de candidatures automatisés ; la comparaison reste une aide factuelle sous contrôle humain. Utiliser un outil validé pour ces données et ne partager que les éléments nécessaires dont l&#39;utilisation dans cet outil est autorisée. Retirer les noms ne garantit pas l&#39;anonymat ; les données pseudonymisées restent des données personnelles.
+Termine le livrable par : « À faire valider en interne avant usage. »</pre>
+          </div>
+        </details>
         
-        <div class="valider"><input type="checkbox" id="fin-2" data-fin="2"><label for="fin-2">Étape terminée — mes éléments sont prêts</label></div>
+        <div class="valider"><input type="checkbox" id="fin-2" data-fin="2"><label for="fin-2">Étape terminée — mes éléments sont prêts pour l'essai choisi</label></div>
       </div>
     </details>
   </section>
@@ -218,23 +371,17 @@ input:focus-visible,summary:focus-visible{outline:2px solid var(--action);outlin
     <details>
       <summary><span class="titre">Posez le cadre de sécurité</span><span class="duree">10 min</span><span class="chevron">▶</span></summary>
       <div class="contenu">
-        <p>Ces règles ne sont pas optionnelles : elles protègent votre entreprise, vos salariés et vos clients. Cochez-les une fois mises en place.</p>
-        
+        <p>Règles source à conserver et à appliquer avant de partager des données :</p>
+        <p class="source">Utiliser uniquement des critères professionnels nécessaires au poste ; exclure les caractéristiques protégées et leurs proxys. Ne pas inférer personnalité, état mental, santé ou loyauté. Citer les éléments explicites du CV, signaler l&#39;inconnu et faire vérifier par le recruteur. Pas de rejet, de décision ni de classement de candidatures automatisés ; la comparaison reste une aide factuelle sous contrôle humain. Utiliser un outil validé pour ces données et ne partager que les éléments nécessaires dont l&#39;utilisation dans cet outil est autorisée. Retirer les noms ne garantit pas l&#39;anonymat ; les données pseudonymisées restent des données personnelles.</p>
         <div class="coche">
-          <input type="checkbox" id="e3g1" data-suivi>
-          <label for="e3g1">Anonymiser les CV avant soumission.</label>
+          <input type="checkbox" id="e3source" data-suivi>
+          <label for="e3source">J'ai vérifié l'application des règles source pour cet essai</label>
         </div>
-        
         <div class="coche">
-          <input type="checkbox" id="e3g2" data-suivi>
-          <label for="e3g2">Ne pas partager de coordonnées personnelles.</label>
+          <input type="checkbox" id="e3outil" data-suivi>
+          <label for="e3outil">L'outil et l'usage de ces données sont autorisés par mon organisation
+            <small>Vérifiez confidentialité, accès, conservation et limites de l'offre. En cas de doute, restez sur une trame vide ou suspendez l'essai.</small></label>
         </div>
-        
-        <div class="coche">
-          <input type="checkbox" id="e3g3" data-suivi>
-          <label for="e3g3">Toute décision de recrutement reste humaine — l'IA est un outil d'aide à l'évaluation.</label>
-        </div>
-        
         <div class="coche">
           <input type="checkbox" id="e3rgpd" data-suivi>
           <label for="e3rgpd">Aucune donnée personnelle identifiable ne sera collée dans l'assistant IA
@@ -251,10 +398,17 @@ input:focus-visible,summary:focus-visible{outline:2px solid var(--action);outlin
     <details>
       <summary><span class="titre">Produisez votre premier livrable</span><span class="duree">1 h</span><span class="chevron">▶</span></summary>
       <div class="contenu">
-        <p><b>Votre première action, dans les 48 h :</b></p>
-        <p>Préparer la fiche de poste avec les 5 critères de sélection prioritaires et 3 à 5 CV anonymisés. Ouvrir un assistant IA conversationnel gratuit et lui fournir la fiche de poste + les CV en lui demandant de produire une grille d'analyse comparative : note sur chaque critère (1 à 5), points forts, points de vigilance et classement global. Astuce : dans votre demande à l'IA, précisez (1) votre rôle — ex. « Je suis dirigeant d'une PME et je recrute un responsable logistique » (2) les critères de sélection par ordre de priorité (3) le format — ex. « grille comparative en tableau avec un candidat par colonne » (4) les contraintes — ex. « évaluation factuelle, sans discrimination, axée compétences ». Attention : anonymiser les CV (supprimer nom, adresse, photo) avant de les soumettre à l'IA. Vérifier : confronter l'analyse IA à votre propre lecture des CV. Livrable : grille d'analyse comparative des candidatures prête pour le comité de sélection.</p>
-        <p class="note">Réutilisez <a href="#prompt-demarrage">votre prompt de démarrage</a> (en haut de page) — cette fois avec vos vrais éléments de l'étape 2, pas des exemples.</p>
-        <div class="critere"><b>C'est fait quand :</b> le livrable existe et a été relu par la personne concernée dans l'entreprise.</div>
+        <p><b>Votre première action proposée — adaptez le délai à vos contraintes :</b></p>
+        <p class="source">Préparer la fiche de poste avec les 5 critères de sélection prioritaires et 3 à 5 CV minimisés et pseudonymisés dont l’analyse par cet outil est autorisée. Ouvrir un assistant IA autorisé par votre organisation et lui fournir la fiche de poste + les CV en lui demandant de produire une grille d&#39;analyse comparative : éléments explicitement présents pour chaque critère avec référence au CV, informations manquantes et questions à vérifier en entretien, sans classement automatique. Astuce : dans votre demande à l&#39;IA, précisez (1) votre rôle — ex. « Je suis dirigeant d&#39;une PME et je recrute un responsable logistique » (2) les critères de sélection par ordre de priorité (3) le format — ex. « grille comparative en tableau avec un candidat par colonne » (4) les contraintes — ex. « évaluation factuelle, sans discrimination, axée compétences ». Attention : supprimer nom, adresse, photo et données non nécessaires avant toute soumission autorisée ; un CV pseudonymisé reste une donnée personnelle. Vérifier : confronter l&#39;analyse IA à votre propre lecture des CV. Livrable : grille d&#39;analyse comparative des candidatures prête pour le comité de sélection.</p>
+        <p class="note">Ce premier livrable n'est pas un déploiement. Une intégration ou une automatisation éventuelle demande une mise en place et des validations distinctes.</p>
+        <p class="note">Réutilisez <a href="#prompt-demarrage">votre prompt de démarrage</a> (en bas de page) — cette fois avec vos éléments de l'étape 2, dans le respect du cadre de sécurité de l'étape 3. Le livrable relu servira ensuite pour l'étape 5.</p>
+        <h3>Avant de l'utiliser, vérifiez trois points</h3>
+        <ul class="reflexion">
+          <li><b>Utile :</b> le résultat répond-il à la tâche choisie, dans le format attendu ?</li>
+          <li><b>Fiable :</b> les noms, chiffres, dates et calculs correspondent-ils aux éléments fournis ? Les manques sont-ils signalés ?</li>
+          <li><b>Utilisable :</b> les règles de l'étape 3 sont-elles respectées et la relecture nécessaire a-t-elle été faite ?</li>
+        </ul>
+        <div class="critere"><b>C'est fait quand :</b> un premier livrable limité existe ; la personne concernée a contrôlé les faits, les sources, les calculs et les limites. Un brouillon fictif reste identifié comme tel. Aucun envoi ni déclenchement automatique.</div>
         <div class="valider"><input type="checkbox" id="fin-4" data-fin="4"><label for="fin-4">Étape terminée — premier livrable produit</label></div>
       </div>
     </details>
@@ -264,17 +418,18 @@ input:focus-visible,summary:focus-visible{outline:2px solid var(--action);outlin
   <section class="etape" data-etape="5">
     <div class="marqueur"><span>5</span></div>
     <details>
-      <summary><span class="titre">Testez en conditions réelles</span><span class="duree">cette semaine</span><span class="chevron">▶</span></summary>
+      <summary><span class="titre">Testez en conditions réelles</span><span class="duree">selon disponibilité</span><span class="chevron">▶</span></summary>
       <div class="contenu">
-        <p>Testez le fonctionnement mis en place sur un cas réel cette semaine, en parallèle de votre méthode actuelle — ne débranchez rien encore.</p>
+        <p>Testez le fonctionnement sur un périmètre réel limité et autorisé, en parallèle de votre méthode actuelle — ne débranchez rien. Avec des données seulement fictives, vérifiez la forme et les contrôles, puis reportez toute conclusion sur l'efficacité réelle.</p>
 <ul>
-<div class="coche"><input type="checkbox" id="auto1" data-suivi><label for="auto1">Faites tourner le nouveau fonctionnement sur un périmètre limité (un client, un dossier, une semaine)</label></div>
-<div class="coche"><input type="checkbox" id="auto2" data-suivi><label for="auto2">Gardez votre méthode habituelle en parallèle pour comparer</label></div>
-<div class="coche"><input type="checkbox" id="auto3" data-suivi><label for="auto3">Mesurez : temps gagné, erreurs évitées, réactions de l'équipe</label></div>
-<div class="coche"><input type="checkbox" id="auto4" data-suivi><label for="auto4">Ajustez ce qui coince avant d'élargir</label></div>
+<div class="coche"><input type="checkbox" id="auto1" data-suivi><label for="auto1">Choisissez une tâche limitée et vérifiez les autorisations, le contrôle humain et la possibilité d'arrêter avant tout effet réel</label></div>
+<div class="coche"><input type="checkbox" id="auto2" data-suivi><label for="auto2">Gardez votre méthode habituelle en parallèle pour comparer à qualité attendue équivalente</label></div>
+<div class="coche"><input type="checkbox" id="auto3" data-suivi><label for="auto3">Mesurez le temps habituel et le temps total du test, préparation + mise en place + exécution + vérification + corrections comprises</label></div>
+<div class="coche"><input type="checkbox" id="auto4" data-suivi><label for="auto4">Notez les erreurs, incidents, retouches et limites constatés, sans supposer un gain ni un retour sur investissement</label></div>
+<div class="coche"><input type="checkbox" id="auto5" data-suivi><label for="auto5">Décidez : utilisable sur ce périmètre, à ajuster puis retester, ou à arrêter ; notez pourquoi avant tout élargissement</label></div>
 </ul>
-<p><strong>C'est fait quand</strong> : le test a tourné sur un périmètre réel et vous avez décidé en connaissance de cause d'élargir ou d'ajuster.</p>
-        <div class="valider"><input type="checkbox" id="fin-5" data-fin="5"><label for="fin-5">Étape terminée — testé en réel</label></div>
+<p><strong>C'est fait quand</strong> : la comparaison réelle est documentée et la suite décidée. Un test fictif ou une case cochée ne prouve pas l'efficacité ni l'adoption.</p>
+        <div class="valider"><input type="checkbox" id="fin-5" data-fin="5"><label for="fin-5">Étape terminée — comparaison faite et suite décidée</label></div>
       </div>
     </details>
   </section>
@@ -285,15 +440,22 @@ input:focus-visible,summary:focus-visible{outline:2px solid var(--action);outlin
     <details>
       <summary><span class="titre">Installez l'usage durablement</span><span class="duree">30 min</span><span class="chevron">▶</span></summary>
       <div class="contenu">
-        <p>Un fonctionnement qui repose sur une seule personne s'arrête avec elle. Ancrez-le dans l'organisation.</p>
+        <p>Ne réutilisez que ce qui a été validé sur le périmètre testé. Documentez les ajustements ou l'arrêt si le résultat n'est pas utilisable.</p>
 <ul>
-<div class="coche"><input type="checkbox" id="auto5" data-suivi><label for="auto5">Documentez le fonctionnement en une page : quoi, qui, quand, avec quel outil</label></div>
-<div class="coche"><input type="checkbox" id="auto6" data-suivi><label for="auto6">Formez une deuxième personne à le faire tourner</label></div>
-<div class="coche"><input type="checkbox" id="auto7" data-suivi><label for="auto7">Fixez le déclencheur : « à chaque fois que [situation], le processus démarre »</label></div>
-<div class="coche"><input type="checkbox" id="auto8" data-suivi><label for="auto8">Planifiez un point à 1 mois : garder, ajuster ou arrêter</label></div>
+<div class="coche"><input type="checkbox" id="auto6" data-suivi><label for="auto6">Sauvegardez la recette validée dans un espace autorisé : instructions, outil, entrées permises, contrôles, limites et procédure d'arrêt ; aucun nouveau compte nécessaire</label></div>
+<div class="coche"><input type="checkbox" id="auto7" data-suivi><label for="auto7">Désignez le responsable du contrôle et, si utile, une personne capable de reprendre la tâche</label></div>
+<div class="coche"><input type="checkbox" id="auto8" data-suivi><label for="auto8">Définissez la prochaine tâche comparable, sa validation humaine et les conditions de lancement ; aucun déclenchement automatique depuis ce parcours</label></div>
+<div class="coche"><input type="checkbox" id="auto9" data-suivi><label for="auto9">Prévoyez un point de décision et gardez le lien du parcours : garder, ajuster ou arrêter</label></div>
 </ul>
-<p><strong>C'est fait quand</strong> : le fonctionnement a tourné une fois sans vous.</p>
-        <div class="valider"><input type="checkbox" id="fin-6" data-fin="6"><label for="fin-6">Étape terminée — l'usage est installé</label></div>
+<p><strong>C'est fait quand</strong> : la recette, les responsabilités et la prochaine tâche sont définies, ou l'arrêt est consigné. Une case cochée ne démontre ni autonomie ni adoption durable.</p>
+        <details class="aide-element">
+          <summary>Si utile : transmettre une synthèse au responsable</summary>
+          <div class="contenu">
+            <p>Dans votre canal interne autorisé, partagez seulement : tâche testée et périmètre, données réelles ou fictives, résultat vérifié et limites, temps total comparé, décision (utilisable / à ajuster / à arrêter), responsable et prochaine tâche. N'annoncez aucun gain non mesuré.</p>
+            <p class="note">Transmission manuelle et facultative : ce parcours ne crée aucun compte, n'envoie aucun email et ne notifie personne.</p>
+          </div>
+        </details>
+        <div class="valider"><input type="checkbox" id="fin-6" data-fin="6"><label for="fin-6">Étape terminée — recette et suite documentées, ou arrêt consigné</label></div>
       </div>
     </details>
   </section>
@@ -304,46 +466,89 @@ input:focus-visible,summary:focus-visible{outline:2px solid var(--action);outlin
 <details class="quickwin-accordion">
   <summary><span class="titre">Si vous voulez tester sans attendre — votre prompt prêt</span><span class="chevron">▶</span></summary>
   <div class="contenu-qw">
-    <p>Vous pouvez commencer tout de suite avec ce prompt. Copiez-le, collez-le dans votre assistant IA habituel — ChatGPT, Claude, Le Chat, Gemini, Copilot… la version gratuite suffit — complétez les parties entre [crochets] et laissez-vous guider.</p>
-    <div class="ticket" id="prompt-demarrage">
+    <p>Vous pouvez commencer avec ce prompt dans un assistant IA autorisé par votre organisation. Complétez les parties entre [crochets] avec des exemples fictifs ou des données dont le partage est autorisé, sans données personnelles identifiables. Vérifiez les règles de confidentialité et les limites de l'offre utilisée ; une version gratuite n'est pas nécessairement adaptée.</p>
+    <div class="ticket" id="prompt-demarrage" tabindex="-1" role="region" aria-label="Votre prompt de démarrage">
       <div class="bandeau"><span>Votre prompt de démarrage</span><button type="button" data-copie>Copier</button></div>
-      <pre>Je suis dirigeant d'une PME/TPE française. Mon contexte : [votre secteur, taille d'entreprise, situation actuelle].
+      <pre>Mon rôle : [votre fonction ou rôle dans l&#39;entreprise]. Mon contexte : [votre secteur, taille d&#39;entreprise, situation actuelle].
 
-Mon besoin — Structurer l’analyse des candidatures : Vous évaluez objectivement chaque candidature sans y passer des heures. L'IA analyse les CV reçus selon vos critères (formation, expérience, compétences clés) et produit une grille comparative structurée pour faciliter la pré-sélection et les discussions en équipe.
+Référence du catalogue (ne pas la réécrire) :
+Domaine métier du cas : RH &amp; gestion des équipes.
+Mon objectif prioritaire est : Recruter et intégrer.
+Contexte secteur : Multi-sectoriel.
+Cas d&#39;usage cible : Structurer l’analyse des candidatures.
 
-Procède ainsi :
-1. Pose-moi d'abord ces questions, une par une : Recevez-vous plus de 20 CV par poste ? Utilisez-vous des critères écrits ? Le tri prend-il trop de temps ?
-2. Demande-moi ensuite les éléments suivants (ou aide-moi à les préparer si je ne les ai pas) : Fiche de poste avec critères de sélection hiérarchisés ; CV des candidats (anonymisés si possible) ; Grille d'évaluation utilisée actuellement (si existante) ; Contraintes du poste (localisation, disponibilité, salaire).
-3. Produis alors un premier livrable concret, en français, directement utilisable dans une PME.
+Description source : Vous comparez les éléments factuels des candidatures selon des critères de poste explicites. L&#39;IA analyse les CV reçus selon vos critères (formation, expérience, compétences clés) et produit une grille comparative structurée pour faciliter la pré-sélection et les discussions en équipe.
 
-Règles à respecter impérativement : Anonymiser les CV avant soumission. Ne pas partager de coordonnées personnelles. Toute décision de recrutement reste humaine — l'IA est un outil d'aide à l'évaluation. Ne me demande jamais de données personnelles identifiables.
+Première action source : Préparer la fiche de poste avec les 5 critères de sélection prioritaires et 3 à 5 CV minimisés et pseudonymisés dont l’analyse par cet outil est autorisée. Ouvrir un assistant IA autorisé par votre organisation et lui fournir la fiche de poste + les CV en lui demandant de produire une grille d&#39;analyse comparative : éléments explicitement présents pour chaque critère avec référence au CV, informations manquantes et questions à vérifier en entretien, sans classement automatique. Astuce : dans votre demande à l&#39;IA, précisez (1) votre rôle — ex. « Je suis dirigeant d&#39;une PME et je recrute un responsable logistique » (2) les critères de sélection par ordre de priorité (3) le format — ex. « grille comparative en tableau avec un candidat par colonne » (4) les contraintes — ex. « évaluation factuelle, sans discrimination, axée compétences ». Attention : supprimer nom, adresse, photo et données non nécessaires avant toute soumission autorisée ; un CV pseudonymisé reste une donnée personnelle. Vérifier : confronter l&#39;analyse IA à votre propre lecture des CV. Livrable : grille d&#39;analyse comparative des candidatures prête pour le comité de sélection.
+
+Éléments prévus par le cas : Fiche de poste avec critères professionnels de sélection hiérarchisés ; CV dont l&#39;analyse par l&#39;outil est autorisée, minimisés et pseudonymisés avant partage ; Grille d&#39;évaluation actuelle ; Contraintes professionnelles justifiées du poste.
+
+Consignes pour mon premier essai :
+1. Pars du cas et de la première action source ci-dessus. Demande uniquement les entrées indispensables encore absentes ou ambiguës pour cette première action (périmètre, contenu à traiter, contraintes ou format attendu).
+2. Distingue données réelles disponibles et autorisées, données à obtenir et exemple fictif. S&#39;il manque une donnée factuelle, demande sa source ou propose une trame vide ou un exemple explicitement fictif. N&#39;invente jamais d&#39;historique de ventes, de résultats observés ou de preuves. Un exemple fictif ne valide pas l&#39;efficacité réelle.
+3. À partir de la première action source, prépare un premier livrable concret en français sur un périmètre réduit, dans le format utile à cette action. Si elle prévoit plusieurs travaux, commence par le premier élément réalisable et indique ce qui reste à faire. Si les entrées sont insuffisantes, donne la trame et nomme les manques plutôt que présenter un résultat comme acquis.
+4. Sépare les faits fournis, les hypothèses et les points à vérifier. Vérifie les faits contre les sources disponibles, cite seulement les sources réellement consultées et rends les calculs vérifiables (données, méthode, unités). Signale tout contrôle impossible et demande une validation métier avant usage.
+5. N&#39;effectue aucune action automatique : aucun envoi, publication, modification de système ou déclenchement de processus. Prépare uniquement un brouillon à relire.
+
+Règles source à respecter impérativement : Utiliser uniquement des critères professionnels nécessaires au poste ; exclure les caractéristiques protégées et leurs proxys. Ne pas inférer personnalité, état mental, santé ou loyauté. Citer les éléments explicites du CV, signaler l&#39;inconnu et faire vérifier par le recruteur. Pas de rejet, de décision ni de classement de candidatures automatisés ; la comparaison reste une aide factuelle sous contrôle humain. Utiliser un outil validé pour ces données et ne partager que les éléments nécessaires dont l&#39;utilisation dans cet outil est autorisée. Retirer les noms ne garantit pas l&#39;anonymat ; les données pseudonymisées restent des données personnelles.
+Utilise uniquement un outil autorisé et des données dont le partage est autorisé. Ne me demande jamais de données personnelles identifiables.
 
 Termine chaque livrable par : « À faire valider en interne avant usage. »</pre>
     </div>
-    <p class="note">Les règles de prudence essentielles sont déjà intégrées au prompt : l'assistant vous les rappellera.</p>
-    <p class="note">💡 Vous aussi vous retrouverez ce prompt dans l'étape 4 du parcours, à réutiliser avec vos vrais éléments.</p>
+    <p class="note">Le bouton Copier reprend uniquement le texte affiché ; adaptez-le vous-même après copie. Les règles de prudence sont intégrées au prompt ; cela ne garantit pas que l'assistant les respectera. Vérifiez toujours son résultat.</p>
+    <p class="note">💡 Vous retrouverez aussi ce prompt à l'étape 4 du parcours, à réutiliser avec vos éléments autorisés ou fictifs.</p>
   </div>
 </details>
 
 <footer>
-  <p>Contenu vérifié, issu de la base Avoulia v4.5.3 — cas UC-0252.
-  Ce parcours vous a été remis à l'issue de votre diagnostic sur <a href="https://avouslia.fr">avouslia.fr</a>.
+  <p>Contenu source issu de la base Avoulia v4.6.3 — cas UC-0252.
+  Ce parcours vous a été remis à l'issue de votre diagnostic sur <a href="https://nricl.github.io/A-Vous-l-IA/">nricl.github.io/A-Vous-l-IA</a>.
   Il ne constitue pas un conseil professionnel ; faites valider vos livrables en interne.</p>
-  <p class="avoulia-relance" style="margin-top:10px"><a href="https://avoulia-frontend.purpleocean-980317d1.francecentral.azurecontainerapps.io" style="color:#2B59C3;text-decoration:none;font-weight:700">&larr; Revenir à Avoulia pour explorer d'autres cas d'usage</a></p>
 </footer>
 
 </div>
 <script>
 (function(){
+  function ouvrirPrompt(){
+    var cible=document.getElementById('prompt-demarrage');
+    cible.closest('details').open=true;
+    cible.focus({preventScroll:true});
+    cible.scrollIntoView({block:'start'});
+  }
+  document.querySelectorAll('a[href="#prompt-demarrage"]').forEach(function(lien){
+    lien.addEventListener('click',function(){ ouvrirPrompt(); });
+  });
+  window.addEventListener('hashchange',function(){
+    if(window.location.hash==='#prompt-demarrage') ouvrirPrompt();
+  });
+  if(window.location.hash==='#prompt-demarrage') ouvrirPrompt();
+
   var CLE="avoulia-parcours-zrajbykt99";
   var etat={};
-  try{ etat=JSON.parse(localStorage.getItem(CLE)||"{}"); }catch(e){}
+  try{
+    var ancien=JSON.parse(localStorage.getItem(CLE)||"{}");
+    if(ancien&&typeof ancien==='object'&&!Array.isArray(ancien)){
+      document.querySelectorAll('input[type=checkbox]').forEach(function(cb){
+        if(typeof ancien[cb.id]==='boolean') etat[cb.id]=ancien[cb.id];
+      });
+    }
+  }catch(e){}
   function sauve(){ try{ localStorage.setItem(CLE,JSON.stringify(etat)); }catch(e){} }
 
   // restauration + suivi de toutes les cases
   document.querySelectorAll('input[type=checkbox]').forEach(function(cb){
     if(etat[cb.id]) cb.checked=true;
     cb.addEventListener('change',function(){ etat[cb.id]=cb.checked; sauve(); maj(); });
+  });
+  document.querySelectorAll('input[name="adequation"]').forEach(function(choix){
+    choix.addEventListener('change',function(){
+      var aides={
+        essai:"Vous choisissez un essai limité ; vérifiez les données et les règles avant de poursuivre.",
+        "plus-tard":"Vous pouvez vous arrêter ici et reprendre ce parcours quand le besoin sera prioritaire.",
+        incertain:"Clarifiez le point incertain avec la personne concernée, sans conclure à l'adéquation du cas."
+      };
+      document.getElementById('decision-aide').textContent=aides[choix.value];
+    });
   });
 
   function maj(){
@@ -357,17 +562,36 @@ Termine chaque livrable par : « À faire valider en interne avant usage. »</pr
     document.getElementById('prog-count').textContent=faites+(faites>1?" étapes":" étape")+" sur 6";
     document.getElementById('prog-fill').style.width=(faites/6*100)+"%";
     document.getElementById('prog-label').textContent=
-      faites===6?"Bravo — usage installé !":faites>0?"Continuez, vous êtes lancé":"Votre avancement";
+      faites===6?"Suivi complété — résultat à valider":faites>0?"Votre suivi, à votre rythme":"Votre avancement";
   }
 
   // boutons copier
   document.querySelectorAll('[data-copie]').forEach(function(btn){
     btn.addEventListener('click',function(){
-      var txt=btn.closest('.ticket').querySelector('pre').textContent;
+      var ticket=btn.closest('.ticket');
+      var precedent=ticket.querySelector('[data-copie-manuelle]');
+      if(precedent) precedent.remove();
+      var txt=ticket.querySelector('pre').textContent;
       function ok(){ btn.textContent="Copié ✓"; setTimeout(function(){btn.textContent="Copier";},2000); }
-      if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(ok); }
-      else{ var t=document.createElement('textarea'); t.value=txt; document.body.appendChild(t);
-            t.select(); try{document.execCommand('copy'); ok();}catch(e){} document.body.removeChild(t); }
+      function secours(){
+        var t=document.createElement('textarea'); t.value=txt; t.setAttribute('readonly','');
+        t.style.position='fixed'; t.style.opacity='0'; document.body.appendChild(t);
+        t.select();
+        var copie=false;
+        try{copie=document.execCommand('copy');}catch(e){}
+        document.body.removeChild(t); btn.focus({preventScroll:true});
+        if(copie) ok();
+        else{
+          btn.textContent="Copie indisponible";
+          var manuel=document.createElement('textarea');
+          manuel.value=txt; manuel.readOnly=true; manuel.setAttribute('aria-label','Texte à copier manuellement');
+          manuel.setAttribute('data-copie-manuelle',''); ticket.appendChild(manuel);
+          manuel.focus(); manuel.select();
+        }
+      }
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        try{navigator.clipboard.writeText(txt).then(ok,secours);}catch(e){secours();}
+      }else{secours();}
     });
   });
 

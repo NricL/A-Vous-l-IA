@@ -8,8 +8,6 @@ on:
 # une seule déclaration ici pour ce workflow).
 env:
   BACKEND_ORIGIN: https://avoulia-backend.purpleocean-980317d1.francecentral.azurecontainerapps.io
-  PREVIEW_BACKEND_ORIGIN: https://avoulia-backend--qual-20260913-r1.purpleocean-980317d1.francecentral.azurecontainerapps.io
-  PREVIEW_APP_ORIGIN: https://nricl.github.io
 permissions:
   contents: read
   pages: write
@@ -32,15 +30,11 @@ jobs:
         # The same state checks must pass on the actual Pages publication path.
         # Backend deployment remains separate.
         working-directory: frontend
-        run: npm run type-check && node --test scripts/check-chat-state.mjs scripts/check-preview-state.mjs
+        run: npm run type-check && npm run check:chat
       - name: Build Pages
         working-directory: frontend
         env:
           VITE_API_URL: ${{ env.BACKEND_ORIGIN }}/api/v1
-          VITE_AVIA_PREVIEW: 'true'
-          VITE_AVIA_PREVIEW_CLOUD: 'true'
-          VITE_AVIA_PREVIEW_ORIGIN: ${{ env.PREVIEW_BACKEND_ORIGIN }}
-          VITE_AVIA_PREVIEW_HOSTS: ${{ env.PREVIEW_APP_ORIGIN }}
         run: npx vite build --base=/A-Vous-l-IA/
       - name: SPA fallback and nojekyll
         working-directory: frontend

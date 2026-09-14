@@ -1,8 +1,39 @@
 # Avoulia V2 — Implementation Summary (2026-07-10)
 
-**Latest delivery preparation (13 September, requested at 20:47):** isolated GitHub Pages/Azure preview using 1,021 already-public v4.6.1 records, explicit qualification and improved six-step rendering. AVIA branding retained. Cloud transport, pinned Azure authentication, clean image packaging and Python 3.11 compatibility prepared; private images precede the exact publication confirmation. Stable root/traffic remain unchanged. Protected workbooks/private v462 are excluded; semantic-scope and latency issues still block promotion. See HANDOFF and `.azure/plan.md` for configuration and rollback. This is not a deployment receipt.
+**V463 backend deployed,14September:** user approved1021Sheet1fiches and generic six-step
+parcours at12:13. Revision `v463-20260914-r1` serves100% after isolated acceptance;
+image `5de8ca8cc8f46828b8a62ddf83b7a47f0c9afb767b2d75720f6558a6e0c95182`,
+private builddd2u on Python3.11.16.1021current+4historical pages, unchanged mappings,
+private labelled workbook/audits excluded from public Git/webroot. Public HTML is
+synchronized and the old mapping CSV removed from HEAD, not Git history. Existing
+frontend image and selector wording retained; old stable remains the rollback.
 
-**Historical scope:** July implementation summary; not the current integration or deployment status.
+**The following milestones are historical**, not the current delivery status.
+
+**Content milestone after14September11:29:** private v463 prepared from preserved v462
+with four focused editorial changes, unchanged1021IDs/taxonomy/modes and6158formulas.
+Four six-step text previews and generic prompts remain inside the labelled workbook.
+No private HTML/JSON export, no catalogue regeneration or deployment. The earlier
+complete review and five taxonomy reservations are retained, not re-audited or erased.
+
+**Current work (2026-09-14, 80/20):** keep the existing Haystack/Chroma bot. Remove the
+parallel preview/verifier/orientation and its deployment wiring; do not migrate to R2.
+Retain the full retrieved candidate pool before the five-result display cap.
+As of10:59 the original selection prompt is restored unchanged; no comparative benefit
+was established for the experimental wording. Private image dd2s predates that restoration
+and must not be deployed as the current minimal bot.
+Keep generic six-step adoption guidance without automatically copying the chat need.
+Roadmap now prioritizes all 1,021 case/parcours improvements over further bot tuning.
+The common parcours template has a shorter introduction, plain prerequisite choices
+and three practical output checks (useful/reliable/usable). Local template changes only;
+stable, deployed r1, catalogue, generated pages and traffic unchanged.
+
+**Archived experiment:** r1 (`812aa94`, private renderer `5c748ef`) was deployed separately;
+r2 never was. The experiment's false rejections, timeout and recovery attempts remain
+documented, but are no longer active implementation or rollout instructions.
+
+**Historical scope below:** earlier implementation notes, not the current development
+or deployment instructions. ROADMAP/HANDOFF contain the superseding 80/20 direction.
 
 **Current status (2026-09-13):** v461 and the five UX fixes are deployed on the existing DEV backend revision `avoulia-backend--ux-20260913-d02ffad`; Pages and the Azure frontend carry the same source commit `d02ffad`. Parcours source remains `a500a22`, and workbook, mapping and generated pages are unchanged. Private exports are not served. See [`ROADMAP.md`](./ROADMAP.md), [`SUIVI_PROJET.md`](./SUIVI_PROJET.md) and [`HANDOFF.md`](./HANDOFF.md) for the final receipt and retained rollback images. The Simplon package remains deferred; historical generation instructions below are not the current release recipe.
 

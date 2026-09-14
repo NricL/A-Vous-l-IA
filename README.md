@@ -2,21 +2,48 @@
 Chatbot open source pour aider à explorer et structurer des cas d’usage de
 l’IA.
 
-## État courant — 13 septembre 2026
+## État courant — 14 septembre 2026
 
-**Candidate de test isolée en préparation pour GitHub et Azure personnel**, à la demande du 13 septembre à 20:47. Le nouveau protocole, le RAG **PUBLIC_PAGES** et les parcours en six étapes utilisent uniquement les 1 021 fiches v4.6.1 déjà publiées, pas le classeur General ni la candidate privée v462. Identité visuelle AVIA conservée ; qualification brève, fiche courte, un bouton parcours, puis arrêt du dialogue.
+**La v463 est servie sur le backend personnel**, révision `v463-20260914-r1` :
+1 021fiches et parcours génériques en six étapes, quatre anciennes pages conservées.
+Le classeur complet, ses audits/commentaires et le mapping restent privés.
+Les pages HTML autorisées sont synchronisées avec les sources ; aucun classeur n'est publié.
 
-La route prévue est `https://nricl.github.io/A-Vous-l-IA/preview`, avec API Azure sur une révision séparée `qual-20260913-r1`. La racine du site et le trafic principal Azure restent sur la version stable. Les images privées sont construites avant activation ; cette documentation décrit la candidate, **pas une confirmation de mise en ligne ou de promotion**. Configuration et retour arrière dans [`HANDOFF.md`](./HANDOFF.md) et [`.azure/plan.md`](./.azure/plan.md).
+**Recentrage 80/20 :** le bot existant Haystack/Chroma reste le socle, avec ses consignes
+de sélection inchangées. Seule la coupure prématurée des candidats est corrigée.
+L'usager adapte lui-même son parcours générique. Qualification
+explicite, fiche courte, un bouton parcours, puis arrêt du dialogue.
 
-La préversion locale réelle reste `http://127.0.0.1:4178/preview`. La portée de certaines suggestions et la latence restent à affiner : déplacer l'hébergement ne supprime pas le coût des appels et du quota des modèles Azure. Le consentement précède ces appels ; aucune promesse de rapidité ni de pertinence universelle.
+Le moteur parallèle `/preview` et son vérificateur exhaustif sont retirés des sources
+actives, avec leurs routes, flags et builds. R2 est abandonnée, pas livrée.
+Les travaux antérieurs restent archivés. Les améliorations utiles des six étapes
+sont conservées dans le générateur de parcours, sans transfert automatique du besoin.
 
-À Vous l'IA reste destiné à la découverte d'usages par les employés de PME non spécialistes de l'IA. **Le catalogue v461 et ses parcours sont déployés sur le dev**, avec import contrôlé, secteurs issus des métadonnées et conservation des hashes. Voir [`ROADMAP.md`](./ROADMAP.md) et [`HANDOFF.md`](./HANDOFF.md).
+**Livraison contrôlée :** la nouvelle révision a été exercée sans trafic principal avant
+la bascule à100%. L'ancienne révision `ux-20260913-d02ffad` et son image sont conservées
+pour le retour arrière. Le frontend Azure stable est réutilisé, sans changement de look.
+Priorité : contenu des 1 021 cas et parcours génériques ; le bot garde un lot technique
+minimal, sans poursuivre les réglages de pertinence. Voir [`ROADMAP.md`](./ROADMAP.md), [`HANDOFF.md`](./HANDOFF.md)
+et [`.azure/plan.md`](./.azure/plan.md).
 
-Révision backend active : `avoulia-backend--ux-20260913-d02ffad`. Référence utilisateur : https://nricl.github.io/A-Vous-l-IA/. Sources publiées : chatbot `d02ffad`, parcours inchangé `a500a22`. Les cinq correctifs UX sont livrés sur le backend, GitHub Pages et le frontend Azure : 1 021 cas, 14 domaines métier et 71 intentions. Le package Simplon est différé. Ne pas déposer de classeur privé ou d'export de catalogue dans ce dépôt public ; `noindex` et une URL non devinable ne remplacent pas une autorisation d'accès.
+À Vous l'IA reste destiné à la découverte d'usages par les employés de PME non spécialistes
+de l'IA. Le catalogue v463 conserve1 021cas,14domaines métier,71intentions et les hashes
+historiques. Voir [`ROADMAP.md`](./ROADMAP.md) et [`HANDOFF.md`](./HANDOFF.md).
 
-Dernier lot livré : cas unique sélectionnable, exemples Q3 limités à quatre situations applicables, besoin initial conservé, consignes de sélection sans hypothèses métier non exprimées (UX-01 à UX-05 dans la roadmap). Catalogue, mapping et pages parcours inchangés.
+Révision backend active : `avoulia-backend--v463-20260914-r1`. Référence utilisateur :
+https://nricl.github.io/A-Vous-l-IA/. Image `sha256:5de8ca8cc8f46828b8a62ddf83b7a47f0c9afb767b2d75720f6558a6e0c95182`.
+Les cinq correctifs UX antérieurs sont conservés ; le package Simplon reste différé.
+Ne pas déposer de classeur privé ou d'audit dans ce dépôt public : `noindex` et une URL
+non devinable ne remplacent pas une autorisation d'accès.
 
-Le programme complet et l'historique sont conservés dans ROADMAP/CHANGELOG/SUIVI_PROJET : qualification exacte, orientation explicitement confirmée, revue complète privée du catalogue, premier essai faisable, contrôle et réutilisation. La fixture synthétique reste un outil local distinct, désactivé pour la candidate cloud. La candidate de contenu v462 reste séparée de cette livraison de code.
+Le lot conserve cas unique sélectionnable, exemples Q3 applicables et besoin initial.
+Le moteur examine le pool récupéré avant de limiter les résultats à cinq ; les consignes
+de sélection sont inchangées. Aucun vérificateur supplémentaire ni parcours personnalisé par le chat.
+
+Le programme complet et l'historique sont conservés dans ROADMAP/CHANGELOG/SUIVI_PROJET :
+qualification exacte, revue complète privée du catalogue, premier essai faisable,
+contrôle et réutilisation. L'orientation entre domaines est différée. L'autorisation
+v463 porte sur les fiches et parcours publics, jamais sur le classeur complet ou les audits.
 
 ## Principe projet — Livraison Simplon & traçabilité (À LIRE EN PREMIER)
 Cette application est **co-construite puis livrée à Simplon**, qui l'héberge chez elle.

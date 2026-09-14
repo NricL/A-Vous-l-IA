@@ -70,6 +70,29 @@ class RelevanceEvaluationTests(unittest.TestCase):
         with patch("sys.stderr"), self.assertRaises(SystemExit):
             evaluation.parse_args(["--suite", "stock-assumptions", "--scenario", "zero-match"])
 
+    def test_generic_intent_suite_distinguishes_context_from_different_tasks(self):
+        args = evaluation.parse_args(["--suite", "generic-intent", "--repeats", "1"])
+        docs = evaluation.synthetic_documents(args.suite)
+        selected, repeats, _, plan, prompts = evaluation.evaluation_plan(args, docs)
+        self.assertEqual((len(selected), repeats, len(plan)), (8, 1, 8))
+        self.assertEqual([row["expected_ids"] for row in plan[:5]],
+                         [["synthetic-product-rewrite"]] * 5)
+        self.assertEqual([row["expected_ids"] for row in plan[5:]],
+                         [["synthetic-product-video"], ["synthetic-product-translation"], []])
+        for row in plan:
+            prompt = prompts[(row["scenario_id"], row["repeat"])]
+            payload = json.loads(prompt.rsplit("\n\n", 1)[1])
+            self.assertEqual(payload["besoin_concret"], row["query"])
+            self.assertEqual([c["description"] for c in payload["candidats"]],
+                             [doc.content for doc in docs])
+            self.assertNotIn("BTP", payload["contexte_secondaire"])
+        with (
+            patch.object(evaluation, "discover_config", side_effect=AssertionError("No Azure")),
+            patch.object(evaluation, "live_client", side_effect=AssertionError("No model")),
+        ):
+            report, code = evaluation.run(args)
+        self.assertEqual((code, report["attempted_calls"]), (0, 0))
+
     def test_synonym_query_has_zero_production_keyword_overlap(self):
         scenario = next(row for row in evaluation.scenarios() if row["id"] == "synonyms-zero-keyword-overlap")
         keywords = set(evaluation.rag._query_keywords(scenario["query"]))

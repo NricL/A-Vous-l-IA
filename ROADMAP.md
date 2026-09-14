@@ -4,7 +4,110 @@
 Décisions prises en tant que Product Owner (Eneric) ; ce fichier est versionné dans le
 repo pour rester traçable côté Eneric **et** côté Simplon.
 
-**Dernière mise à jour :** 2026-09-13
+**Dernière mise à jour :** 2026-09-14
+
+## Cap actif — efficacité et pertinence, règle 80/20
+
+**V463 déployée sur le backend personnel**, révision `v463-20260914-r1` à100% :
+1 021fiches/parcours actuels et quatre pages historiques conservées. Autorisation
+explicite à12:13, candidate exercée avant bascule, retour arrière conservé.
+Les notes de préparation privée ci-dessous sont historiques. La publication porte
+sur les fiches/parcours, jamais sur le classeur complet, ses audits ou le mapping.
+
+**Avancement après accord du 14 septembre à 11:29 : candidate privée v463 prête à relire.**
+La revue complète v462 et ses370corrections de contenu sont réutilisées ; quatre
+ajustements ciblés supplémentaires clarifient les entrées et les premières actions.
+Les1 021IDs, le schéma, la taxonomie, les modes et les6 158formules sont conservés.
+Les cinq réserves de classement nécessitant un avis métier restent consignées, sans
+reclassement automatique ni blocage artificiel du reste du catalogue.
+
+Quatre aperçus textuels des parcours (fiches produit, chantier, stocks, recrutement)
+contiennent les six étapes et le prompt générique courant. Ils sont conservés uniquement
+dans le classeur labellisé, pas exportés en HTML/JSON. Ce sont des supports de relecture,
+pas une recette interactive des pages déployées. L'accord de publication du contenu
+a depuis été donné à12:13 ; la bascule contrôlée vers v463 est réalisée.
+
+**Priorité révisée à 10:59 : fiches et parcours avant optimisation du bot.**
+Les consignes du sélecteur existant sont restaurées à l'identique ; seule la coupure
+prématurée du pool de candidats reste corrigée. Aucun gain des nouvelles consignes
+n'a été démontré par une comparaison avant/après. Arrêt des essais de formulation
+et des builds supplémentaires pour ce chantier.
+
+Travail actif : rendre le premier essai clair, les prérequis compréhensibles et le
+résultat vérifiable. Le gabarit commun présente désormais une seule introduction courte,
+des choix de préparation en langage courant et trois contrôles avant usage :
+utile, fiable, utilisable. Les six étapes, leurs textes source et les prompts
+génériques sont conservés. Ces gabarits sont appliqués aux1 021pages v463 servies.
+
+**Décision d'Eneric du 14 septembre à 10:21 : conserver le bot existant comme socle.**
+Le programme r2 est arrêté, pas livré ni déclaré réparé. Le moteur parallèle `/preview`,
+son vérificateur exhaustif, sa réorientation et son transfert de contexte personnalisé
+sont retirés du développement actif. Les sources et résultats antérieurs restent
+récupérables dans Git et dans la trace locale hors dépôt ; ne pas relancer leurs anciens
+commandes, builds ou plans de livraison.
+
+AVIA aide à découvrir une possibilité d'usage puis à faire un premier essai utile.
+Il reconnaît **l'action, son objet et le livrable**, sans exiger qu'une cible ou une
+motivation figure dans la fiche. « Réécrire mes fiches produit pour la GenZ »,
+« pour de nouveaux clients » et « améliorer mes descriptions produit » peuvent mener
+au même cas générique. L'usager adapte lui-même le parcours. Cela n'autorise ni
+à inventer un canal comme TikTok, ni à ignorer une exclusion explicite.
+
+La qualification reste domaine choisi → secteur applicable → objectif → besoin.
+Les filtres, IDs et sources restent autoritaires. Après sélection : fiche courte,
+un bouton parcours, fin du dialogue. Même identité visuelle, pas de coach bavard.
+
+**Précision du 14 septembre à 10:56 : jusqu'à cinq cas utiles sont souhaitables.**
+La découverte peut offrir plusieurs pistes ; trouver le cas attendu ne doit pas
+forcer une réponse unique. Évaluer séparément sa présence, les exclusions réellement
+exprimées et l'utilité des autres pistes, plutôt qu'exiger une liste d'IDs exactement
+égale à un seul cas. Ni remplissage obligatoire à cinq, ni rejet automatique des alternatives.
+
+### Livraisons par valeur, sans dépendance à une nouvelle architecture
+
+| Priorité | Livrable | Périmètre et limite |
+|---|---|---|
+| P1 — bot existant, lot technique limité | Corriger la coupure prématurée, sans changer la sélection | Livré avec v463 : pool complet avant sélection, cinq après rapprochement. Prompt inchangé ; aucun second juge, mot-clé spécial ou personnalisation de fiche. |
+| P0 — nettoyage | Retirer l'expérimentation parallèle | Supprimer son code, ses flags, routes, dépendances et recettes de build. Conserver les cinq corrections UX livrées, le banc du moteur existant et les preuves archivées. Les mécanismes asynchrones expérimentaux restent récupérables, pas une migration imposée. |
+| P0 — contenu complet | Améliorer les 1 021 cas dans les colonnes existantes | V463 adoptée sur le backend après autorisation : première action claire, entrées réalistes, validation humaine. Sources v461/v462 conservées, audits privés, cinq réserves de classement documentées sans reclassement automatique. |
+| P0 — parcours génériques | Rendre les six étapes praticables, sans changer leur ordre | Garder données/prérequis, premier livrable, contrôles métier, comparaison et réutilisation. Retirer le contexte injecté depuis le chat. Les prompts restent génériques et complétés par l'usager. |
+| P0 — premier essai honnête | Séparer brouillon, analyse et automatisation déployée | Indiquer données, droits et outil nécessaires. Données fictives annoncées comme telles ; ne pas inventer d'historique, de résultat ou de gain. Informations à préparer dans le parcours, pas questionnaire d'admission au cas. |
+| P1 — usage fiable | Corriger les frictions observées sur le socle conservé | Choix/boutons cohérents après retour arrière, besoin conservé, erreurs explicites, absence de dialogue après la fiche. Mesurer d'abord la latence de l'appel existant ; ne pas transférer les défauts du moteur expérimental au diagnostic du stable. |
+| P2 — suites utiles | Réutilisation volontaire, responsable, formation/accompagnement | Dans les parcours, sans compte imposé ni transmission automatique. Une copie de prompt ou une case cochée ne prouve pas l'adoption. |
+| P2 — éventuelle orientation | Aider seulement si la recherche principale reste une impasse | À reconsidérer après le correctif intrafiltre. Piste réelle séparée, autre classement expliqué, accord obligatoire. Aucun développement actif de recherche secondaire dans ce lot. |
+
+Le générique concerne le contexte de l'usager, pas la précision de l'action : une
+traduction n'est pas une réécriture, un script vidéo n'est pas une fiche produit.
+Une spécialisation réellement indispensable au cas ne devient pas générique par
+effacement de son sens. Les documents à réunir et la relecture ne sont pas supposés acquis.
+
+### État et publication
+
+Les cinq correctifs UX restent en ligne, avec le catalogue et les parcours v463.
+L'ancien stable `d02ffad` reste la référence de retour arrière. Le code preview est
+retiré des sources ; la désactivation des anciennes révisions expérimentales est suivie
+séparément de la bascule. Aucune ancienne image ni aucun mapping n'est détruit.
+Le périmètre de cette livraison a reçu son aperçu et sa confirmation à12:13.
+Il utilise un contexte neuf du bot existant et conserve les images/index/mappings de retour arrière.
+
+La recette compare notamment les trois formulations produit ci-dessus, une exclusion
+explicite, un autre livrable demandé, l'absence de cas, le cas au-delà du cinquième candidat
+et le détail terminal lié au bon parcours. Les résultats locaux ne sont pas un reçu Azure
+ni une garantie de pertinence sur toutes les formulations.
+
+Les repères Bpifrance/France Num/DGE motivent le premier essai faisable, le contrôle du
+résultat et la réutilisation ; ils ne prescrivent pas une refonte de moteur ni ne prouvent
+la performance d'AVIA. Pas de nouveau modèle, connecteur, télémétrie ou package Simplon.
+
+Les suites restent ciblées : avis métier sur les cinq réserves de classement, retours
+sur des usages réels, puis relais humains facultatifs. Les libellés historiques du
+chat et de la vitrine peuvent encore employer « personnalisé » au sens de découverte ;
+les pages et prompts ne reprennent ni n'adaptent automatiquement le besoin du chat.
+
+## Archive de la roadmap antérieure — ne pas exécuter
+
+Les sections suivantes conservent la chronologie, y compris des hypothèses corrigées.
+Le cap 80/20 ci-dessus remplace leurs consignes de développement et de préversion.
 
 ## État actif du 13 septembre — v461 servie sur DEV
 

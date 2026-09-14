@@ -1,6 +1,89 @@
 # Azure Deployment Plan
 
-## Status
+## V463 backend deployed — 14 September
+
+Main traffic100% on `avoulia-backend--v463-20260914-r1`, private builddd2u, image
+`sha256:5de8ca8cc8f46828b8a62ddf83b7a47f0c9afb767b2d75720f6558a6e0c95182`.
+Python3.11.16 gates and payload passed:239backend/17parcours checks, one Node-only
+skip each,1021current+4historical pages. Initialdd2t failed an obsolete heading assertion;
+equivalent approved-template assertion corrected before successful build.
+
+Candidate checked before main switch; real GenZ includes the expected case, HTTP/SSE
+detail and generic handoff agree, domestic off-topic request has no case, four current
+and four old page hashes match, private paths return404. Main static checks also passed.
+Azure PATCH returned an asynchronous acknowledgment; state was read back before proceeding.
+
+Rollback remains `ux-20260913-d02ffad` / backend058fe528, retained with its data.
+New index directory `/app/data/chroma-v463-20260914-r1`, collection
+`documents-v463-20260914-r1`; no persistent-volume topology change. Frontend stable
+image2ae5e263 remains in use. Retire only the old experimental qual-20260913-r1 revisions
+after cleaned Pages publication; preserve images and stable rollback.
+
+### Approved rollout sequence (applied)
+
+User explicitly approved public1021Sheet1case fields and generic six-step parcours,
+not public workbook/audits/mapping. Freeze canonical v463 (content equal to reviewed
+copy), preserve1025ID/hash associations and four historical pages, build a fresh private
+context using Dockerfile.dev-catalogue-release and immutable stable backend058fe528.
+
+Target backend suffix v463-20260914-r1. Clone the stable revision template
+ux-20260913-d02ffad, not the latest preview template; preserve secret references,
+use a new replica-local Chroma directory/collection and keep stable100% main traffic
+until actual candidate API/page checks pass. Original selector wording is retained.
+Frontend Azure stable image2ae5e263 is reusable; cleaned Pages removes preview flags.
+Retire only old experimental revisions after successful replacement. Preserve rollback.
+
+The older private-only preparation states below are historical, not the authorization
+status of this scoped release. Build success alone is not deployment success.
+
+## Historical status — 80/20 existing-bot cleanup
+
+Content milestone14September11:29: labelled private v463 and four protected text previews
+are ready for review. They are NOT inputs authorized for a public HTML/index export.
+Do not use v463 in an Azure image or regenerate served pages without explicit content
+publication approval. This private workbook operation changed no Azure resource.
+
+User decision14September10:21 retires the parallel preview stack, not the stable bot.
+Active runtime is `app.main` with Haystack/Chroma and the existing frontend/API.
+Preview modules, origin flags and preview-specific build recipes are removed locally.
+Do not build/deploy `qual-20260914-r2` or reuse its stale build contexts.
+
+No Azure resources, traffic, images, indexes or public data have changed in this cleanup.
+Last observed stable revisions `ux-20260913-d02ffad` retain100% main traffic in Multiple
+mode; r1 remains separately deployed until an explicit cloud retirement. Removing code
+locally does not deactivate those replicas. Keep immutable rollback images and mappings.
+
+Next release must use a fresh, reviewed code-only context for the existing bot:
+the full-candidate-pool correction with the original selection prompt unchanged, preserving the current
+private v461 payload and generic page URLs. No PUBLIC_PAGES snapshot or labelled v462
+export. Reassess private content separately before any authorized regeneration.
+Exact outbound publication preview/confirmation remains required; no new model or quota.
+
+At10:59 the user prioritized case/parcours work over additional bot tuning. Private build
+dd2s succeeded but includes subsequently withdrawn prompt wording; it is retained as
+historical evidence, not the current release candidate. No rebuild or activation in this
+parcours-priority pass. Generic template changes have not regenerated served pages.
+
+## Archived r1/r2 plans — not active deployment instructions
+
+The following failed/intermediate plans preserve provenance only. Preview modules
+and commands they name are intentionally absent from the cleaned source.
+
+### Former status — reliability candidate r2
+
+**Not deployed.** Final semantic acceptance remains failed (valid GenZ case rejected; verifier response truncation). Private build `dd2r` failed a prompt-language assertion; its equivalent translated assertion now passes locally, but the image was not rebuilt while semantic acceptance is blocked. No r2 image may be treated as release-ready. Temporary r2 local servers were stopped; no main traffic, r1 revision or public GitHub source changed.
+
+R1 was activated on14September after exact approval: public source812aa94, private renderer5c748ef; Pages34809713720 and CI34809713718 succeeded. Both `qual-20260913-r1` revisions are Healthy at0% main traffic. Stable `ux-20260913-d02ffad` revisions remain at100% in Multiple mode. No promotion occurred.
+
+R2 target suffix: `qual-20260914-r2`, existing apps/environment/registry and same public v4.6.1 snapshot. The fixes remove long inference from HTTP request lifetimes, allow cancellation/resumption and prevent cross-session blocking or late commits. Hosted legacy preview inference endpoints return409 `async_required`; the frontend must use the new operations API. Main legacy bot paths are unchanged.
+
+Build with the reviewed allowlist, including `preview_execution.py`, `preview_operations.py`, verifier/operation tests and the asynchronous smoke adapter. Reuse the pinned stable OS/dependency image, not a private workbook/index export. Validate under Python3.11, then stage both revisions at0% main traffic with one replica each and the existing secret references. No quota increase. Explicitly configure the r2 backend/frontend origins, Pages backlink and actually observed trusted proxy peers.
+
+Pages receives r2 API origin and a real `preview/index.html` so canonical `/A-Vous-l-IA/preview/` returns200. Keep old candidate and stable images for recovery; remove old candidate traffic/replicas only after the corrected frontend has switched and been exercised. Main stable traffic must never use `latestRevision:true`.
+
+Live acceptance must distinguish HTTP submission/poll latency from total model/quota latency. Exercise original GenZ, a negative need, genuine orientation/refusal/acceptance, pending cancellation, independent sessions, refresh and stale handoff. R1's504/502 findings remain open until this integration is evaluated; successful private builds alone do not prove runtime behavior or semantic reliability. The following record describes r1 preparation and retained rollback, not r2 completion.
+
+## Historical r1 preparation
 
 Following the user's 13 September 20:47 request, an isolated GitHub/Azure personal test candidate is prepared. Private ACR builds succeeded: backend `dd2q`, `sha256:619e31f29bbd0c65a1112540eaf237644306ef0cb567b7ba45e0aa62765bc385`; frontend `dd2p`, `sha256:8a82f246b3e4d91f61c7491db85b4a359417b354899737eea3f5d9b77862dacd`. Both use tag `qual-20260913-r1` in their existing repositories. The initial backend build failed on a missing public-parser dependency, now explicitly declared. Build success is not a deployed-service or inference receipt.
 
