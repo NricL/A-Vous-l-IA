@@ -4,7 +4,14 @@ l’IA.
 
 ## État courant — 14 septembre 2026
 
-**Révision publiée :** préparation clarifiée sur les1 021parcours et
+**Dernier correctif publié :** les exemples de problèmes Q3 sont sélectionnés par
+diversité de cas et vocabulaire métier, avec report des formulations très proches,
+plutôt que principalement par alphabet. Textes source et filtres conservés ;
+la base v463, les recommandations finales et les parcours ne changent pas.
+Révision `v463-q3-20260914-r2` à100%, image `407403ae…`.
+La révision de préparation reste disponible pour retour arrière. Même lien utilisateur.
+
+**Livraison précédente :** préparation clarifiée sur les1 021parcours et
 3 774prompts, puis réutilisation des entrées à l'étape4, test en5 et réutilisation en6.
 La base métier v463 et le bot ne changent pas. Révision Azure
 `v463-preparation-20260914-r1`,100% du trafic, image
@@ -46,8 +53,8 @@ et [`.azure/plan.md`](./.azure/plan.md).
 de l'IA. Le catalogue v463 conserve1 021cas,14domaines métier,71intentions et les hashes
 historiques. Voir [`ROADMAP.md`](./ROADMAP.md) et [`HANDOFF.md`](./HANDOFF.md).
 
-Révision backend active : `avoulia-backend--v463-preparation-20260914-r1`. Référence utilisateur :
-https://nricl.github.io/A-Vous-l-IA/. Le frontend est inchangé ; seuls les parcours et leurs prompts sont actualisés.
+Révision backend active : `avoulia-backend--v463-q3-20260914-r2`. Référence utilisateur :
+https://nricl.github.io/A-Vous-l-IA/. Le frontend est inchangé ; le dernier lot corrige uniquement les exemples Q3.
 Les cinq correctifs UX antérieurs sont conservés ; le package Simplon reste différé.
 Ne pas déposer de classeur privé ou d'audit dans ce dépôt public : `noindex` et une URL
 non devinable ne remplacent pas une autorisation d'accès.

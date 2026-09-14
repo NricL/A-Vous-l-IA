@@ -1,5 +1,85 @@
 # Avoulia V2 — Implementation Handover Guide for Simplon
 
+## Q3 généralisé et déployé — accord du 14 septembre à17:10
+
+Backend `avoulia-backend--v463-q3-20260914-r2`, Healthy,100% du trafic principal.
+Image `sha256:407403ae34141e7609275d5de0374bc63d7966bc9b4be8a96a56094a78529f64`,
+build privé `dd30`. Retour arrière conservé et actif :
+`v463-preparation-20260914-r1` / image `a8a6cf7c…`.
+Le frontend et ses liens restent inchangés. La candidate Q3 r1 est désactivée,
+jamais promue ; son image reste disponible. Ne pas confondre cette r2 Q3 ciblée
+avec l'ancien programme de moteur parallèle R2 abandonné.
+
+Le correctif s'applique à tous les domaines sans liste de cas privilégiés.
+Priorité secteur préservée, puis report des formulations très proches, diversité
+des cas et vocabulaire du titre/objectif, position source et alphabet de départage.
+Deux formulations sont considérées proches si elles ont au moins trois mots-clés
+communs couvrant au moins deux tiers de leur union. C'est un repère lexical
+conservateur, pas un détecteur de synonymes ; les exemples proches restent disponibles
+si les alternatives manquent. Les sources ne sont ni réécrites ni retirées du pool complet.
+
+123 tests locaux ciblés, incluant qualification et invariants sur les14domaines ;
+109 tests Python3.11 dans l'image finale. Comparaison réelle de18parcours de
+qualification sur14domaines, dont quatre secteurs spécifiques : HTTP/SSE identiques,
+choix Q1/Q1.5/Q2 inchangés, au plus quatre exemples, aucune recommandation prématurée.
+Les18parcours ont été rejoués sur l'URL principale après bascule. Neuf pages
+(cinq actuelles/quatre historiques) identiques et cinq chemins privés404 avant/après.
+Le scénario achats a aussi été parcouru sur GitHub Pages à390px, sans débordement.
+Ces sondes de qualification ne demandent aucune inférence de sélection.
+
+La première candidate révélait encore deux exemples proches dans le domaine terrain :
+report générique ajouté avec régression et contrôle négatif. Les versions successives
+ne changent ni base v463, ni index logique, modèles, filtres, recommandations finales
+ou parcours. L'index de la nouvelle réplique utilise un répertoire/une collection propres.
+Certaines formulations source restent génériques, spécialisées ou jargonneuses :
+la comparaison ne certifie pas tous les objectifs ni la qualité de tous les textes.
+
+Construction à partir de l'image de préparation immuable, huit fichiers autorisés
+seulement ; un fichier runtime superposé, tests et auxiliaires confinés à l'étage
+de validation. Aucun classeur/mapping transmis depuis le poste ou ajouté aux sources.
+Deux builds initiaux ont échoué sur des imports manquants du contexte de tests ;
+ce contexte a été complété sans toucher aux dépendances runtime. Le journal du build
+Q3 r1 réussi a ensuite nécessité une normalisation CR/LF, sans nouveau build.
+L'accusé ARM pouvait précéder l'apparition de la révision : suivi par lecture,
+jamais resoumission aveugle. Le premier contrôle navigateur visait à tort un élément
+par ligne ; la bulle contient toute la liste et a été vérifiée dans son ensemble.
+Trace durable hors dépôt : `../_local-trace/2026-09-14-q3-examples/`.
+
+## Historique du correctif Q3 local — 14 septembre, accord à16:50
+
+Non commité, non publié, non déployé. Le backend en ligne reste la révision
+`v463-preparation-20260914-r1` décrite ci-dessous. Aucun classeur, index, parcours,
+modèle, filtre ou prompt de sélection des recommandations n'est modifié.
+
+Dans `backend/app/haystack_rag.py`, `build_pool` conserve le périmètre Q2 et la
+priorité secteur exact / multi-sectoriel. Après séparation et déduplication des
+déclencheurs, le classement privilégie les cas les moins représentés, puis les
+termes encore non représentés communs au déclencheur et au titre/objectif du cas,
+puis le nombre de ces termes, la position source et enfin l'alphabet.
+Les helpers de normalisation, mots-clés, alias de titre et ID métier sont réutilisés.
+Les occurrences de chunks ne comptent pas comme une fréquence. Sans ID métier,
+les groupes titre/déclencheurs identiques sont réunis prudemment ; ce regroupement
+ne prétend pas reconstituer des identités manquantes.
+
+Les textes restent verbatim, au maximum quatre pour Q3. Le vocabulaire partagé est
+un repère lexical limité : pas de jugement sémantique, pas de garantie de clarté
+universelle, pas de reclassement métier. Aucun déclencheur éligible n'est supprimé
+du pool complet et aucun exemple hors filtre n'est ajouté pour remplir la liste.
+La formulation devient « Voici quelques exemples de problèmes liés à cet objectif
+pour vous aider à formuler : ». Les instructions Q3 historiques sont alignées
+sur l'ordre backend, le verbatim et la limite de quatre ; les autres étapes restent intactes.
+
+Validation locale :106 tests ciblés (`test_haystack_rag`, `test_chat_regressions`,
+`test_case_selection_prompt`, `test_infilter_retrieval`). Huit régressions Q3
+supplémentaires utilisent uniquement des données synthétiques : diversité des cas
+et termes, invariance aux chunks/ordre d'entrée, secteurs, alias, IDs absents,
+source exacte, plusieurs domaines et texte de la question.
+Comparaison avant/après du scénario signalé effectuée en mémoire sur des valeurs
+lues via Microsoft365, sans traitement local de classeur ni export des valeurs.
+Ce n'est pas une lecture de l'index Chroma déployé ni une recette Azure.
+La première passe a corrigé une attente de test sur l'ordre de départage, pas la règle
+de fidélité au texte. Avant mise en ligne : aperçu/accord distinct, candidate et rollback.
+
 ## Révision de préparation publiée — accord du 14 septembre à14:48
 
 Backend `avoulia-backend--v463-preparation-20260914-r1`,100% main traffic, Healthy.

@@ -8,6 +8,21 @@ repo pour rester traçable côté Eneric **et** côté Simplon.
 
 ## Cap actif — efficacité et pertinence, règle 80/20
 
+**Correctif Q3 livré après accord à17:10 :** règle commune aux14domaines,
+diversité des cas et du vocabulaire, report des quasi-doublons observés.
+18parcours réels comparés HTTP/SSE avant/après, choix de qualification inchangés ;
+123 tests locaux et109 dans l'image. Révision `v463-q3-20260914-r2` à100%.
+Base/parcours et sélection finale conservés ; ancienne préparation disponible
+pour retour arrière. Les formulations source restent un sujet éditorial distinct,
+pas une garantie sémantique du classement lexical. Détail dans `HANDOFF.md`.
+
+**Jalon local précédent après accord à16:50 :** retirer le biais alphabétique dominant
+des quatre exemples de problèmes. Diversité de cas et vocabulaire du titre/objectif,
+sans nouvelle fréquence supposée, modèle ou taxonomie. Sources verbatim et filtres
+inchangés ; les recommandations finales ne sont pas reclassées par ce correctif.
+Implémentation locale et régressions dans `HANDOFF.md` ; pas de publication ni de
+déploiement à ce jalon. La révision Q3 ci-dessus l'a depuis remplacée en ligne.
+
 **Lot demandé à13:56, confirmé à14:48 et publié : préparation et complémentarité des étapes.**
 Revue complète des1 021cas /3 774entrées terminée. Gabarit local : une entrée préparée
 avec contenu utilisable, manques et sources/statut ; données existantes non inventées,

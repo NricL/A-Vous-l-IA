@@ -1,5 +1,25 @@
 # Avoulia — Changelog v1 → v2 (synthèse d'onboarding)
 
+## 14 septembre — exemples Q3 généralisés et déployés après accord à17:10
+
+Révision `v463-q3-20260914-r2` à100%, image `407403ae…`, build privé `dd30`.
+Diversité de cas/vocabulaire et report conservateur des quasi-doublons ; source
+verbatim, filtres, base v463, sélection finale et parcours inchangés.
+123 tests locaux ;109 dans l'image ;18parcours de qualification sur14domaines
+comparés avant/après en HTTP/SSE, puis rejoués sur le principal.
+Retour arrière de préparation conservé ; première candidate Q3 désactivée.
+Frontend inchangé. Limites lexicales et trace détaillée dans `HANDOFF.md`.
+
+## Historique du 14 septembre — exemples Q3 corrigés localement
+
+Accord à16:50. La sélection des quatre aides à la formulation privilégie la diversité
+des cas et le vocabulaire de leurs titres/objectifs avant le départage alphabétique.
+Les chunks répétés n'ajoutent aucun poids ; textes source et filtres sont conservés.
+Le libellé parle d'exemples liés à l'objectif, sans prétendre mesurer leur fréquence.
+Instructions Q3 alignées sur le verbatim et quatre exemples. Aucun changement de
+base, parcours ou sélection finale des cas ; aucun push, build cloud ou déploiement.
+Détails et limites du classement lexical dans `HANDOFF.md`.
+
 ## 14 septembre — préparation des entrées publiée après accord à14:48
 
 Revue des3 774prompts sur1 021cas. Préparation d'une seule entrée avec format,

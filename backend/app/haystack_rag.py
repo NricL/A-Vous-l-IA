@@ -8,6 +8,7 @@ import logging
 import json
 import re
 import unicodedata
+from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 from difflib import SequenceMatcher
@@ -539,6 +540,20 @@ def _doc_is_applicable_to_sector(doc, secteur_choisi: str) -> bool:
     return _doc_matches_sector(doc, secteur_choisi, include_multisector=True)
 
 
+@dataclass
+class _Q3Example:
+    text: str
+    sector_score: int
+    source_position: int
+    case_keys: set[str] = field(default_factory=set)
+    context_terms: set[str] = field(default_factory=set)
+
+
+def _q3_examples_overlap(left: set[str], right: set[str]) -> bool:
+    shared = len(left & right)
+    return shared >= 3 and shared * 3 >= len(left | right) * 2
+
+
 def build_pool(
     domaine_code: str,
     intention: str | None = None,
@@ -546,8 +561,8 @@ def build_pool(
     top_k: int | None = None,
 ) -> list[str]:
     """
-    Exemples individuels des cas applicables, secteur exact avant multi-sectoriel.
-    Déduplique les variantes sans réécrire le texte source ; borne après séparation.
+    Exemples source, secteur exact puis diversité des cas et vocabulaire métier.
+    Le recouvrement lexical est un repère, pas une mesure de pertinence sémantique.
     """
     docs = _fetch_documents_for_domaine(domaine_code)
 
@@ -563,24 +578,57 @@ def build_pool(
     if secteur_choisi:
         docs = [doc for doc in docs if _doc_is_applicable_to_sector(doc, secteur_choisi)]
 
-    # Les chunks et les groupes de situations peuvent répéter le même exemple.
-    trigger_scores: dict[str, tuple[int, str]] = {}
+    examples: dict[str, _Q3Example] = {}
     for doc in docs:
         score = _get_doc_sector_score(doc, secteur_choisi)
-        group = _get_trigger_from_meta(getattr(doc, "meta", None) or {})
-        for raw in group.split("|"):
+        meta = getattr(doc, "meta", None) or {}
+        group = _get_trigger_from_meta(meta)
+        title = _meta_first_nonempty(meta, CASE_EXTRA_FIELD_ALIASES["cas_utilisation"])
+        context_terms = set(_query_keywords(title + " " + _get_intention_from_meta(meta)))
+        # Sans ID métier, regrouper prudemment les métadonnées identiques, jamais les chunks.
+        case_key = _extract_case_id_from_meta(meta) or json.dumps(
+            [_normalize_query_text(title), sorted({
+                _normalize_query_text(part) for part in group.split("|") if part.strip()
+            })],
+            ensure_ascii=True,
+        )
+        for position, raw in enumerate(group.split("|")):
             trigger = raw.strip()
             key = _normalize_query_text(trigger)
             if not key:
                 continue
-            prev = trigger_scores.get(key)
-            if prev is None or (-score, trigger) < (-prev[0], prev[1]):
-                trigger_scores[key] = score, trigger
+            prev = examples.get(key)
+            if prev is None or score > prev.sector_score:
+                prev = examples[key] = _Q3Example(trigger, score, position)
+            if score == prev.sector_score:
+                if (position, trigger) < (prev.source_position, prev.text):
+                    prev.source_position, prev.text = position, trigger
+                prev.case_keys.add(case_key)
+                prev.context_terms.update(set(_query_keywords(trigger)) & context_terms)
 
-    ranked = sorted(trigger_scores.items(), key=lambda item: (-item[1][0], item[0]))
-    triggers = [value[1] for _, value in ranked]
-    if top_k is not None and top_k > 0:
-        return triggers[:top_k]
+    case_uses: dict[str, int] = {}
+    used_terms: set[str] = set()
+    example_terms = {key: set(_query_keywords(example.text)) for key, example in examples.items()}
+    shown_terms: list[set[str]] = []
+    triggers: list[str] = []
+    limit = top_k if top_k is not None and top_k > 0 else len(examples)
+    while examples and len(triggers) < limit:
+        # Alterner les cas, puis les termes métier ; l'alphabet ne départage que les égalités.
+        key = min(examples, key=lambda key: (
+            -examples[key].sector_score,
+            any(_q3_examples_overlap(example_terms[key], shown) for shown in shown_terms),
+            min(case_uses.get(case, 0) for case in examples[key].case_keys),
+            -bool(examples[key].context_terms - used_terms),
+            -len(examples[key].context_terms),
+            examples[key].source_position,
+            key,
+        ))
+        example = examples.pop(key)
+        triggers.append(example.text)
+        used_terms.update(example.context_terms)
+        shown_terms.append(example_terms[key])
+        for case in example.case_keys:
+            case_uses[case] = case_uses.get(case, 0) + 1
     return triggers
 
 
@@ -944,15 +992,11 @@ Si le backend fournit une liste d'exemples de situations
 "Pouvez-vous décrire le problème concret que vous
 rencontrez actuellement ?"
 
-"Voici quelques situations fréquentes dans votre cas
+"Voici quelques exemples de problèmes liés à cet objectif
 pour vous aider à formuler :"
 
-Tu affiches les exemples fournis par le backend reformulés en phrase courtes et en français sous
-forme de liste simple (tirets), par exemple :
-  - marge en baisse sans explication claire
-  - stocks d'invendus en fin de saison
-  - prix fixés à l'intuition
-  - concurrence agressive sur les prix
+Tu affiches uniquement les exemples fournis par le backend, sans reformulation,
+dans le même ordre, sous forme de liste simple (tirets).
 
 Puis tu ajoutes :
 "Décrivez votre situation en une ou deux phrases."
@@ -962,7 +1006,7 @@ Règles :
 - Si un problème libre a déjà été fourni, réutilise-le sans reposer Q3.
 - Les exemples sont une aide à la formulation, pas des
   choix à sélectionner.
-- Les exemples sont limités à 6 exemples.
+- Les exemples sont limités à 4 exemples.
 - Tu ne proposes AUCUN mécanisme de coche ou de clic.
 - Tu ne reformules jamais les exemples fournis.
 - Tu ne changes jamais le domaine, l'intention ou le
@@ -2407,7 +2451,7 @@ def _qualification_response(
         if triggers:
             return (
                 "Pouvez-vous décrire le problème concret que vous rencontrez actuellement ?\n\n"
-                "Voici quelques situations fréquentes dans votre cas pour vous aider à formuler :\n"
+                "Voici quelques exemples de problèmes liés à cet objectif pour vous aider à formuler :\n"
                 + triggers + "\n\nDécrivez votre situation en une ou deux phrases."
             )
         return "Quel problème concret rencontrez-vous actuellement ?"

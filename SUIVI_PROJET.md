@@ -705,7 +705,28 @@ Premiers chantiers de la ROADMAP (Axe 2 UX, Axe 4 fiabilité). Livrés et valid�
 
 ## 📐 Vision & Architecture
 
-### Objectif V2
+### Correctif Q3 déployé — 14 septembre, accord à17:10
+
+`v463-q3-20260914-r2`, Healthy,100% du trafic ; image `407403ae…`, build `dd30`.
+123 tests locaux,109 dans l'image,18parcours de qualification sur14domaines
+comparés puis rejoués sur le principal. Choix Q1/Q1.5/Q2, sources, base v463,
+recommandations finales et parcours inchangés. Le tri évite le biais alphabétique
+dominant et reporte les formulations très proches lorsqu'il existe des alternatives.
+Le parcours achats fonctionne via le lien GitHub Pages habituel à390px.
+Révision de préparation et image conservées pour rollback ; candidate Q3 r1 arrêtée.
+Trace hors dépôt et limites dans `HANDOFF.md`. Les jalons ci-dessous sont historiques.
+
+## Historique du correctif local Q3 — 14 septembre, accord à16:50
+
+Les quatre exemples ne sont plus choisis principalement par alphabet : priorité
+sectorielle conservée, alternance entre cas et vocabulaire lié aux titres/objectifs.
+Texte source intact, doublons de chunks sans poids, aucun cas ajouté hors périmètre.
+Introduction et instructions Q3 harmonisées, sans affirmation de fréquence.
+106 régressions ciblées réussies ; détails et limites dans `HANDOFF.md`.
+Base v463, parcours et recommandations finales inchangés. Aucun commit, push,
+build cloud ou déploiement ; la révision en ligne reste celle décrite ci-dessous.
+
+## Objectif V2
 Ajouter au système Avoulia existant (backend RAG + frontend Vue) :
 1. **Parcours pages** — Guidance step-by-step post-diagnostic (6 étapes ~ 2.5h)
 2. **Telemetry** — Tracking complet du funnel chat → RAG → parcours → completion

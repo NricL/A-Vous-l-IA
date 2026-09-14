@@ -1,5 +1,27 @@
 # Azure Deployment Plan
 
+## Q3 example ranking — deployed after14September17:10 approval
+
+Main100% on `avoulia-backend--v463-q3-20260914-r2`, Healthy, immutable image
+`sha256:407403ae34141e7609275d5de0374bc63d7966bc9b4be8a96a56094a78529f64`.
+Private ACR build `dd30`,109 Python3.11 tests;123 targeted local tests.
+Eight-file allowlisted context overlays only `app/haystack_rag.py` at runtime.
+Workbook, mapping, dependencies and all pages inherited from the pinned preparation image.
+New replica-local directory/collection `chroma-v463-q3-20260914-r2` /
+`documents-v463-q3-20260914-r2`; same storage topology and model configuration.
+
+18 real Q3 flows across14domains plus specific-sector variants compared with the
+baseline in HTTP/SSE; replayed on main after promotion. Nine page hashes unchanged,
+five private paths404. Actual GitHub Pages purchasing flow confirmed at390px.
+First Q3 candidate never received main traffic and is now inactive; image retained.
+Preparation revision `v463-preparation-20260914-r1` / `a8a6cf7c…` remains active for rollback.
+Frontend unchanged; no Pages rebuild is required for this backend-only correction.
+Receipts and build recipe: `../../_local-trace/2026-09-14-q3-examples/` from this directory.
+
+Rollback requires pointing main traffic explicitly to the retained preparation revision,
+preserving code/catalogue/index/pages together. Do not use latestRevision routing,
+remove old images or erase indexes. Q3 r2 is unrelated to the archived parallel-engine R2.
+
 ## Preparation-prompt revision — deployed after14September14:48 approval
 
 Main100% on `avoulia-backend--v463-preparation-20260914-r1`, Healthy, image

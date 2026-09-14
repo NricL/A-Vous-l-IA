@@ -121,6 +121,216 @@ class HaystackRagRetrievalFilterTests(unittest.TestCase):
             ), "")
             triggers.assert_not_called()
 
+    def test_q3_prefers_contextual_examples_from_distinct_cases(self):
+        docs = [
+            SimpleNamespace(meta={
+                "case_id": f"UC-{i:04d}", "intention": "Objectif", "secteur": "Multi-sectoriel",
+                "cas_utilisation": title, "declencheurs_typiques": triggers,
+            })
+            for i, (title, triggers) in enumerate((
+                ("Centraliser les commandes", "analyse abstraite | commandes dispersées | commandes en doublon"),
+                ("Comparer les contrats", "amélioration souhaitée | contrats introuvables"),
+                ("Préparer les factures", "adhésion limitée | factures incomplètes"),
+                ("Organiser les livraisons", "analyse tardive | livraisons décalées"),
+            ), start=1)
+        ]
+        with patch.object(haystack_rag, "_fetch_documents_for_domaine", return_value=docs):
+            pool = haystack_rag.build_pool("achats_fournisseurs", "Objectif", "Autre / Non spécifique")
+            examples = haystack_rag.get_q3_triggers("achats_fournisseurs", "Objectif", "Autre / Non spécifique")
+        self.assertEqual(examples, [
+            "commandes dispersées", "contrats introuvables", "factures incomplètes", "livraisons décalées",
+        ])
+        self.assertEqual(examples, pool[:4])
+        self.assertEqual(len(pool), 9)
+
+    def test_q3_chunk_repetition_and_input_order_do_not_change_selection(self):
+        docs = [
+            SimpleNamespace(id=f"chunk-{i}", meta={
+                "case_id": f"UC-{i:04d}", "intention": "Objectif",
+                "cas_utilisation": title, "declencheurs_typiques": triggers,
+            })
+            for i, (title, triggers) in enumerate((
+                ("Classer les dossiers", "dossiers dispersés | dossiers incomplets"),
+                ("Suivre les demandes", "demandes perdues | demandes répétées"),
+                ("Organiser les réunions", "réunions sans suivi"),
+                ("Préparer les rapports", "rapports en retard"),
+            ), start=1)
+        ]
+        with patch.object(haystack_rag, "_fetch_documents_for_domaine", return_value=docs):
+            expected = haystack_rag.get_q3_triggers("relation_client", "Objectif")
+        duplicates = [SimpleNamespace(id=f"duplicate-{i}", meta=dict(docs[0].meta)) for i in range(40)]
+        for ordering in (docs + duplicates, list(reversed(docs + duplicates))):
+            with patch.object(haystack_rag, "_fetch_documents_for_domaine", return_value=ordering):
+                self.assertEqual(haystack_rag.get_q3_triggers("relation_client", "Objectif"), expected)
+        self.assertEqual(len(expected), 4)
+        self.assertEqual(sum(t.startswith("dossiers") for t in expected), 1)
+
+    def test_q3_diversifies_context_terms_before_repeating_a_topic(self):
+        docs = [
+            SimpleNamespace(meta={
+                "case_id": f"UC-{i:04d}", "intention": "Objectif",
+                "cas_utilisation": title, "declencheurs_typiques": trigger,
+            })
+            for i, (title, trigger) in enumerate((
+                ("Classer les dossiers", "dossiers absents"),
+                ("Classer les dossiers", "dossiers incomplets"),
+                ("Classer les dossiers", "dossiers perdus"),
+                ("Suivre les tickets", "tickets oubliés"),
+                ("Préparer les rapports", "rapports en retard"),
+            ), start=1)
+        ]
+        with patch.object(haystack_rag, "_fetch_documents_for_domaine", return_value=docs):
+            examples = haystack_rag.get_q3_triggers("relation_client", "Objectif", top_k=3)
+        self.assertEqual(examples, ["dossiers absents", "rapports en retard", "tickets oubliés"])
+
+    def test_q3_defers_near_duplicate_wordings_from_different_cases(self):
+        docs = [
+            SimpleNamespace(meta={
+                "case_id": f"UC-{i:04d}", "intention": "Objectif",
+                "cas_utilisation": title, "declencheurs_typiques": trigger,
+            })
+            for i, (title, trigger) in enumerate((
+                ("Consolider les tickets clients", "tickets clients non classés globalement"),
+                ("Consolider les tickets internes", "tickets internes non classés globalement"),
+                ("Classer les dossiers", "dossiers incomplets"),
+                ("Préparer les rapports", "rapports en retard"),
+                ("Suivre les devis", "devis sans réponse"),
+            ), start=1)
+        ]
+        with patch.object(haystack_rag, "_fetch_documents_for_domaine", return_value=docs):
+            pool = haystack_rag.build_pool("relation_client", "Objectif")
+            shown = haystack_rag.get_q3_triggers("relation_client", "Objectif")
+        self.assertEqual(len(pool), 5)
+        self.assertEqual(shown, pool[:4])
+        self.assertEqual(sum(text.startswith("tickets") for text in shown), 1)
+        self.assertEqual(pool[-1], "tickets internes non classés globalement")
+
+    def test_q3_redundancy_is_conservative_and_never_drops_source_examples(self):
+        words = haystack_rag._query_keywords
+        self.assertFalse(haystack_rag._q3_examples_overlap(set(), set()))
+        self.assertFalse(haystack_rag._q3_examples_overlap(
+            set(words("factures en retard")), set(words("factures incomplètes"))))
+        self.assertTrue(haystack_rag._q3_examples_overlap(
+            set(words("coûts de traitement élevés")), set(words("coûts traitement élevés"))))
+        docs = [SimpleNamespace(meta={
+            "case_id": "UC-0001", "intention": "Objectif",
+            "declencheurs_typiques": "coûts de traitement élevés | coûts traitement élevés",
+        })]
+        with patch.object(haystack_rag, "_fetch_documents_for_domaine", return_value=docs):
+            self.assertEqual(haystack_rag.get_q3_triggers("relation_client", "Objectif"),
+                             ["coûts de traitement élevés", "coûts traitement élevés"])
+
+    def test_q3_keeps_exact_sector_priority_and_source_order_without_lexical_match(self):
+        docs = [
+            SimpleNamespace(meta={
+                "case_id": "UC-0001", "intention": "Objectif", "secteur": "Industrie",
+                "declencheurs_typiques": "Zéro suivi | Analyse tardive",
+            }),
+            SimpleNamespace(meta={
+                "case_id": "UC-0002", "intention": "Objectif", "secteur": "Multi-sectoriel",
+                "cas_utilisation": "Suivre les commandes", "declencheurs_typiques": "commandes dispersées",
+            }),
+        ]
+        with patch.object(haystack_rag, "_fetch_documents_for_domaine", return_value=docs):
+            self.assertEqual(haystack_rag.get_q3_triggers("achats_fournisseurs", "Objectif", "Industrie"),
+                             ["Zéro suivi", "Analyse tardive", "commandes dispersées"])
+            self.assertEqual(haystack_rag.get_q3_triggers("achats_fournisseurs", "Objectif", "Autre"),
+                             ["commandes dispersées"])
+
+    def test_q3_missing_ids_and_normalized_duplicates_keep_source_text(self):
+        docs = [
+            SimpleNamespace(meta={"intention": "Objectif", "cas_utilisation": "Suivre les échanges",
+                                  "declencheurs_typiques": " | Échanges   dispersés | échanges disperses | suivi absent"}),
+            SimpleNamespace(meta={"intention": "Objectif", "cas_utilisation": "Préparer les devis",
+                                  "declencheurs_typiques": "devis en retard"}),
+        ]
+        with patch.object(haystack_rag, "_fetch_documents_for_domaine", return_value=docs * 10):
+            pool = haystack_rag.build_pool("relation_client", "Objectif")
+        self.assertEqual(pool, ["devis en retard", "Échanges   dispersés", "suivi absent"])
+
+    def test_q3_source_variants_and_shared_examples_keep_sector_provenance(self):
+        docs = [
+            SimpleNamespace(meta={
+                "Code du cas": "UC-0001", "intention": "Objectif", "secteur": "Industrie",
+                "cas_utilisation": "Suivre les échanges", "Trigger": "Échanges   dispersés | suivi absent",
+            }),
+            SimpleNamespace(meta={
+                "Code du cas": "UC-0002", "intention": "Objectif", "secteur": "Multi-sectoriel",
+                "cas_utilisation": "Suivre les échanges", "Trigger": "echanges disperses",
+            }),
+        ]
+        for ordering in (docs, list(reversed(docs)), docs * 5):
+            with patch.object(haystack_rag, "_fetch_documents_for_domaine", return_value=ordering):
+                self.assertEqual(haystack_rag.get_q3_triggers("relation_client", "Objectif", "Industrie"),
+                                 ["Échanges   dispersés", "suivi absent"])
+                self.assertEqual(haystack_rag.get_q3_triggers("relation_client", "Objectif", "Autre"),
+                                 ["echanges disperses"])
+
+    def test_q3_contextual_ranking_is_not_specific_to_purchasing(self):
+        for domain, intention, title, source in (
+            ("ressources_humaines", "Recruter", "Comparer les candidatures",
+             "analyse insuffisante | candidatures dispersées"),
+            ("stocks_logistique", "Organiser les stocks", "Suivre les inventaires",
+             "amélioration souhaitée | inventaires incohérents"),
+            ("marketing_visibilite", "Créer des contenus", "Préparer les brochures",
+             "adhésion limitée | brochures obsolètes"),
+        ):
+            with self.subTest(domain=domain):
+                doc = SimpleNamespace(meta={
+                    "case_id": "UC-0001", "intention": intention, "secteur": "Multi-sectoriel",
+                    "cas_utilisation": title, "declencheurs_typiques": source,
+                })
+                with patch.object(haystack_rag, "_fetch_documents_for_domaine", return_value=[doc]):
+                    self.assertEqual(haystack_rag.get_q3_triggers(domain, intention, "Autre", top_k=1),
+                                     [source.split("|")[1].strip()])
+
+    def test_q3_introduction_does_not_claim_frequency_or_change_examples(self):
+        with patch.object(haystack_rag, "get_q15_choices", return_value=[]):
+            response = haystack_rag._qualification_response(
+                "relation_client", None, "1", "", "", "- Échanges   dispersés", None,
+            )
+        self.assertIn("exemples de problèmes liés à cet objectif", response)
+        self.assertNotIn("fréquentes", response)
+        self.assertIn("- Échanges   dispersés\n", response)
+        self.assertTrue(response.endswith("Décrivez votre situation en une ou deux phrases."))
+
+    def test_q3_generalizes_to_all_domains_without_changing_eligible_pool(self):
+        for domain in haystack_rag.CHOIX_Q1_TO_DOMAINE_CODE.values():
+            sectors = haystack_rag.SECTEURS_PAR_DOMAINE.get(domain, [])
+            selections = (None, "Autre / Non spécifique", *sectors)
+            docs = [
+                SimpleNamespace(meta={
+                    "case_id": f"UC-{i:04d}", "domaine": domain, "intention": objective,
+                    "secteur": sector, "cas_utilisation": title, "declencheurs_typiques": triggers,
+                })
+                for i, (objective, sector, title, triggers) in enumerate((
+                    ("Objectif A", "Multi-sectoriel", "Suivre les commandes",
+                     "analyse tardive | commandes dispersées | commandes incomplètes"),
+                    ("Objectif A", "Multi-sectoriel", "Suivre les factures",
+                     "amélioration souhaitée | factures perdues"),
+                    ("Objectif A", sectors[0] if sectors else "Industrie", "Suivre les dossiers",
+                     "adhésion limitée | dossiers incomplets"),
+                    ("Objectif B", "Multi-sectoriel", "Comparer les contrats", "contrats introuvables"),
+                ), start=1)
+            ]
+            for sector in selections:
+                for objective in ("Objectif A", "Objectif B", "Objectif absent"):
+                    with self.subTest(domain=domain, sector=sector, objective=objective):
+                        eligible = [
+                            doc for doc in docs if doc.meta["intention"] == objective
+                            and (not sector or haystack_rag._doc_is_applicable_to_sector(doc, sector))
+                        ]
+                        expected = {t.strip() for doc in eligible
+                                    for t in doc.meta["declencheurs_typiques"].split("|")}
+                        with patch.object(haystack_rag, "_fetch_documents_for_domaine", return_value=docs):
+                            pool = haystack_rag.build_pool(domain, objective, sector)
+                            shown = haystack_rag.get_q3_triggers(domain, objective, sector)
+                        self.assertEqual(set(pool), expected)
+                        self.assertEqual(shown, pool[:4])
+                        with patch.object(haystack_rag, "_fetch_documents_for_domaine",
+                                          return_value=list(reversed(docs)) * 3):
+                            self.assertEqual(haystack_rag.get_q3_triggers(domain, objective, sector), shown)
+
     def test_build_retrieval_filters_combines_domain_and_intention_metadata(self):
         with patch.object(
             haystack_rag,
