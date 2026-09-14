@@ -1,5 +1,19 @@
 # Avoulia V2 — Suivi Projet & Décisions
 
+### 14septembre — complément éditorial des1 021cas
+
+`editorial-value-2` :5 105champs qualitatifs rédigés depuis les seuls HTML déjà publics,
+avec citations et empreinte des champs source.75formulations corrigées lors du contrôle
+complémentaire ; aucune validation métier humaine ou mesure de ROI revendiquée.
+Gain, premier livrable et condition d'observation apparaissent tôt dans les cartes,
+la fiche et le parcours ; préparation/relecture restent à mettre en balance.
+Backend/frontend Azure `v463-editorial-20260914-r1` à100%, builds `dd35`/`dd34`,
+source fonctionnelle `f21a869`.160tests ciblés locaux,148dans l'image,38frontend,
+18chemins HTTP/SSE et recette réelle avec plusieurs propositions puis lien du bon cas.
+Base, sélection, prompts, six étapes et quatre pages historiques conservés.
+Le socle précédent reste disponible pour retour arrière ; reçus dans la trace locale
+`2026-09-14-value-editorial`. **Gain mesuré et durée avant valeur : non établis pour les1 021cas.**
+
 ### 14 septembre à19:56 — valeur source et expérience livrées
 
 Backend `v463-value-20260914-r1` et frontend Azure `v463-value-20260914-r2`,

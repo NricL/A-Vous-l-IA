@@ -1,5 +1,36 @@
 # Avoulia V2 — Implementation Handover Guide for Simplon
 
+## Complément éditorial —14septembre2026
+
+**Azure livré :** backend et frontend `v463-editorial-20260914-r1`, sains à100%.
+Source fonctionnelle `f21a869`; builds ACR `dd35` (backend,148tests) et `dd34` (frontend).
+Images backend `891b906cdde62a101f7fde6c8a0060a32a17206d34f3bef8bb08cfa21f5a9712`,
+frontend `d181331d8a722a09a8d2a84091660a8e8a98c838e2072da8914ceb62e97d7a23`.
+Rollback conservé : backend `v463-value-20260914-r1`, frontend `v463-value-20260914-r2`.
+
+- **Couverture :**1 021cas lus/rédigés,5 105champs qualitatifs renseignés.
+  Gain, premier livrable, condition de première observation, situation utile et
+  contrepartie ont des appuis exacts dans les sources déjà publiques.75formulations
+  ont été reprises lors du contrôle complémentaire. La présence d'une citation
+  ne prouve pas la justesse d'une hypothèse : rédaction/relecture IA, sans prétendre
+  à une validation humaine ni à un essai métier réalisé.
+- **Inconnues :** aucun gain mesuré ni durée chiffrée avant valeur établis.
+  L'horizon affiché est une condition d'observation, pas un délai promis ou un ROI.
+- `app/content/value_editorial.json` et `app/value_editorial.py` restent hors du
+  moteur de sélection. Empreinte des quatre champs source, normalisation des seuls
+  retours de ligne ; absence ou divergence = présentation source seule.
+  Les champs métier, prompts, filtres, rangs et parcours générique restent inchangés.
+- Copie identique du module et de l'artefact dans `pipeline/` du générateur privé.
+  `publish_editorial_pages.py` remplace seulement le fragment d'entrée possédé :
+ 1 021pages rapprochées, quatre historiques non modifiées. Aucun classeur lu ou modifié.
+- Valeur visible tôt dans cartes, détail et parcours ; sources longues repliables.
+  Tests :160ciblés backend/gabarits,38frontend, typage/build,18chemins HTTP/SSE,
+  deux besoins réels marketing/BTP, égalité API/parcours, neuf hashes distants et
+  cinq chemins privés404. Fixture explicite : échappement, clavier, mobile, CTA unique.
+
+Les reçus détaillés restent dans `_local-trace/2026-09-14-value-editorial/`.
+Les essais d'adoption, réserves taxonomiques et packaging Simplon gardent leur propriétaire/périmètre antérieur.
+
 ## Valeur et expérience — réalisation autorisée à19:09,14septembre
 
 **Livré et vérifié à19:56.** Le socle conservé reste le bot Q3/v463 :

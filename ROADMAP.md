@@ -8,15 +8,16 @@ repo pour rester traçable côté Eneric **et** côté Simplon.
 
 ## Programme actif — valeur visible et expérience de choix, accord à18:15
 
-**Statut à19:56 : socle valeur et expérience livré sur Azure et GitHub Pages après accord de19:09.**
+**Complément du14septembre : couche éditoriale des1 021cas livrée sur Azure, publication frontend coordonnée avec Pages.**
 Le périmètre reste affichage/enrichissement d'expérience, sans modifier le bot,
-la base ni la taxonomie. Le socle valeur couvre les1 021cas par leurs sources exactes ;
-**zéro enrichissement éditorial riche validé à l'échelle du catalogue**. Ne pas
-confondre couverture de présentation et création de bénéfices/horizons par cas.
+la base ni la taxonomie. Les1 021cas ont été lus et rédigés individuellement à partir
+des descriptions, premières actions et précautions déjà publiques :5 105champs qualitatifs.
+Ce sont des hypothèses éditoriales relues contre les sources par IA, pas des validations
+humaines ou des résultats d'usage. **Aucun gain mesuré ni délai chiffré avant valeur établi.**
 Ce programme complète le cap80/20, sans relancer un moteur parallèle. Objectif :
 comprendre tôt l'intérêt d'un cas, choisir une piste et commencer un essai utile.
-La révision backend `v463-value-20260914-r1` et le frontend `v463-value-20260914-r2`
-reçoivent100% du trafic. Q3 reste disponible pour retour arrière.
+Backend et frontend Azure `v463-editorial-20260914-r1` reçoivent100% du trafic.
+Le socle précédent `v463-value-20260914-r1` / `v463-value-20260914-r2` est conservé pour retour arrière.
 
 **Répartition confirmée à18:10 :** Eneric prend en charge les essais d'usage complets,
 les corrections qui en découlent et les cinq réserves de classement métier. Ces
@@ -28,9 +29,9 @@ restent différés ; le présent cadrage n'autorise pas leur lancement.
 
 | Ordre / ID | Lot | Livrable attendu | Critère de réussite / limite | État |
 |---|---|---|---|---|
-| 1 — VAL-01 | Bénéfice visible dès la découverte | Gain recherché, premier résultat, horizon de première valeur et conditions d'intérêt ; présentation courte dans les propositions, la fiche et l'entrée du parcours | Un utilisateur comprend pourquoi essayer, ce qu'il obtiendra et l'effort à mettre en balance ; aucun chiffre ou délai de rentabilité inventé | Socle source seul raccordé aux1 021cas ; hypothèses éditoriales riches non généralisées |
+| 1 — VAL-01 | Bénéfice visible dès la découverte | Gain recherché, premier résultat, horizon de première valeur et conditions d'intérêt ; présentation courte dans les propositions, la fiche et l'entrée du parcours | Un utilisateur comprend pourquoi essayer, ce qu'il obtiendra et l'effort à mettre en balance ; aucun chiffre ou délai de rentabilité inventé | Livré :1 021hypothèses par cas, premier livrable et condition d'observation visibles tôt ; gains réels à éprouver |
 | 1 — VAL-02 | Promesse suivie dans le parcours | Relier le bénéfice visé aux entrées nécessaires, au résultat de l'étape4, au bilan simple de l'étape5 et à la réutilisation en6 | Distinguer temps gagné/perdu, qualité perçue et intérêt à recommencer ; « non évalué » possible ; pas de score d'adoption déduit des cases cochées | Livré : bilan facultatif non stocké et continuité2/4/5/6 |
-| 2 — CHOIX-01 | Comparer les pistes | Cartes compactes avec titre source, gain recherché, résultat et effort disponible ; bouton explicite par cas au lieu des seuls « Cas1/2 » | Jusqu'à cinq pistes restent possibles ; identité cas/détail/lien inchangée ; pas de classement par ROI supposé ni de nouveau tour de dialogue | Livré : cartes source, gain riche non inventé |
+| 2 — CHOIX-01 | Comparer les pistes | Cartes compactes avec titre source, gain recherché, résultat et effort disponible ; bouton explicite par cas au lieu des seuls « Cas1/2 » | Jusqu'à cinq pistes restent possibles ; identité cas/détail/lien inchangée ; pas de classement par ROI supposé ni de nouveau tour de dialogue | Livré : gains éditoriaux sourcés séparés des champs catalogue ; choix serveur conservé |
 | 3 — ENTREE-01 | Démarrage évident | Afficher immédiatement la première question et les domaines, sans devoir deviner un premier message ; conserver la possibilité de saisir un besoin initial | Domaine toujours confirmé explicitement, aucune classification silencieuse ; démarrage utilisable au clic et au clavier, sans tour vide | Livré :14choix canoniques immédiats |
 | 3 — CONTEXTE-01 | Contexte lisible | Résumé des valeurs domaine/secteur/objectif et accès aux corrections déjà disponibles | Comprendre le périmètre choisi et l'effet d'un retour arrière ; aucune incohérence entre libellés, état serveur et choix dépendants | Livré, corrections existantes conservées |
 | 4 — REPRISE-01 | Attente et récupération | État d'attente compréhensible, message d'erreur unique, reprise explicite sans ressaisie ni double soumission | Ne pas simuler des étapes de calcul, un pourcentage ou une annulation serveur inexistants ; conserver besoin et choix | Livré, interruption et reprise exacte testées |
