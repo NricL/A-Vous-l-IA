@@ -7,12 +7,16 @@ avec citations et empreinte des champs source.75formulations corrigées lors du 
 complémentaire ; aucune validation métier humaine ou mesure de ROI revendiquée.
 Gain, premier livrable et condition d'observation apparaissent tôt dans les cartes,
 la fiche et le parcours ; préparation/relecture restent à mettre en balance.
-Backend/frontend Azure `v463-editorial-20260914-r1` à100%, builds `dd35`/`dd34`,
-source fonctionnelle `f21a869`.160tests ciblés locaux,148dans l'image,38frontend,
+Backend/frontend Azure `v463-editorial-20260914-r2` à100%, builds `dd37`/`dd36`,
+source fonctionnelle `f21a869`, correctif de publication `8529418`.
+161tests ciblés locaux,149dans l'image,38frontend,
 18chemins HTTP/SSE et recette réelle avec plusieurs propositions puis lien du bon cas.
 Base, sélection, prompts, six étapes et quatre pages historiques conservés.
 Le socle précédent reste disponible pour retour arrière ; reçus dans la trace locale
 `2026-09-14-value-editorial`. **Gain mesuré et durée avant valeur : non établis pour les1 021cas.**
+Pages `34888127182` et CI `34889281059` réussis (236tests,5ignorés).
+La r2 corrige les dates de fichiers de l'image : ancien cache réellement testé,
+contenus inchangés, navigation canonique et rechargement ordinaire vérifiés.
 
 ### 14 septembre à19:56 — valeur source et expérience livrées
 

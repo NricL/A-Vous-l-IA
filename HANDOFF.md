@@ -2,10 +2,11 @@
 
 ## Complément éditorial —14septembre2026
 
-**Azure livré :** backend et frontend `v463-editorial-20260914-r1`, sains à100%.
-Source fonctionnelle `f21a869`; builds ACR `dd35` (backend,148tests) et `dd34` (frontend).
-Images backend `891b906cdde62a101f7fde6c8a0060a32a17206d34f3bef8bb08cfa21f5a9712`,
-frontend `d181331d8a722a09a8d2a84091660a8e8a98c838e2072da8914ceb62e97d7a23`.
+**Azure livré :** backend et frontend `v463-editorial-20260914-r2`, sains à100%.
+Source fonctionnelle `f21a869`, correction de publication `8529418`;
+builds ACR `dd37` (backend,149tests) et `dd36` (frontend).
+Images backend `0f8d4b28a954544fee1ecf3011053aeb6ee7e5b0bb42f1de6568718706184326`,
+frontend `44673a32d567bed7c70346d568f576b29378aa2ee00769a8e666b66ed2e7b6b3`.
 Rollback conservé : backend `v463-value-20260914-r1`, frontend `v463-value-20260914-r2`.
 
 - **Couverture :**1 021cas lus/rédigés,5 105champs qualitatifs renseignés.
@@ -24,9 +25,17 @@ Rollback conservé : backend `v463-value-20260914-r1`, frontend `v463-value-2026
   `publish_editorial_pages.py` remplace seulement le fragment d'entrée possédé :
  1 021pages rapprochées, quatre historiques non modifiées. Aucun classeur lu ou modifié.
 - Valeur visible tôt dans cartes, détail et parcours ; sources longues repliables.
-  Tests :160ciblés backend/gabarits,38frontend, typage/build,18chemins HTTP/SSE,
+  Tests :161ciblés backend/gabarits,38frontend, typage/build,18chemins HTTP/SSE,
   deux besoins réels marketing/BTP, égalité API/parcours, neuf hashes distants et
   cinq chemins privés404. Fixture explicite : échappement, clavier, mobile, CTA unique.
+
+**Recette de publication :** Pages `34888127182` et CI fonctionnelle finale
+`34889281059` réussis (236tests,5ignorés). La recette dans un navigateur déjà utilisé
+a découvert des dates de fichiers à1970 en r1 : r2 corrige les métadonnées sans changer
+les octets de l'application ou des contenus. Les validateurs de cache de la version
+précédente obtiennent bien200 ; le même navigateur retrouve les nouvelles hypothèses
+après rechargement ordinaire, sans interception réseau ni paramètre de contournement.
+Un onglet déjà ouvert doit naturellement être rechargé pour afficher une nouvelle livraison.
 
 Les reçus détaillés restent dans `_local-trace/2026-09-14-value-editorial/`.
 Les essais d'adoption, réserves taxonomiques et packaging Simplon gardent leur propriétaire/périmètre antérieur.

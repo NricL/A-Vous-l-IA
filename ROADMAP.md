@@ -16,7 +16,7 @@ Ce sont des hypothèses éditoriales relues contre les sources par IA, pas des v
 humaines ou des résultats d'usage. **Aucun gain mesuré ni délai chiffré avant valeur établi.**
 Ce programme complète le cap80/20, sans relancer un moteur parallèle. Objectif :
 comprendre tôt l'intérêt d'un cas, choisir une piste et commencer un essai utile.
-Backend et frontend Azure `v463-editorial-20260914-r1` reçoivent100% du trafic.
+Backend et frontend Azure `v463-editorial-20260914-r2` reçoivent100% du trafic.
 Le socle précédent `v463-value-20260914-r1` / `v463-value-20260914-r2` est conservé pour retour arrière.
 
 **Répartition confirmée à18:10 :** Eneric prend en charge les essais d'usage complets,
@@ -65,7 +65,7 @@ des oublis, cohérence ou traçabilité selon la source. Aucun pourcentage, mont
 ultérieur resterait un scénario fondé sur les hypothèses déclarées par l'usager,
 pas un ROI validé ; aucun calculateur financier n'est requis pour ce premier lot.
 
-### Premier chantier concret
+### Historique — premier prototype à18:23
 
 **Avancement du lot lancé à18:23 :** inventaire des champs servis réalisé dans le code,
 sans lecture de classeur. Description, première action, effort, prérequis, guardrails
@@ -94,8 +94,8 @@ le dossier Microsoft Scout, actualisé au même emplacement. Navigation séquent
 consultable et liens vers les parcours actuels. Habillage d'atelier, pas nouvelle
 identité AVIA ; aucun appel IA, formulaire de bilan, stockage ou exécution simulée.
 14 tests synthétiques et navigation sur4scénarios/4étapes à390/1280px, clair/sombre.
-Le raccordement API/frontend/générateur et la couverture des1021cas restent à faire
-après validation du format et de la méthode éditoriale. Détails dans `HANDOFF.md`.
+Le raccordement API/frontend/générateur et les1 021cas sont désormais livrés dans
+la couche séparée `editorial-value-2` décrite ci-dessus ; cet aperçu initial reste un prototype.
 
 Commencer par l'inventaire des champs déjà disponibles et la définition d'un contrat
 de présentation commun à la liste, la fiche et le parcours. Définir la provenance
