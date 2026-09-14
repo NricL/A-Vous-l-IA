@@ -1,6 +1,48 @@
 # Avoulia V2 — Implementation Handover Guide for Simplon
 
-## Livraison v463 — backend déployé le 14 septembre
+## Révision de préparation publiée — accord du 14 septembre à14:48
+
+Backend `avoulia-backend--v463-preparation-20260914-r1`,100% main traffic, Healthy.
+Image `sha256:a8a6cf7cde6cb48f59ffe4e15e1943229f962fcbbb084d434bc2447426917ff8`,
+build `dd2v`. Précédent `v463-20260914-r1` / image `5de8ca8c…` conservé pour rollback.
+Le frontend Azure et GitHub Pages gardent leur code ; les liens pointent sur les pages actualisées.
+
+La soumission CLI avait échoué avant tout run (archive lente puis reset10054).
+Reprise via APIs ARM documentées et transfert HTTPS natif de l'archive exactement
+vérifiée, sans URL signée persistée. Build réussi :239contrôles backend et20parcours,
+un contrôle Node ignoré dans chaque suite,1021pages+4historiques et exports privés
+contrôlés. Les codes ANSI du journal ont été normalisés pour reconnaître les deux
+résultats OK ; aucun build relancé pour ce seul problème de lecture de log.
+
+Portée : uniquement générateur/gabarits du dépôt parcours et sorties HTML.
+`prompt_preparation(c, element)` produit un bloc pour chaque prérequis par position
+(les doublons de libellé ne sont pas écrasés). Le rôle à compléter reste au début ;
+les champs source et les règles restent verbatim. Les formats sont des consignes à
+l'assistant, pas un classifieur ni une nouvelle taxonomie.
+
+Le prompt principal réutilise les entrées et les informations déjà fournies dans la
+conversation de l'assistant choisi par l'usager ; ce n'est pas un transfert automatique
+du chat AVIA. Aucune donnée libre supplémentaire n'est stockée par les pages.
+Le raccourci reste le même prompt que l'étape4, et5/6 ne recommencent pas la préparation.
+
+Revue :1 021IDs /3 774entrées, quatre rapports disjoints, mêmes empreintes de source.
+Candidate finale locale : `release-preparation-20260914/revision-2` dans les artefacts
+de session, générateur SHA256 `594662ed81ae2d80f0687bd4fb8af2c598d60563f5336f7f7d9652ad39264aa9`.
+1 021pages actuelles, quatre historiques identiques,3 774blocs rapprochés et32contrôles
+locaux réussis. Ce snapshot final est celui du build et des pages déployées. Ne pas utiliser
+le premier snapshot dont les sources avaient changé pendant la préparation.
+
+Six appels IA bornés sur exercices fictifs ont aidé à supprimer les sorties répétées.
+La séparation des étapes est observée, pas la justesse universelle des réponses :
+longueur, hypothèses de profil et conseils d'outils non vérifiés restent à relire.
+Trace : `../_local-trace/2026-09-14-preparation-prompts/`.
+
+Recette réelle, sans nouvel appel modèle : neuf empreintes de pages (cinq actuelles,
+quatre historiques), API existante disponible, cinq chemins privés404 ; quatre pages
+à390px avec préparation, passage au prompt principal, six étapes et absence de contexte
+automatique. Les mêmes contrôles statiques passent sur l'URL principale après bascule.
+
+## Historique — première livraison v463 du 14 septembre
 
 Sources de livraison : public `830d2b0976d99a1622fc373437c873d1d90c7e1c`,
 parcours privé `e61e4873a6d714aae24eb67003123d73a74def26`.

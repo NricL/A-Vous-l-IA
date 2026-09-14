@@ -1,5 +1,43 @@
 # Avoulia V2 — Suivi Projet & Décisions
 
+### 14 septembre à13:56 — préparation explicite et étapes complémentaires
+
+**Publié après confirmation à14:48.** Révision `v463-preparation-20260914-r1` à100%,
+image `a8a6cf7cde6cb48f59ffe4e15e1943229f962fcbbb084d434bc2447426917ff8`.
+Le bot, la base métier v463, les URLs et les quatre pages historiques restent inchangés.
+La révision v463 précédente et son image sont conservées.
+
+Le retour utilisateur valide le déroulé du bot mais demande de revoir tous les prompts
+de préparation. Inventaire des seuls champs v463 déjà publiés :1 021cas,3 774prérequis,
+3 677libellés distincts. Quatre relectures sémantiques disjointes couvrent tout le lot ;
+les empreintes et IDs sont rapprochés, sans accès aux onglets privés d'audit.
+
+Le gabarit local cible une seule entrée, un format concret et un état prêt/partiel/bloqué.
+Les références existantes restent sourcées, les données absentes ne sont pas fabriquées,
+les entrées facultatives ne deviennent pas obligatoires. Les cas de données à garder
+localement, d'essai fictif imposé, de période/régime/outil à confirmer et de pièce couvrant
+plusieurs entrées sont traités par le contrat partagé, sans retag ni exception codée par ID.
+L'étape4 réutilise cette préparation et demande seulement les manques bloquants ;5teste,
+6capitalise. Le bot et la base métier ne changent pas.
+
+Après un premier essai IA trop répétitif, une seule révision supplémentaire a imposé
+un format et une fiche uniques. Les réponses IA restent susceptibles d'être longues
+ou de contenir des hypothèses/conseils à vérifier ; aucun score automatique de justesse
+n'est revendiqué. Les deux séries de trois appels fictifs et les sources sont conservées.
+
+Candidate finale régénérée :1 021+4pages,3 774blocs identiques au générateur,32contrôles
+locaux et quatre pages mobiles. Premier snapshot conservé mais remplacé après détection
+de changement de source. Gabarits et documentation locaux uniquement ; pas encore de
+commit, ACR ou publication à ce stade historique de préparation.
+
+La construction a ensuite été reprise après un échec réseau de la CLI sans création
+de run. L'archive native vérifiée (1 064fichiers identiques) a été transmise par HTTPS
+et soumise via les APIs ARM documentées : run `dd2v` réussi,239contrôles backend,
+20parcours et payload1 021+4. Les secrets/URLs signées ne sont pas conservés dans les reçus.
+Candidate contrôlée puis bascule ; neuf pages/chemins privés et quatre parcours mobiles
+confirmés. Les résultats d'IA fictifs antérieurs restent des observations limitées,
+pas une garantie de justesse des réponses d'un assistant externe.
+
 ### 14 septembre — livraison v463 clôturée
 
 Sources publiées : `830d2b0976d99a1622fc373437c873d1d90c7e1c` (chatbot/HTML)

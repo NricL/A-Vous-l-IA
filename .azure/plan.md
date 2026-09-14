@@ -1,6 +1,31 @@
 # Azure Deployment Plan
 
-## V463 backend deployed — 14 September
+## Preparation-prompt revision — deployed after14September14:48 approval
+
+Main100% on `avoulia-backend--v463-preparation-20260914-r1`, Healthy, image
+`sha256:a8a6cf7cde6cb48f59ffe4e15e1943229f962fcbbb084d434bc2447426917ff8`.
+Private builddd2v:239backend/20parcours tests, one Node-only skip each;1021current
+and4historical pages. Previousv463-20260914-r1/image5de8ca8c retained for rollback.
+New replica-local index: `chroma-v463-preparation-20260914-r1`,
+collection `documents-v463-preparation-20260914-r1`; no model or storage-topology change.
+
+User14September13:56 requested clearer preparation on all1021parcours and complementary
+steps4/5/6. Base v463 and runtime bot remain identical to live. New local context:
+`release-preparation-20260914/revision-2`,1064files, inventory
+`e3fba9951354ee51174f0f1b43c6e8e505dbc30d421ab394cfb7b37a708fdcd6`.
+All3774preparation blocks and1021+4pages checked;32local tests.
+This exact context was subsequently built and deployed, without further generation changes.
+Do not reuse the first snapshot after source drift.
+
+Any next approved build starts from current5de8ca8c backend image, preserves the same
+labelled v463 and private mapping, and overlays only reviewed page/template changes.
+Tag `v463-preparation-20260914-r1` now corresponds to the deployed immutable image.
+CLI archive/upload failed before scheduling any run; documented ARM upload/schedule
+and native HTTPS transfer succeeded on the same verified context. Signed URLs and
+access tokens remain in memory only. Candidate page/browser evidence preceded promotion;
+main page hashes and private404 boundaries were confirmed afterward.
+
+## Historical initial v463 deployment — 14 September
 
 Main traffic100% on `avoulia-backend--v463-20260914-r1`, private builddd2u, image
 `sha256:5de8ca8cc8f46828b8a62ddf83b7a47f0c9afb767b2d75720f6558a6e0c95182`.

@@ -1,5 +1,14 @@
 # Avoulia V2 — Implementation Summary (2026-07-10)
 
+**Preparation revision deployed after14September14:48 approval:** all1021cases/3774prerequisites
+reviewed. Named single-input preparation with explicit output/status and unchanged
+source rules; production consumes prepared inputs, step5tests and step6reuses.
+All pages regenerated and deployed at100% on `v463-preparation-20260914-r1`,
+image `a8a6cf7cde6cb48f59ffe4e15e1943229f962fcbbb084d434bc2447426917ff8`,
+private builddd2v. Workbook/IDs/mapping/bot unchanged; old v463 kept as rollback.
+Initial CLI submission failed before a run; documented ARM/native HTTPS transport
+resumed the same verified archive successfully. The deployment below is historical.
+
 **V463 backend deployed,14September:** user approved1021Sheet1fiches and generic six-step
 parcours at12:13. Revision `v463-20260914-r1` serves100% after isolated acceptance;
 image `5de8ca8cc8f46828b8a62ddf83b7a47f0c9afb767b2d75720f6558a6e0c95182`,

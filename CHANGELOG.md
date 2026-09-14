@@ -1,5 +1,16 @@
 # Avoulia — Changelog v1 → v2 (synthèse d'onboarding)
 
+## 14 septembre — préparation des entrées publiée après accord à14:48
+
+Revue des3 774prompts sur1 021cas. Préparation d'une seule entrée avec format,
+sources/statut et manques explicites ; pas de donnée inventée ni de livrable final
+produit prématurément. Production réutilisant les entrées sans questionnaire répété ;
+raccourci identique à l'étape4, test en5 puis réutilisation en6.
+Base v463, IDs, mapping, six étapes, source verbatim et bot inchangés.
+Toutes les pages sont régénérées et servies sur `v463-preparation-20260914-r1` à100%,
+image `a8a6cf7c…`, build privé `dd2v`. V463 précédente conservée pour rollback,
+aucune nouvelle version Excel ni changement de moteur.
+
 ## 14 septembre — backend v463 déployé après accord à12:13
 
 Publication des fiches et parcours explicitement confirmée après relecture des exemples.

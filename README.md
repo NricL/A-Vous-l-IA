@@ -4,7 +4,14 @@ l’IA.
 
 ## État courant — 14 septembre 2026
 
-**La v463 est servie sur le backend personnel**, révision `v463-20260914-r1` :
+**Révision publiée :** préparation clarifiée sur les1 021parcours et
+3 774prompts, puis réutilisation des entrées à l'étape4, test en5 et réutilisation en6.
+La base métier v463 et le bot ne changent pas. Révision Azure
+`v463-preparation-20260914-r1`,100% du trafic, image
+`sha256:a8a6cf7cde6cb48f59ffe4e15e1943229f962fcbbb084d434bc2447426917ff8`.
+Les mêmes liens restent utilisables ; le précédent v463 est conservé pour rollback.
+
+**La v463 est servie sur le backend personnel**, avec cette révision de préparation :
 1 021fiches et parcours génériques en six étapes, quatre anciennes pages conservées.
 Le classeur complet, ses audits/commentaires et le mapping restent privés.
 Les pages HTML autorisées sont synchronisées avec les sources ; aucun classeur n'est publié.
@@ -35,8 +42,8 @@ et [`.azure/plan.md`](./.azure/plan.md).
 de l'IA. Le catalogue v463 conserve1 021cas,14domaines métier,71intentions et les hashes
 historiques. Voir [`ROADMAP.md`](./ROADMAP.md) et [`HANDOFF.md`](./HANDOFF.md).
 
-Révision backend active : `avoulia-backend--v463-20260914-r1`. Référence utilisateur :
-https://nricl.github.io/A-Vous-l-IA/. Image `sha256:5de8ca8cc8f46828b8a62ddf83b7a47f0c9afb767b2d75720f6558a6e0c95182`.
+Révision backend active : `avoulia-backend--v463-preparation-20260914-r1`. Référence utilisateur :
+https://nricl.github.io/A-Vous-l-IA/. Le frontend est inchangé ; seuls les parcours et leurs prompts sont actualisés.
 Les cinq correctifs UX antérieurs sont conservés ; le package Simplon reste différé.
 Ne pas déposer de classeur privé ou d'audit dans ce dépôt public : `noindex` et une URL
 non devinable ne remplacent pas une autorisation d'accès.

@@ -218,6 +218,7 @@ input:focus-visible,summary:focus-visible,textarea:focus-visible,select:focus-vi
       <summary><span class="titre">Rassemblez vos éléments</span><span class="duree">30 min</span><span class="chevron">▶</span></summary>
       <div class="contenu">
         <p>Repérez ce que vous avez déjà et ce qu'il vous manque. Pour chaque élément, choisissez « disponible », « à préparer » ou « fictif ». Cochez quand il est prêt pour votre essai.</p>
+        <p class="note">Ici, vous préparez les entrées, pas encore le résultat du cas. Si un élément est déjà disponible et autorisé, gardez-le tel quel : le prompt d'aide est facultatif.</p>
         <p class="note">L'IA peut proposer une trame ou un exemple clairement fictif, pas fabriquer un historique de ventes, des résultats observés ou des preuves. Sans données réelles nécessaires, l'essai reste fictif : il ne démontre pas l'efficacité du cas.</p>
         
         <div class="coche">
@@ -237,20 +238,38 @@ input:focus-visible,summary:focus-visible,textarea:focus-visible,select:focus-vi
           <summary>Besoin d'aide pour préparer cet élément ?</summary>
           <div class="ticket mini">
           <div class="bandeau"><span>Prompt de préparation</span><button type="button" data-copie>Copier</button></div>
-          <pre>Mon rôle : [votre fonction ou rôle dans l'entreprise].
+          <pre>Mon rôle : [votre fonction ou rôle dans l&#39;entreprise].
+Étape 2 — préparer une entrée, pas encore réaliser le cas.
 Domaine métier du cas : Développement commercial.
 Mon objectif prioritaire est : Piloter l&#39;activité et le pipeline commercial.
 Contexte secteur : Multi-sectoriel.
 Cas d&#39;usage cible : Prioriser vos opportunités de vente à fort potentiel.
 
+Élément source à préparer : Liste des opportunités en cours (montant, étape, probabilité estimée)
 
-Élément source à préparer : Liste des opportunités en cours (montant, étape, probabilité estimée).
-Pars du cas et de l'élément source ci-dessus. Demande uniquement les informations indispensables manquantes.
-Distingue ce qui doit venir de mes données réelles de ce que tu peux préparer : une trame vide, un format de collecte ou un exemple explicitement fictif.
-N'invente jamais d'historique de ventes, de résultats observés ni de preuves. Si la source réelle manque, indique où la demander en interne, sans prétendre l'avoir obtenue.
-Produis un premier support limité à cet élément ; sépare faits, hypothèses et champs à compléter. Vérifie les faits, sources et calculs disponibles, signale les contrôles impossibles.
-Utilise uniquement un outil autorisé et des exemples fictifs ou des données dont le partage est autorisé, sans données personnelles identifiables. Aucun envoi ni aucune action automatique.
-Règles à respecter impérativement : Ne transmettre que les données nécessaires et autorisées dans l’outil retenu ; retirer les identifiants et données bancaires inutiles. La pseudonymisation ne supprime ni caractère personnel ni confidentialité. Vérifier périodes, montants, hypothèses et données manquantes avec le responsable commercial ; aucune mise à jour automatique du CRM.
+Première action prévue à l&#39;étape 4 — référence de périmètre, à ne pas exécuter ici :
+Exporter la liste des opportunités en cours avec montant, étape, probabilité estimée par le responsable commercial, échéance confirmée et date de dernier contact. Ouvrir un assistant IA autorisé par votre organisation et lui fournir cette liste protégée, les critères de priorisation et la capacité commerciale, puis lui demander de classer les opportunités par priorité avec critères et recommandation d&#39;action pour chacune. Astuce : dans votre demande à l&#39;IA, précisez (1) votre rôle et contexte — ex. « Je suis responsable commercial d&#39;une PME avec 25 affaires en cours et 2 commerciaux » (2) la tâche exacte attendue (3) le format de sortie souhaité — ex. « tableau priorisé : opportunité, score, action recommandée cette semaine, risque si inaction » (4) les contraintes — ex. « focus sur les 10 premières, critères : montant × probabilité × urgence ». Vérifier : confronter le classement avec votre intuition terrain. Livrable : tableau de priorisation des opportunités avec actions recommandées.
+
+Aide-moi uniquement à obtenir ou à préciser cet élément pour pouvoir l&#39;utiliser à l&#39;étape 4. Réutilise les informations que j&#39;ai déjà fournies dans cette conversation ; ne me les redemande pas. Si la même pièce couvre plusieurs entrées, référence-la sans la refaire. S&#39;il manque des informations indispensables, pose quelques questions simples centrées sur cet élément, mon activité et l&#39;usage prévu, au plus trois à la fois. Les informations optionnelles restent optionnelles.
+
+Choisis UN SEUL format adapté à l&#39;entrée parmi les formats ci-dessous ; ne produis pas successivement toutes ces rubriques. Va à l&#39;essentiel, sans reprendre le contexte du cas, les consignes ou une stratégie dans ta réponse.
+Formats possibles :
+- Profil ou description : prépare une fiche courte avec périmètre, caractéristiques connues, besoins ou attentes déclarés, critères ou contraintes et inconnues. Distingue observations réelles, cible ou choix souhaité et hypothèses à valider ; ne déduis pas de préférences ou de caractéristiques personnelles non fournies.
+- Objectif, budget ou contraintes : prépare un brief de cadrage avec les choix déclarés, valeurs et limites confirmées, puis les décisions restant à faire valider.
+- Brouillon ou modèle explicitement à créer : rédige seulement ce document d&#39;entrée ou sa trame, à partir de mes réponses, sans réaliser sa transformation finale.
+- Données, historique, document existant ou référence : prépare un tableau de collecte (information ou document, source à confirmer, période ou version, format, disponible ou à obtenir). Utilise seulement les contenus réellement fournis ; ne prétends pas avoir consulté un fichier, une source ou effectué des calculs sans accès effectif. Un contrat, une procédure, une preuve ou une règle en vigueur ne se remplace pas par un texte plausible. Conserve l&#39;original séparé de tes annotations : ne corrige ni ne transforme une entrée qui doit être analysée ou réécrite ensuite. Si tu ne sais pas si le document existe ou doit être créé, demande-le.
+- Outil, accès ou autorisation : prépare une checklist des disponibilités et validations à obtenir, sans demander de mot de passe ou de clé, ni installer ou connecter quoi que ce soit.
+- Simple règle ou condition, plutôt qu&#39;une entrée : indique comment vérifier son respect et son statut ; ne fabrique pas un document pour remplir cette rubrique.
+
+Ta réponse est UNE fiche « Entrée préparée pour l&#39;étape 4 », sans la répéter dans une seconde synthèse :
+1. Contenu utilisable — le format choisi, rempli seulement avec mes informations ; une trame vide suffit si les faits manquent.
+2. À compléter ou confirmer — seulement les manques utiles et leur prochaine action. Ne rends pas une précision facultative bloquante et n&#39;ajoute pas de nouvelles données démographiques ou commerciales à collecter sans nécessité pour cet élément.
+3. Sources et statut — origine, période/périmètre connus, faits, choix déclarés ou hypothèses distingués ; indique prêt, partiel ou bloqué et pourquoi.
+Ne complète pas les inconnues par un portrait ou des chiffres fictifs. Un exemple fictif n&#39;est produit que sur demande explicite pour cet élément ou si le premier essai l&#39;impose ; il reste séparé des informations confirmées.
+N&#39;invente jamais d&#39;historique de ventes, de résultats observés ni de preuves. Ne réalise pas encore le livrable final du cas. Si cet élément correspond lui-même au résultat à produire, signale-le et rassemble seulement les entrées nécessaires ; sa réalisation reste à l&#39;étape 4.
+
+Utilise uniquement un outil autorisé et des données dont le partage est autorisé, sans données personnelles identifiables. Les restrictions du premier essai et les règles de confidentialité s&#39;appliquent dès cette préparation, même si un exemple générique de collecte semble plus large. Un prérequis cité n&#39;est pas une autorisation de le transmettre : si le cas impose une préparation locale ou des données fictives/agrégées, ne demande pas les données brutes ; recueille seulement leur disponibilité ou le résultat autorisé et validé. Aucun envoi, publication, modification de système ni action automatique. Les règles du cas ci-dessous encadrent la préparation ; elles ne demandent pas de réaliser la stratégie, l&#39;analyse ou le déploiement maintenant.
+Règles source à respecter impérativement : Ne transmettre que les données nécessaires et autorisées dans l’outil retenu ; retirer les identifiants et données bancaires inutiles. La pseudonymisation ne supprime ni caractère personnel ni confidentialité. Vérifier périodes, montants, hypothèses et données manquantes avec le responsable commercial ; aucune mise à jour automatique du CRM.
 Termine le livrable par : « À faire valider en interne avant usage. »</pre>
           </div>
         </details>
@@ -272,20 +291,38 @@ Termine le livrable par : « À faire valider en interne avant usage. »</pre>
           <summary>Besoin d'aide pour préparer cet élément ?</summary>
           <div class="ticket mini">
           <div class="bandeau"><span>Prompt de préparation</span><button type="button" data-copie>Copier</button></div>
-          <pre>Mon rôle : [votre fonction ou rôle dans l'entreprise].
+          <pre>Mon rôle : [votre fonction ou rôle dans l&#39;entreprise].
+Étape 2 — préparer une entrée, pas encore réaliser le cas.
 Domaine métier du cas : Développement commercial.
 Mon objectif prioritaire est : Piloter l&#39;activité et le pipeline commercial.
 Contexte secteur : Multi-sectoriel.
 Cas d&#39;usage cible : Prioriser vos opportunités de vente à fort potentiel.
 
+Élément source à préparer : Critères de priorisation importants pour votre activité
 
-Élément source à préparer : Critères de priorisation importants pour votre activité.
-Pars du cas et de l'élément source ci-dessus. Demande uniquement les informations indispensables manquantes.
-Distingue ce qui doit venir de mes données réelles de ce que tu peux préparer : une trame vide, un format de collecte ou un exemple explicitement fictif.
-N'invente jamais d'historique de ventes, de résultats observés ni de preuves. Si la source réelle manque, indique où la demander en interne, sans prétendre l'avoir obtenue.
-Produis un premier support limité à cet élément ; sépare faits, hypothèses et champs à compléter. Vérifie les faits, sources et calculs disponibles, signale les contrôles impossibles.
-Utilise uniquement un outil autorisé et des exemples fictifs ou des données dont le partage est autorisé, sans données personnelles identifiables. Aucun envoi ni aucune action automatique.
-Règles à respecter impérativement : Ne transmettre que les données nécessaires et autorisées dans l’outil retenu ; retirer les identifiants et données bancaires inutiles. La pseudonymisation ne supprime ni caractère personnel ni confidentialité. Vérifier périodes, montants, hypothèses et données manquantes avec le responsable commercial ; aucune mise à jour automatique du CRM.
+Première action prévue à l&#39;étape 4 — référence de périmètre, à ne pas exécuter ici :
+Exporter la liste des opportunités en cours avec montant, étape, probabilité estimée par le responsable commercial, échéance confirmée et date de dernier contact. Ouvrir un assistant IA autorisé par votre organisation et lui fournir cette liste protégée, les critères de priorisation et la capacité commerciale, puis lui demander de classer les opportunités par priorité avec critères et recommandation d&#39;action pour chacune. Astuce : dans votre demande à l&#39;IA, précisez (1) votre rôle et contexte — ex. « Je suis responsable commercial d&#39;une PME avec 25 affaires en cours et 2 commerciaux » (2) la tâche exacte attendue (3) le format de sortie souhaité — ex. « tableau priorisé : opportunité, score, action recommandée cette semaine, risque si inaction » (4) les contraintes — ex. « focus sur les 10 premières, critères : montant × probabilité × urgence ». Vérifier : confronter le classement avec votre intuition terrain. Livrable : tableau de priorisation des opportunités avec actions recommandées.
+
+Aide-moi uniquement à obtenir ou à préciser cet élément pour pouvoir l&#39;utiliser à l&#39;étape 4. Réutilise les informations que j&#39;ai déjà fournies dans cette conversation ; ne me les redemande pas. Si la même pièce couvre plusieurs entrées, référence-la sans la refaire. S&#39;il manque des informations indispensables, pose quelques questions simples centrées sur cet élément, mon activité et l&#39;usage prévu, au plus trois à la fois. Les informations optionnelles restent optionnelles.
+
+Choisis UN SEUL format adapté à l&#39;entrée parmi les formats ci-dessous ; ne produis pas successivement toutes ces rubriques. Va à l&#39;essentiel, sans reprendre le contexte du cas, les consignes ou une stratégie dans ta réponse.
+Formats possibles :
+- Profil ou description : prépare une fiche courte avec périmètre, caractéristiques connues, besoins ou attentes déclarés, critères ou contraintes et inconnues. Distingue observations réelles, cible ou choix souhaité et hypothèses à valider ; ne déduis pas de préférences ou de caractéristiques personnelles non fournies.
+- Objectif, budget ou contraintes : prépare un brief de cadrage avec les choix déclarés, valeurs et limites confirmées, puis les décisions restant à faire valider.
+- Brouillon ou modèle explicitement à créer : rédige seulement ce document d&#39;entrée ou sa trame, à partir de mes réponses, sans réaliser sa transformation finale.
+- Données, historique, document existant ou référence : prépare un tableau de collecte (information ou document, source à confirmer, période ou version, format, disponible ou à obtenir). Utilise seulement les contenus réellement fournis ; ne prétends pas avoir consulté un fichier, une source ou effectué des calculs sans accès effectif. Un contrat, une procédure, une preuve ou une règle en vigueur ne se remplace pas par un texte plausible. Conserve l&#39;original séparé de tes annotations : ne corrige ni ne transforme une entrée qui doit être analysée ou réécrite ensuite. Si tu ne sais pas si le document existe ou doit être créé, demande-le.
+- Outil, accès ou autorisation : prépare une checklist des disponibilités et validations à obtenir, sans demander de mot de passe ou de clé, ni installer ou connecter quoi que ce soit.
+- Simple règle ou condition, plutôt qu&#39;une entrée : indique comment vérifier son respect et son statut ; ne fabrique pas un document pour remplir cette rubrique.
+
+Ta réponse est UNE fiche « Entrée préparée pour l&#39;étape 4 », sans la répéter dans une seconde synthèse :
+1. Contenu utilisable — le format choisi, rempli seulement avec mes informations ; une trame vide suffit si les faits manquent.
+2. À compléter ou confirmer — seulement les manques utiles et leur prochaine action. Ne rends pas une précision facultative bloquante et n&#39;ajoute pas de nouvelles données démographiques ou commerciales à collecter sans nécessité pour cet élément.
+3. Sources et statut — origine, période/périmètre connus, faits, choix déclarés ou hypothèses distingués ; indique prêt, partiel ou bloqué et pourquoi.
+Ne complète pas les inconnues par un portrait ou des chiffres fictifs. Un exemple fictif n&#39;est produit que sur demande explicite pour cet élément ou si le premier essai l&#39;impose ; il reste séparé des informations confirmées.
+N&#39;invente jamais d&#39;historique de ventes, de résultats observés ni de preuves. Ne réalise pas encore le livrable final du cas. Si cet élément correspond lui-même au résultat à produire, signale-le et rassemble seulement les entrées nécessaires ; sa réalisation reste à l&#39;étape 4.
+
+Utilise uniquement un outil autorisé et des données dont le partage est autorisé, sans données personnelles identifiables. Les restrictions du premier essai et les règles de confidentialité s&#39;appliquent dès cette préparation, même si un exemple générique de collecte semble plus large. Un prérequis cité n&#39;est pas une autorisation de le transmettre : si le cas impose une préparation locale ou des données fictives/agrégées, ne demande pas les données brutes ; recueille seulement leur disponibilité ou le résultat autorisé et validé. Aucun envoi, publication, modification de système ni action automatique. Les règles du cas ci-dessous encadrent la préparation ; elles ne demandent pas de réaliser la stratégie, l&#39;analyse ou le déploiement maintenant.
+Règles source à respecter impérativement : Ne transmettre que les données nécessaires et autorisées dans l’outil retenu ; retirer les identifiants et données bancaires inutiles. La pseudonymisation ne supprime ni caractère personnel ni confidentialité. Vérifier périodes, montants, hypothèses et données manquantes avec le responsable commercial ; aucune mise à jour automatique du CRM.
 Termine le livrable par : « À faire valider en interne avant usage. »</pre>
           </div>
         </details>
@@ -307,20 +344,38 @@ Termine le livrable par : « À faire valider en interne avant usage. »</pre>
           <summary>Besoin d'aide pour préparer cet élément ?</summary>
           <div class="ticket mini">
           <div class="bandeau"><span>Prompt de préparation</span><button type="button" data-copie>Copier</button></div>
-          <pre>Mon rôle : [votre fonction ou rôle dans l'entreprise].
+          <pre>Mon rôle : [votre fonction ou rôle dans l&#39;entreprise].
+Étape 2 — préparer une entrée, pas encore réaliser le cas.
 Domaine métier du cas : Développement commercial.
 Mon objectif prioritaire est : Piloter l&#39;activité et le pipeline commercial.
 Contexte secteur : Multi-sectoriel.
 Cas d&#39;usage cible : Prioriser vos opportunités de vente à fort potentiel.
 
+Élément source à préparer : Historique des deals signés (caractéristiques communes)
 
-Élément source à préparer : Historique des deals signés (caractéristiques communes).
-Pars du cas et de l'élément source ci-dessus. Demande uniquement les informations indispensables manquantes.
-Distingue ce qui doit venir de mes données réelles de ce que tu peux préparer : une trame vide, un format de collecte ou un exemple explicitement fictif.
-N'invente jamais d'historique de ventes, de résultats observés ni de preuves. Si la source réelle manque, indique où la demander en interne, sans prétendre l'avoir obtenue.
-Produis un premier support limité à cet élément ; sépare faits, hypothèses et champs à compléter. Vérifie les faits, sources et calculs disponibles, signale les contrôles impossibles.
-Utilise uniquement un outil autorisé et des exemples fictifs ou des données dont le partage est autorisé, sans données personnelles identifiables. Aucun envoi ni aucune action automatique.
-Règles à respecter impérativement : Ne transmettre que les données nécessaires et autorisées dans l’outil retenu ; retirer les identifiants et données bancaires inutiles. La pseudonymisation ne supprime ni caractère personnel ni confidentialité. Vérifier périodes, montants, hypothèses et données manquantes avec le responsable commercial ; aucune mise à jour automatique du CRM.
+Première action prévue à l&#39;étape 4 — référence de périmètre, à ne pas exécuter ici :
+Exporter la liste des opportunités en cours avec montant, étape, probabilité estimée par le responsable commercial, échéance confirmée et date de dernier contact. Ouvrir un assistant IA autorisé par votre organisation et lui fournir cette liste protégée, les critères de priorisation et la capacité commerciale, puis lui demander de classer les opportunités par priorité avec critères et recommandation d&#39;action pour chacune. Astuce : dans votre demande à l&#39;IA, précisez (1) votre rôle et contexte — ex. « Je suis responsable commercial d&#39;une PME avec 25 affaires en cours et 2 commerciaux » (2) la tâche exacte attendue (3) le format de sortie souhaité — ex. « tableau priorisé : opportunité, score, action recommandée cette semaine, risque si inaction » (4) les contraintes — ex. « focus sur les 10 premières, critères : montant × probabilité × urgence ». Vérifier : confronter le classement avec votre intuition terrain. Livrable : tableau de priorisation des opportunités avec actions recommandées.
+
+Aide-moi uniquement à obtenir ou à préciser cet élément pour pouvoir l&#39;utiliser à l&#39;étape 4. Réutilise les informations que j&#39;ai déjà fournies dans cette conversation ; ne me les redemande pas. Si la même pièce couvre plusieurs entrées, référence-la sans la refaire. S&#39;il manque des informations indispensables, pose quelques questions simples centrées sur cet élément, mon activité et l&#39;usage prévu, au plus trois à la fois. Les informations optionnelles restent optionnelles.
+
+Choisis UN SEUL format adapté à l&#39;entrée parmi les formats ci-dessous ; ne produis pas successivement toutes ces rubriques. Va à l&#39;essentiel, sans reprendre le contexte du cas, les consignes ou une stratégie dans ta réponse.
+Formats possibles :
+- Profil ou description : prépare une fiche courte avec périmètre, caractéristiques connues, besoins ou attentes déclarés, critères ou contraintes et inconnues. Distingue observations réelles, cible ou choix souhaité et hypothèses à valider ; ne déduis pas de préférences ou de caractéristiques personnelles non fournies.
+- Objectif, budget ou contraintes : prépare un brief de cadrage avec les choix déclarés, valeurs et limites confirmées, puis les décisions restant à faire valider.
+- Brouillon ou modèle explicitement à créer : rédige seulement ce document d&#39;entrée ou sa trame, à partir de mes réponses, sans réaliser sa transformation finale.
+- Données, historique, document existant ou référence : prépare un tableau de collecte (information ou document, source à confirmer, période ou version, format, disponible ou à obtenir). Utilise seulement les contenus réellement fournis ; ne prétends pas avoir consulté un fichier, une source ou effectué des calculs sans accès effectif. Un contrat, une procédure, une preuve ou une règle en vigueur ne se remplace pas par un texte plausible. Conserve l&#39;original séparé de tes annotations : ne corrige ni ne transforme une entrée qui doit être analysée ou réécrite ensuite. Si tu ne sais pas si le document existe ou doit être créé, demande-le.
+- Outil, accès ou autorisation : prépare une checklist des disponibilités et validations à obtenir, sans demander de mot de passe ou de clé, ni installer ou connecter quoi que ce soit.
+- Simple règle ou condition, plutôt qu&#39;une entrée : indique comment vérifier son respect et son statut ; ne fabrique pas un document pour remplir cette rubrique.
+
+Ta réponse est UNE fiche « Entrée préparée pour l&#39;étape 4 », sans la répéter dans une seconde synthèse :
+1. Contenu utilisable — le format choisi, rempli seulement avec mes informations ; une trame vide suffit si les faits manquent.
+2. À compléter ou confirmer — seulement les manques utiles et leur prochaine action. Ne rends pas une précision facultative bloquante et n&#39;ajoute pas de nouvelles données démographiques ou commerciales à collecter sans nécessité pour cet élément.
+3. Sources et statut — origine, période/périmètre connus, faits, choix déclarés ou hypothèses distingués ; indique prêt, partiel ou bloqué et pourquoi.
+Ne complète pas les inconnues par un portrait ou des chiffres fictifs. Un exemple fictif n&#39;est produit que sur demande explicite pour cet élément ou si le premier essai l&#39;impose ; il reste séparé des informations confirmées.
+N&#39;invente jamais d&#39;historique de ventes, de résultats observés ni de preuves. Ne réalise pas encore le livrable final du cas. Si cet élément correspond lui-même au résultat à produire, signale-le et rassemble seulement les entrées nécessaires ; sa réalisation reste à l&#39;étape 4.
+
+Utilise uniquement un outil autorisé et des données dont le partage est autorisé, sans données personnelles identifiables. Les restrictions du premier essai et les règles de confidentialité s&#39;appliquent dès cette préparation, même si un exemple générique de collecte semble plus large. Un prérequis cité n&#39;est pas une autorisation de le transmettre : si le cas impose une préparation locale ou des données fictives/agrégées, ne demande pas les données brutes ; recueille seulement leur disponibilité ou le résultat autorisé et validé. Aucun envoi, publication, modification de système ni action automatique. Les règles du cas ci-dessous encadrent la préparation ; elles ne demandent pas de réaliser la stratégie, l&#39;analyse ou le déploiement maintenant.
+Règles source à respecter impérativement : Ne transmettre que les données nécessaires et autorisées dans l’outil retenu ; retirer les identifiants et données bancaires inutiles. La pseudonymisation ne supprime ni caractère personnel ni confidentialité. Vérifier périodes, montants, hypothèses et données manquantes avec le responsable commercial ; aucune mise à jour automatique du CRM.
 Termine le livrable par : « À faire valider en interne avant usage. »</pre>
           </div>
         </details>
@@ -342,24 +397,43 @@ Termine le livrable par : « À faire valider en interne avant usage. »</pre>
           <summary>Besoin d'aide pour préparer cet élément ?</summary>
           <div class="ticket mini">
           <div class="bandeau"><span>Prompt de préparation</span><button type="button" data-copie>Copier</button></div>
-          <pre>Mon rôle : [votre fonction ou rôle dans l'entreprise].
+          <pre>Mon rôle : [votre fonction ou rôle dans l&#39;entreprise].
+Étape 2 — préparer une entrée, pas encore réaliser le cas.
 Domaine métier du cas : Développement commercial.
 Mon objectif prioritaire est : Piloter l&#39;activité et le pipeline commercial.
 Contexte secteur : Multi-sectoriel.
 Cas d&#39;usage cible : Prioriser vos opportunités de vente à fort potentiel.
 
+Élément source à préparer : Capacité commerciale disponible (temps, ressources)
 
-Élément source à préparer : Capacité commerciale disponible (temps, ressources).
-Pars du cas et de l'élément source ci-dessus. Demande uniquement les informations indispensables manquantes.
-Distingue ce qui doit venir de mes données réelles de ce que tu peux préparer : une trame vide, un format de collecte ou un exemple explicitement fictif.
-N'invente jamais d'historique de ventes, de résultats observés ni de preuves. Si la source réelle manque, indique où la demander en interne, sans prétendre l'avoir obtenue.
-Produis un premier support limité à cet élément ; sépare faits, hypothèses et champs à compléter. Vérifie les faits, sources et calculs disponibles, signale les contrôles impossibles.
-Utilise uniquement un outil autorisé et des exemples fictifs ou des données dont le partage est autorisé, sans données personnelles identifiables. Aucun envoi ni aucune action automatique.
-Règles à respecter impérativement : Ne transmettre que les données nécessaires et autorisées dans l’outil retenu ; retirer les identifiants et données bancaires inutiles. La pseudonymisation ne supprime ni caractère personnel ni confidentialité. Vérifier périodes, montants, hypothèses et données manquantes avec le responsable commercial ; aucune mise à jour automatique du CRM.
+Première action prévue à l&#39;étape 4 — référence de périmètre, à ne pas exécuter ici :
+Exporter la liste des opportunités en cours avec montant, étape, probabilité estimée par le responsable commercial, échéance confirmée et date de dernier contact. Ouvrir un assistant IA autorisé par votre organisation et lui fournir cette liste protégée, les critères de priorisation et la capacité commerciale, puis lui demander de classer les opportunités par priorité avec critères et recommandation d&#39;action pour chacune. Astuce : dans votre demande à l&#39;IA, précisez (1) votre rôle et contexte — ex. « Je suis responsable commercial d&#39;une PME avec 25 affaires en cours et 2 commerciaux » (2) la tâche exacte attendue (3) le format de sortie souhaité — ex. « tableau priorisé : opportunité, score, action recommandée cette semaine, risque si inaction » (4) les contraintes — ex. « focus sur les 10 premières, critères : montant × probabilité × urgence ». Vérifier : confronter le classement avec votre intuition terrain. Livrable : tableau de priorisation des opportunités avec actions recommandées.
+
+Aide-moi uniquement à obtenir ou à préciser cet élément pour pouvoir l&#39;utiliser à l&#39;étape 4. Réutilise les informations que j&#39;ai déjà fournies dans cette conversation ; ne me les redemande pas. Si la même pièce couvre plusieurs entrées, référence-la sans la refaire. S&#39;il manque des informations indispensables, pose quelques questions simples centrées sur cet élément, mon activité et l&#39;usage prévu, au plus trois à la fois. Les informations optionnelles restent optionnelles.
+
+Choisis UN SEUL format adapté à l&#39;entrée parmi les formats ci-dessous ; ne produis pas successivement toutes ces rubriques. Va à l&#39;essentiel, sans reprendre le contexte du cas, les consignes ou une stratégie dans ta réponse.
+Formats possibles :
+- Profil ou description : prépare une fiche courte avec périmètre, caractéristiques connues, besoins ou attentes déclarés, critères ou contraintes et inconnues. Distingue observations réelles, cible ou choix souhaité et hypothèses à valider ; ne déduis pas de préférences ou de caractéristiques personnelles non fournies.
+- Objectif, budget ou contraintes : prépare un brief de cadrage avec les choix déclarés, valeurs et limites confirmées, puis les décisions restant à faire valider.
+- Brouillon ou modèle explicitement à créer : rédige seulement ce document d&#39;entrée ou sa trame, à partir de mes réponses, sans réaliser sa transformation finale.
+- Données, historique, document existant ou référence : prépare un tableau de collecte (information ou document, source à confirmer, période ou version, format, disponible ou à obtenir). Utilise seulement les contenus réellement fournis ; ne prétends pas avoir consulté un fichier, une source ou effectué des calculs sans accès effectif. Un contrat, une procédure, une preuve ou une règle en vigueur ne se remplace pas par un texte plausible. Conserve l&#39;original séparé de tes annotations : ne corrige ni ne transforme une entrée qui doit être analysée ou réécrite ensuite. Si tu ne sais pas si le document existe ou doit être créé, demande-le.
+- Outil, accès ou autorisation : prépare une checklist des disponibilités et validations à obtenir, sans demander de mot de passe ou de clé, ni installer ou connecter quoi que ce soit.
+- Simple règle ou condition, plutôt qu&#39;une entrée : indique comment vérifier son respect et son statut ; ne fabrique pas un document pour remplir cette rubrique.
+
+Ta réponse est UNE fiche « Entrée préparée pour l&#39;étape 4 », sans la répéter dans une seconde synthèse :
+1. Contenu utilisable — le format choisi, rempli seulement avec mes informations ; une trame vide suffit si les faits manquent.
+2. À compléter ou confirmer — seulement les manques utiles et leur prochaine action. Ne rends pas une précision facultative bloquante et n&#39;ajoute pas de nouvelles données démographiques ou commerciales à collecter sans nécessité pour cet élément.
+3. Sources et statut — origine, période/périmètre connus, faits, choix déclarés ou hypothèses distingués ; indique prêt, partiel ou bloqué et pourquoi.
+Ne complète pas les inconnues par un portrait ou des chiffres fictifs. Un exemple fictif n&#39;est produit que sur demande explicite pour cet élément ou si le premier essai l&#39;impose ; il reste séparé des informations confirmées.
+N&#39;invente jamais d&#39;historique de ventes, de résultats observés ni de preuves. Ne réalise pas encore le livrable final du cas. Si cet élément correspond lui-même au résultat à produire, signale-le et rassemble seulement les entrées nécessaires ; sa réalisation reste à l&#39;étape 4.
+
+Utilise uniquement un outil autorisé et des données dont le partage est autorisé, sans données personnelles identifiables. Les restrictions du premier essai et les règles de confidentialité s&#39;appliquent dès cette préparation, même si un exemple générique de collecte semble plus large. Un prérequis cité n&#39;est pas une autorisation de le transmettre : si le cas impose une préparation locale ou des données fictives/agrégées, ne demande pas les données brutes ; recueille seulement leur disponibilité ou le résultat autorisé et validé. Aucun envoi, publication, modification de système ni action automatique. Les règles du cas ci-dessous encadrent la préparation ; elles ne demandent pas de réaliser la stratégie, l&#39;analyse ou le déploiement maintenant.
+Règles source à respecter impérativement : Ne transmettre que les données nécessaires et autorisées dans l’outil retenu ; retirer les identifiants et données bancaires inutiles. La pseudonymisation ne supprime ni caractère personnel ni confidentialité. Vérifier périodes, montants, hypothèses et données manquantes avec le responsable commercial ; aucune mise à jour automatique du CRM.
 Termine le livrable par : « À faire valider en interne avant usage. »</pre>
           </div>
         </details>
         
+        <p class="note">Conservez les blocs « Entrée préparée pour l'étape 4 » dans un espace autorisé. Continuez dans la même conversation avec votre assistant IA, ou collez-les avec le prompt de l'étape 4. Cette page ne conserve ni ne transmet ces textes.</p>
         <div class="valider"><input type="checkbox" id="fin-2" data-fin="2"><label for="fin-2">Étape terminée — mes éléments sont prêts pour l'essai choisi</label></div>
       </div>
     </details>
@@ -401,7 +475,7 @@ Termine le livrable par : « À faire valider en interne avant usage. »</pre>
         <p><b>Votre première action proposée — adaptez le délai à vos contraintes :</b></p>
         <p class="source">Exporter la liste des opportunités en cours avec montant, étape, probabilité estimée par le responsable commercial, échéance confirmée et date de dernier contact. Ouvrir un assistant IA autorisé par votre organisation et lui fournir cette liste protégée, les critères de priorisation et la capacité commerciale, puis lui demander de classer les opportunités par priorité avec critères et recommandation d&#39;action pour chacune. Astuce : dans votre demande à l&#39;IA, précisez (1) votre rôle et contexte — ex. « Je suis responsable commercial d&#39;une PME avec 25 affaires en cours et 2 commerciaux » (2) la tâche exacte attendue (3) le format de sortie souhaité — ex. « tableau priorisé : opportunité, score, action recommandée cette semaine, risque si inaction » (4) les contraintes — ex. « focus sur les 10 premières, critères : montant × probabilité × urgence ». Vérifier : confronter le classement avec votre intuition terrain. Livrable : tableau de priorisation des opportunités avec actions recommandées.</p>
         <p class="note">Ce premier livrable n'est pas un déploiement. Une intégration ou une automatisation éventuelle demande une mise en place et des validations distinctes.</p>
-        <p class="note">Réutilisez <a href="#prompt-demarrage">votre prompt de démarrage</a> (en bas de page) — cette fois avec vos éléments de l'étape 2, dans le respect du cadre de sécurité de l'étape 3. Le livrable relu servira ensuite pour l'étape 5.</p>
+        <p class="note">Utilisez <a href="#prompt-demarrage">votre prompt de démarrage</a> avec les entrées préparées à l'étape 2, sans les refaire. Gardez leurs sources, les manques et les hypothèses visibles ; appliquez le cadre de sécurité de l'étape 3. Vous produisez ici le résultat du cas, que vous testerez à l'étape 5.</p>
         <h3>Avant de l'utiliser, vérifiez trois points</h3>
         <ul class="reflexion">
           <li><b>Utile :</b> le résultat répond-il à la tâche choisie, dans le format attendu ?</li>
@@ -421,6 +495,7 @@ Termine le livrable par : « À faire valider en interne avant usage. »</pre>
       <summary><span class="titre">Testez en conditions réelles</span><span class="duree">selon disponibilité</span><span class="chevron">▶</span></summary>
       <div class="contenu">
         <p>Testez le fonctionnement sur un périmètre réel limité et autorisé, en parallèle de votre méthode actuelle — ne débranchez rien. Avec des données seulement fictives, vérifiez la forme et les contrôles, puis reportez toute conclusion sur l'efficacité réelle.</p>
+<p>Partez du résultat validé à l'étape 4. S'il ne s'agit encore que d'une trame ou d'un plan, testez ce support sans prétendre qu'un flux est installé. Ne refaites une entrée que si un manque ou une erreur le nécessite.</p>
 <ul>
 <div class="coche"><input type="checkbox" id="auto1" data-suivi><label for="auto1">Choisissez une tâche limitée et vérifiez les autorisations, le contrôle humain et la possibilité d'arrêter avant tout effet réel</label></div>
 <div class="coche"><input type="checkbox" id="auto2" data-suivi><label for="auto2">Gardez votre méthode habituelle en parallèle pour comparer à qualité attendue équivalente</label></div>
@@ -441,6 +516,7 @@ Termine le livrable par : « À faire valider en interne avant usage. »</pre>
       <summary><span class="titre">Installez l'usage durablement</span><span class="duree">30 min</span><span class="chevron">▶</span></summary>
       <div class="contenu">
         <p>Ne réutilisez que ce qui a été validé sur le périmètre testé. Documentez les ajustements ou l'arrêt si le résultat n'est pas utilisable.</p>
+<p>Reprenez la recette et les contrôles issus de l'essai ; cette étape organise leur réutilisation, pas une nouvelle collecte complète ni un déploiement automatique.</p>
 <ul>
 <div class="coche"><input type="checkbox" id="auto6" data-suivi><label for="auto6">Sauvegardez la recette validée dans un espace autorisé : instructions, outil, entrées permises, contrôles, limites et procédure d'arrêt ; aucun nouveau compte nécessaire</label></div>
 <div class="coche"><input type="checkbox" id="auto7" data-suivi><label for="auto7">Désignez le responsable du contrôle et, si utile, une personne capable de reprendre la tâche</label></div>
@@ -466,11 +542,12 @@ Termine le livrable par : « À faire valider en interne avant usage. »</pre>
 <details class="quickwin-accordion">
   <summary><span class="titre">Si vous voulez tester sans attendre — votre prompt prêt</span><span class="chevron">▶</span></summary>
   <div class="contenu-qw">
-    <p>Vous pouvez commencer avec ce prompt dans un assistant IA autorisé par votre organisation. Complétez les parties entre [crochets] avec des exemples fictifs ou des données dont le partage est autorisé, sans données personnelles identifiables. Vérifiez les règles de confidentialité et les limites de l'offre utilisée ; une version gratuite n'est pas nécessairement adaptée.</p>
+    <p>Ce raccourci utilise le même prompt de production que l'étape 4 ; ce n'est pas un second travail à refaire. Si vos entrées sont prêtes, fournissez-les dans un assistant IA autorisé par votre organisation. Sinon, commencez par l'aide de l'étape 2 ou une démonstration explicitement fictive. Complétez les [crochets] avec des données dont le partage est autorisé, sans données personnelles identifiables. Vérifiez les règles de confidentialité et les limites de l'offre utilisée.</p>
     <div class="ticket" id="prompt-demarrage" tabindex="-1" role="region" aria-label="Votre prompt de démarrage">
       <div class="bandeau"><span>Votre prompt de démarrage</span><button type="button" data-copie>Copier</button></div>
       <pre>Mon rôle : [votre fonction ou rôle dans l&#39;entreprise]. Mon contexte : [votre secteur, taille d&#39;entreprise, situation actuelle].
 
+Étape 4 — produire le premier livrable à partir des entrées préparées.
 Référence du catalogue (ne pas la réécrire) :
 Domaine métier du cas : Développement commercial.
 Mon objectif prioritaire est : Piloter l&#39;activité et le pipeline commercial.
@@ -483,11 +560,13 @@ Première action source : Exporter la liste des opportunités en cours avec mont
 
 Éléments prévus par le cas : Liste des opportunités en cours (montant, étape, probabilité estimée) ; Critères de priorisation importants pour votre activité ; Historique des deals signés (caractéristiques communes) ; Capacité commerciale disponible (temps, ressources).
 
+Mes éléments préparés : [collez ici les contenus ou trames issus de la préparation, avec leurs sources, leurs manques et leurs hypothèses ; indiquez « déjà fournis plus haut » s&#39;ils figurent dans cette conversation]. Les crochets non complétés ne sont pas des données.
+
 Consignes pour mon premier essai :
-1. Pars du cas et de la première action source ci-dessus. Demande uniquement les entrées indispensables encore absentes ou ambiguës pour cette première action (périmètre, contenu à traiter, contraintes ou format attendu).
+1. Pars du cas et de la première action source ci-dessus. Réutilise les éléments préparés et les informations effectivement présents dans cette conversation. Ne recommence ni le questionnaire de préparation ni un document d&#39;entrée déjà fourni. Demande uniquement les entrées indispensables encore absentes ou ambiguës qui empêchent la première action ; ne repose pas les questions déjà résolues. Les exemples de la fiche ne remplacent pas mes faits. Conserve les périodes, sources, régimes applicables et statuts réellement confirmés ; explicite tout sous-ensemble choisi pour l&#39;essai, sans le présenter comme un classement mesuré. Les limites de confidentialité et conditions des entrées priment sur une amorce générique de collecte. Signale un conflit et demande la clarification nécessaire avant la partie concernée.
 2. Distingue données réelles disponibles et autorisées, données à obtenir et exemple fictif. S&#39;il manque une donnée factuelle, demande sa source ou propose une trame vide ou un exemple explicitement fictif. N&#39;invente jamais d&#39;historique de ventes, de résultats observés ou de preuves. Un exemple fictif ne valide pas l&#39;efficacité réelle.
-3. À partir de la première action source, prépare un premier livrable concret en français sur un périmètre réduit, dans le format utile à cette action. Si elle prévoit plusieurs travaux, commence par le premier élément réalisable et indique ce qui reste à faire. Si les entrées sont insuffisantes, donne la trame et nomme les manques plutôt que présenter un résultat comme acquis.
-4. Sépare les faits fournis, les hypothèses et les points à vérifier. Vérifie les faits contre les sources disponibles, cite seulement les sources réellement consultées et rends les calculs vérifiables (données, méthode, unités). Signale tout contrôle impossible et demande une validation métier avant usage.
+3. À partir de la première action source, produis un premier livrable concret en français sur un périmètre réduit, dans le format utile à cette action. Si elle prévoit plusieurs travaux, commence par le premier élément réalisable et indique ce qui reste à faire. Si les entrées sont insuffisantes, donne la trame et nomme les manques plutôt que présenter un résultat comme acquis. Le résultat doit être celui du cas, pas un nouveau support de collecte des prérequis. Réserve le test en situation réelle à l&#39;étape 5 et l&#39;organisation de la réutilisation à l&#39;étape 6. Respecte le format demandé sans ajouter des livrables complémentaires. Vérifie que l&#39;ensemble proposé tient dans le budget et le temps disponibles, pas seulement chaque action prise séparément.
+4. Sépare les faits fournis, les hypothèses et les points à vérifier. Vérifie les faits contre les sources disponibles, cite seulement les sources réellement consultées et rends les calculs vérifiables (données, méthode, unités). Signale tout contrôle impossible et demande une validation métier avant usage. Si le cas exige un tableur, un logiciel métier ou un professionnel, respecte ce circuit ; ne présente pas comme effectué un calcul, un accès ou une validation qui n&#39;a pas eu lieu. Sans source récente consultée, présente les outils, fonctionnalités et tarifs comme des options à vérifier, pas comme des offres actuelles garanties.
 5. N&#39;effectue aucune action automatique : aucun envoi, publication, modification de système ou déclenchement de processus. Prépare uniquement un brouillon à relire.
 
 Règles source à respecter impérativement : Ne transmettre que les données nécessaires et autorisées dans l’outil retenu ; retirer les identifiants et données bancaires inutiles. La pseudonymisation ne supprime ni caractère personnel ni confidentialité. Vérifier périodes, montants, hypothèses et données manquantes avec le responsable commercial ; aucune mise à jour automatique du CRM.

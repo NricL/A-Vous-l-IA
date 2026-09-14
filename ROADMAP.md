@@ -8,7 +8,17 @@ repo pour rester traçable côté Eneric **et** côté Simplon.
 
 ## Cap actif — efficacité et pertinence, règle 80/20
 
-**V463 déployée sur le backend personnel**, révision `v463-20260914-r1` à100% :
+**Lot demandé à13:56, confirmé à14:48 et publié : préparation et complémentarité des étapes.**
+Revue complète des1 021cas /3 774entrées terminée. Gabarit local : une entrée préparée
+avec contenu utilisable, manques et sources/statut ; données existantes non inventées,
+choix déclarés séparés, aucune réalisation prématurée du cas.
+L'étape4 consomme cette préparation ; les étapes5/6 testent puis réutilisent sans repartir
+de zéro. Les3 774blocs sont régénérés et contrôlés ; quatre parcours représentatifs ont
+été ouverts localement sur mobile. Le bot et les cellules de la base v463 sont inchangés.
+La révision `v463-preparation-20260914-r1` reçoit100% du trafic après contrôle de
+la candidate. V463 précédente conservée pour retour arrière ; mêmes données et liens.
+
+**Livraison v463 initiale, désormais référence de retour arrière** :
 1 021fiches/parcours actuels et quatre pages historiques conservées. Autorisation
 explicite à12:13, candidate exercée avant bascule, retour arrière conservé.
 Les notes de préparation privée ci-dessous sont historiques. La publication porte
@@ -66,6 +76,10 @@ La découverte peut offrir plusieurs pistes ; trouver le cas attendu ne doit pas
 forcer une réponse unique. Évaluer séparément sa présence, les exclusions réellement
 exprimées et l'utilité des autres pistes, plutôt qu'exiger une liste d'IDs exactement
 égale à un seul cas. Ni remplissage obligatoire à cinq, ni rejet automatique des alternatives.
+
+Les3 774aides de préparation ont une mission et un livrable nommés. Le premier résultat
+du cas est produit à l'étape4, testé en5 puis réutilisé en6. Les champs métier et le bot
+ne sont pas modifiés pour ces améliorations de gabarit.
 
 ### Livraisons par valeur, sans dépendance à une nouvelle architecture
 
