@@ -7,6 +7,7 @@ from pathlib import Path
 import re
 import subprocess
 import tarfile
+import time
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
 
@@ -14,6 +15,13 @@ from app.value_editorial import SOURCE_FIELDS, editorial_for
 from scripts.editorial_sources import extract
 
 ENTRY = r"<!-- value-entry:[^>]+-->.*?<!-- /value-entry -->"
+
+
+def page_archive_entry(name, raw):
+    info = tarfile.TarInfo(name)
+    info.size = len(raw)
+    info.mtime = int(time.time())
+    return info
 
 
 def transform(text, page, template):
@@ -69,9 +77,7 @@ def publish(pages, templates, report, write=False):
     archive = report.parent / "public-pages-overlay.tar"
     with tarfile.open(archive, "w") as output:
         for name, raw, _ in prepared:
-            info = tarfile.TarInfo(name)
-            info.size = len(raw)
-            output.addfile(info, io.BytesIO(raw))
+            output.addfile(page_archive_entry(name, raw), io.BytesIO(raw))
     if write:
         subprocess.run([r"C:\Windows\System32\tar.exe", "-xf", str(archive.resolve()),
                         "-C", str(pages.resolve())], check=True, capture_output=True)

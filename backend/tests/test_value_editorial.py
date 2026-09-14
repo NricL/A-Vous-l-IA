@@ -1,8 +1,11 @@
 import copy
 import html
+import io
 import os
 from pathlib import Path
 import unittest
+import tarfile
+from unittest.mock import patch
 
 from app import value_editorial as editorial_module
 from app.value_editorial import editorial_for, load_editorial, source_fields, source_fingerprint, SOURCE_FIELDS
@@ -153,6 +156,19 @@ class EditorialContractTests(unittest.TestCase):
                          (APP_ROOT / "value_editorial.py").read_bytes())
         self.assertEqual((Path(root) / "pipeline/content/value_editorial.json").read_bytes(),
                          (APP_ROOT / "content/value_editorial.json").read_bytes())
+
+    def test_archive_preserves_bytes_without_epoch_last_modified(self):
+        from scripts.publish_editorial_pages import page_archive_entry
+        raw = b"<p>Reviewed public content</p>"
+        buffer = io.BytesIO()
+        with patch("scripts.publish_editorial_pages.time.time", return_value=1800000001):
+            with tarfile.open(fileobj=buffer, mode="w") as archive:
+                archive.addfile(page_archive_entry("action-test.html", raw), io.BytesIO(raw))
+        buffer.seek(0)
+        with tarfile.open(fileobj=buffer) as archive:
+            member = archive.getmember("action-test.html")
+            self.assertEqual(member.mtime, 1800000001)
+            self.assertEqual(archive.extractfile(member).read(), raw)
 
 
 if __name__ == "__main__":
