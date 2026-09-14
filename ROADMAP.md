@@ -19,7 +19,108 @@ INT-01/02/03 et UX-01 à UX-05 sont livrés sur le dev. Révision active `avouli
 | Calibrage métier à plus grande échelle | Ouvert ; les essais de livraison ne garantissent pas toutes les formulations. |
 | Package et production Simplon | Toujours différés. |
 
-### Lot actif — fluidité après livraison, autorisé le 13 septembre
+## Prochain programme — qualification fiable, naturel maîtrisé et catalogue complet
+
+### Décision à 20:47 — tester sur une candidate Azure isolée
+
+Eneric demande la livraison de test sur GitHub et Azure personnel, sans attendre la fin des essais locaux. Préparation cloud engagée : identité AVIA conservée, route `/preview`, vraie qualification/RAG PUBLIC_PAGES et six étapes, source publique v4.6.1 uniquement. Le classeur privé v462 reste hors de ce lot.
+
+Les images sont préparées dans le registre privé ; l'activation attend l'aperçu exact et sa confirmation. La version stable garde 100% du trafic principal. Les limitations de pertinence secondaire et de latence restent ouvertes et doivent être observées sur la candidate : aucune promotion ni garantie que l'hébergement Azure accélérera les modèles. Cette décision remplace la séquence « finir les essais locaux avant tout déploiement de test », pas les critères de promotion. Configuration et rollback dans HANDOFF et `.azure/plan.md`.
+
+### État après poursuite demandée à17:45 — préversion RAG réelle, non déployée
+
+`http://127.0.0.1:4178/preview` dispose maintenant du mode **PUBLIC_PAGES** :1 021pages v4.6.1 déjà publiées,14domaines, index sémantique local et modèles Azure existants. Quatre pages historiques sont exclues selon leur version observée. Les fichiers labellisés et la candidate privée v462 n'ont pas alimenté cet index : il contient uniquement les champs déjà publics. Les modes PUBLIC_API (ancien RAG distant) et SYNTHETIC restent explicitement distincts.
+
+La cause du faux négatif marketing a été reproduite :26candidats éligibles récupérés, cas attendu classé8–9 par le classement lexical puis exclu par une coupe à5 avant le modèle. Correctif local : laisser examiner le pool récupéré, limiter à5 après sélection et rapprochement des identités. Pas de changement silencieux des filtres ou du domaine. Le cœur en production n'a pas été redéployé.
+
+Le RAG PUBLIC_PAGES retrouve le cas marketing sur la demande initiale. Il ajoute une vérification indépendante de l'adéquation tâche/livrable, sans contexte de domaine susceptible de biaiser la décision ; réponses non structurées ou erreurs restent explicites. Les contrôles de non-correspondance, canal et population spécialisés ont progressé, mais une piste secondaire web reste trop permissive sur un essai répété. La latence observée,70–305secondes selon le flux, est trop élevée pour une livraison publique ; quota existant respecté, aucune hausse de ressources décidée.
+
+Les vrais cas publics ouvrent désormais les **nouveaux parcours locaux** : six étapes, besoin original éditable et distinct de la source, contrôles et réutilisation. Le mode d'exécution absent des pages publiques reste inconnu ; les étapes5/6 utilisent explicitement une présentation commune, pas une valeur métier inventée. Les champs publics sont inchangés et aucune donnée privée v462 n'est exposée.
+
+CONT-01 a produit une candidate **privée, labellisée, non publiée** après arbitrage des propositions. Les changements de mode proposés massivement n'ont pas été appliqués mécaniquement. Les réserves nécessitant une expertise externe sont conservées. La candidate n'est ni la base du site actuel ni celle de PUBLIC_PAGES.
+
+**Avant toute livraison :** essais conjoints sur ce vrai RAG local, traitement de la pertinence secondaire et de la latence, décision sur la candidate de contenu, parité explicite avec le runtime cible et aperçu/publication autorisés. Ne pas présenter cette préversion comme la reproduction exacte de l'index Chroma ni comme une certification de pertinence universelle.
+
+**Cadrage du 13 septembre à 11:55.** Mise à jour documentaire demandée par Eneric après analyse du positionnement, du contenu et de l'expérience. Les lots ci-dessous sont **planifiés, non implémentés**. La livraison `d02ffad` et son reçu `e895cab` restent la référence en ligne ; cette roadmap ne déclenche ni modification Excel ni déploiement.
+
+**Avancement à 12:36 :** QUAL-01 dispose d'un contrat et d'un banc mécanique local ; QUAL-02 et les changements applicatifs restent non implémentés. L'essai conjoint a montré qu'un choix naturel pour l'utilisateur peut exclure un cas classé dans un autre domaine. Ajouter ORI-01 à la conception et aux essais, sans remplacer les autres recommandations de l'analyse Bpifrance/DGE/France Num : contenu des 1 021 cas, premier essai faisable, contrôle du résultat, réutilisation et relais humains.
+
+**Lot lancé à13:37 — préversion locale disponible, programme incomplet :** `http://127.0.0.1:4178/preview` exécute un protocole serveur distinct avec14domaines et16cas explicitement fictifs. Choix par boutons/numéros/libellés reconnus, réorientation acceptée/refusée, fiche terminale courte puis un seul lien vers les six étapes locales. Les filtres et transitions sont réels dans ce moteur d'essai ; la recherche est une règle de fixture, **pas le RAG de production ni la v461**. Ne pas prendre sa réussite comme validation sémantique ou feu vert au déploiement.
+
+CONT-01 reste bloqué avant revue exhaustive : six appels M365 ont permis d'énumérer48IDs, mais ni l'inventaire complet/versionné ni des valeurs exactes suffisantes pour accepter des corrections de tous les cas. **Aucun cas déclaré relu complètement dans ce nouveau lot, aucun classeur corrigé.** Un accès intégral fiable et autorisé est nécessaire pour brancher/évaluer la vraie base et réaliser la revue demandée. Ne pas contourner ce blocage par lecture d'une copie cloud synchronisée sans autorisation explicite de traitement local.
+
+**Actualisation après autorisation de traitement local à16:43 :** l'accès complet à la v461 a été établi, son empreinte rapprochée de la version déployée et les1 021IDs lus sans doublon. La revue documentaire par groupes disjoints est terminée et consolidée dans un classeur de revue conservant l'étiquette d'origine. Les corrections sont des **propositions non appliquées** ; la source, ses formules et ses feuilles restent intactes. Le blocage de lecture décrit au paragraphe précédent est historique.
+
+CONT-01 passe à l'arbitrage cohérent des propositions, notamment des modes d'exécution ; ne pas appliquer des changements de classement en masse sur la seule foi d'un résultat d'agent. Le raccordement au RAG réel reste à traiter dans une destination respectant la classification : aucune copie de contenu vers la fixture, des fichiers texte/HTML ou un index non labellisé. La préversion reste explicitement fictive.
+
+L'examen direct a également montré que l'essai conjoint pouvait manquer un cas dans le périmètre initial. **Diagnostiquer la récupération et la sélection intrafiltre avant de considérer la réorientation comme la solution.** Le cas exact et les observations sont conservés dans le classeur de revue labellisé, pas dans ce dépôt.
+Les gabarits PAR-01 sont implémentés localement : décision d'adéquation explicite, prérequis disponibles/à préparer/exemple fictif, contexte utilisateur séparé dans le prompt copié, contrôles métier, comparaison et réutilisation. Ils sont raccordés aux16cas fictifs, pas régénérés sur les1 021cas. Le bot s'arrête à la fiche et au bouton ; aucun coaching ou questionnaire après sélection.
+
+**Point de validation demandé à 12:16 :** tester la proposition avec Eneric avant déploiement, puis attendre son accord explicite. Une répétition de dialogue peut valider la compréhension des questions, pas le fonctionnement du nouveau protocole ni la qualité du RAG. La préversion technique doit ensuite permettre de voir les choix validés, les filtres effectivement envoyés et les cas récupérés. Ni un écran simulé, ni un nouveau frontend branché sur l'ancien backend ne constituent une recette du comportement futur. Aucun déploiement du nouveau programme n'est autorisé à ce stade.
+
+### Cap produit et limites
+
+La force d'AVIA est sa base métier, pas sa capacité à converser comme un assistant généraliste. L'ordre de priorité est **qualité de qualification et fidélité au catalogue, puis fluidité**. Un parcours plus agréable qui oriente moins bien est une régression.
+
+Conserver la chaîne **domaine explicitement choisi → secteur si applicable → objectif → problème concret → cas du catalogue → fiche verbatim → parcours en six étapes**. Le domaine n'est pas déduit silencieusement du métier ou du secteur. Les boutons, numéros et libellés reconnus restent les moyens de qualification ; une ambiguïté exige une clarification. Le prochain lot n'ajoute pas de sélection sémantique automatique des domaines, secteurs ou objectifs par un LLM.
+
+Le naturel porte sur la présentation : formulations maîtrisées, choix lisibles, transitions courtes, contexte conservé et absence de répétitions. Le problème concret reste libre ; l'IA recherche et sélectionne dans le périmètre validé. Ni la reformulation du besoin, ni une justification de pertinence ne doivent inventer une condition métier ou remplacer les exclusions exprimées par l'utilisateur.
+
+**Périmètre de contenu : tous les 1 021 cas et leurs parcours.** Un échantillon ou des lots de travail internes servent à apprendre et organiser la revue, jamais à remplacer le catalogue ou limiter la livraison à vingt parcours. Les IDs, domaines et structure métier restent stables ; pas de nouveau schéma ni de refonte de taxonomie implicite. Un défaut de classement éventuel est tracé et arbitré séparément, pas corrigé en abandonnant les filtres.
+
+### ORI-01 — récupération guidée entre domaines, proposition à éprouver
+
+Le pré-filtrage demeure la règle de la recherche principale, mais ne doit pas devenir une impasse. En cas d'absence de résultat ou de rejet explicite des propositions par l'utilisateur, examiner une **recherche secondaire d'orientation dans le catalogue**, séparée des résultats normaux. Elle peut proposer un cas réel et son autre classement si tâche, résultat et contraintes correspondent ; elle ne valide ni ne change automatiquement la qualification.
+
+La proposition indique les choix à modifier et attend l'accord de l'utilisateur. Refus : conserver l'état initial. Acceptation : appliquer explicitement les choix confirmés, revalider les dépendances puis relancer la recherche principale. Une différence de secteur doit être signalée, jamais résolue en inventant l'activité de l'utilisateur. Conserver la formulation initiale du besoin et distinguer les éléments fournis (audience, format) des conditions métier absentes qu'il serait abusif de supposer.
+
+Cette capacité existe dans la préversion PUBLIC_PAGES, pas dans le bot stable : le premier essai avait nécessité une intervention humaine. La recherche secondaire, sa pertinence, sa latence, l'abstention et la reprise après acceptation/refus restent à éprouver avant promotion. Ne pas présenter un simple score vectoriel comme une preuve d'adéquation, ni ajouter des pistes périphériques pour remplir une liste.
+
+### Lots ordonnés et critères de sortie
+
+| Ordre | Lot | Livrable et critère de sortie | Dépendance / état |
+|---|---|---|---|
+| 1 | QUAL-01 — contrat de qualification et référence métier | Contrat et corpus versionné : 66 scénarios mécaniques, 14 domaines par numéros/libellés. 63 conformes, trois écarts cibles documentés. Les attentes de pertinence réelle et les essais utilisateurs restent distincts. | Référence mécanique locale préparée ; essais conjoints en cours |
+| 2 | QUAL-02 — état explicite backend/frontend | Protocole isolé avec étape/question/révision, choix canoniques et validation serveur ; inconnus/périmés refusés, historique et saisie conservés. | Raccordé au vrai RAG local PUBLIC_PAGES ; pas migré en production |
+| 3 | CONT-01 — revue d'adoption des 1 021 cas | Revue complète puis arbitrage, journal et candidate privée labellisée ; source préservée et réserves externes explicites. | Candidate v462 préparée ; non publiée, non indexée dans la préversion |
+| 4 | QUAL-03 — dialogue et UI plus naturels | Première question de domaine immédiate, questions courtes, listes lisibles, saisie ou boutons ; fiche et parcours sans questions supplémentaires. | Implémenté dans l'interface d'essai ; retours utilisateur attendus |
+| 4 bis | ORI-01 — orientation catalogue en cas d'impasse | Piste fondée sur un cas existant, autre classement expliqué, accord avant modification, abstention possible et recherche principale relancée sous les filtres confirmés. | Fonctionne sur snapshot public réel ; portée des suggestions et latence à affiner |
+| 5 | PAR-01 — parcours opérationnels sur tout le catalogue | Six étapes, décision explicite, traitement honnête des prérequis, contexte séparé, livrable/contrôles et réutilisation. | Rendu local des1 021cas publics ; candidate privée v462 non utilisée |
+| 6 | REC-01 — non-régression métier et robustesse | Contrôles structurels sur tous les cas, corpus conversationnel couvrant les domaines et situations difficiles, revue des erreurs sémantiques et essais d'usage ciblés. Pas de clôture fondée uniquement sur HTTP200, présence de boutons ou validité des IDs. | Régressions et premiers essais réels réalisés ; portée secondaire/latence ouvertes, essais conjoints sur candidate demandés |
+| 7 | LIV-01 — livraison cohérente DEV | Code, catalogue, index, mapping, pages et documentation identifiés ; candidate isolée, recette sur Pages/HTTP/SSE/mobile, bascule contrôlée et retour arrière. Le classeur et les preuves privées ne sont pas publiés avec le code. | Préparation GitHub/Azure personnel engagée ; activation isolée après aperçu exact, promotion non autorisée |
+
+### Recommandations de contenu et de parcours
+
+Pour CONT-01, améliorer les **colonnes existantes**, pas ajouter d'emblée des champs métier. Distinguer dans les textes l'usage cible, ce que réalise réellement le premier essai et ce qui reste un projet à intégrer. « Sans code », « avec un outil » et « effort faible » ne suffisent pas à décrire autonomie, accès aux données ou risque ; leur présentation doit rester fidèle au cas, sans nouveau classement automatique opaque.
+
+Chaque cas doit préciser un livrable contrôlable et les prérequis qui le rendent possible : éléments disponibles, droit d'accès, autorisation d'utilisation dans l'outil et éventuelle validation d'un responsable. Un assistant conversationnel ne recrée pas des historiques réels absents ; distinguer préparation d'un modèle, données fictives de démonstration et analyse des données réelles. Pour calculs, sources réglementaires et intégration technique, indiquer les capacités nécessaires de l'outil, les sources de vérité et les contrôles humains.
+
+Dans PAR-01, ne pas se contenter d'ajouter une phrase générique dans toutes les pages. Adapter les réponses aux questions ouvertes ou fermées ; une case cochée n'est pas une preuve d'adéquation. Montrer ce que l'essai produit et ne produit pas, les erreurs à rechercher, puis la décision de recommencer, ajuster ou demander un accompagnement. Ne pas remplacer une durée uniforme par une promesse universelle de résultat en cinq ou quinze minutes.
+
+Les exemples de résultats doivent être qualifiés (illustration fictive, contenu relu, retour réel documenté) ; « vérifié » ne signifie pas gain mesuré. Ne pas assimiler clic, prompt copié ou progression cochée à une adoption effective. Une observation volontaire d'un essai utile puis réutilisé est une piste de mesure ultérieure, pas un nouveau chantier de télémétrie engagé.
+
+**Continuité chat → essai :** une page statique de cas peut conserver le contexte métier générique sans reprendre le besoin particulier exprimé dans le chat. PAR-01 doit proposer un complément utilisateur explicite et distinct du contenu source (audience, description à retravailler, contraintes), sans réécrire la fiche validée ni fabriquer des caractéristiques de l'audience. Ne pas mettre du texte libre sensible dans une URL publique ni le transmettre automatiquement à un assistant externe.
+
+### Garde-fous et décision de livraison
+
+Les invariants à faire respecter par le code sont : aucun choix de qualification inventé ou changé silencieusement ; aucune réponse numérique appliquée à la mauvaise question ; aucun cas ajouté hors du périmètre validé ; aucune réponse généraliste de remplacement lorsque le catalogue ne répond pas ; aucune divergence entre cas affiché, ID, détail et lien. Une violation connue bloque la livraison.
+
+Pour ORI-01, une piste extérieure est une **proposition de réorientation identifiée**, pas un résultat ajouté discrètement à la liste filtrée. Ajouter aux essais : bon cas dans un autre domaine, aucune piste adaptée, piste à condition non fournie, refus de réorientation, acceptation puis reprise, changement de secteur non autorisé et conservation du besoin. Le cas conjoint de description produit destinée à la Gen Z sert de référence ciblée, pas de preuve générale de récupération.
+Le corpus adverse doit couvrir au minimum : secteur confondu avec domaine, objectif vague, négations et exclusions, plusieurs besoins, problème fourni dès le départ, changement de domaine/secteur/objectif, réponses tardives/doubles, ancien bouton, liste de choix changée, historique partiel, interruption réseau, absence de correspondance et reprise. Une correction invalide seulement les dépendances concernées, sans réutiliser des cas périmés.
+
+Comparer les qualifications et les cas pertinents avec la référence QUAL-01, en documentant les réponses multiples acceptables et les demandes qui exigent une clarification. Un choix canonique valide peut rester un mauvais choix métier ; une justification plausible ne prouve pas sa fidélité aux sources. Ne pas modifier les attentes après coup pour obtenir un meilleur score ni fixer un seuil de confiance LLM arbitraire. Toute dégradation observée doit être expliquée et résolue ou explicitement arbitrée avant livraison ; aucune promesse de zéro bug en conditions réelles.
+
+QUAL-02 doit prévoir une migration compatible et un périmètre de recette séparant changement de protocole et changement de contenu. Le schéma exact des échanges reste à concevoir ; un champ « étape » seul ne résout pas les anciens numéros, réponses en retard ou listes modifiées. Aucun changement de modèle ni appel génératif supplémentaire pour chaque question n'est nécessaire à l'amélioration de présentation visée.
+
+### Versionnement, exclusions et suites différées
+
+La v461 reste la source déployée jusqu'à une nouvelle livraison explicitement identifiée. Chaque modification du classeur produit une nouvelle version `vXXX` disponible, au même nom/suffixe, sans écraser la source, les formules ou les journaux. La revue complète requiert un accès suffisamment précis aux valeurs courantes ; une restitution textuelle partielle ne doit pas être présentée comme une couverture exhaustive. Garder les audits et journaux hors du dépôt public.
+
+Hors prochain lot : qualification automatique par LLM, remplacement de l'entrée par domaines, assistant généraliste/exécutant, réordonnancement des six étapes, changement de modèle, nouveau schéma métier, connecteurs et package Simplon. Les relais contextuels vers un accompagnateur, une fiche pour le responsable et le bilan du deuxième usage restent des recommandations de second temps, dans les parcours, sans partage automatique ni compte imposé.
+
+**Repères publics pour le positionnement, pas preuves de performance d'AVIA :** [Bpifrance — Accélérez avec l'IA](https://conseil.bpifrance.fr/accelerez-ia), [France Num — Baromètre 2025](https://www.francenum.gouv.fr/guides-et-conseils/strategie-numerique/comprendre-le-numerique/barometre-france-num-2025-le), [Bpifrance — Projet IA](https://www.bpifrance-universite.fr/formation/projet-ia-la-serie-de-tutos-conduire-un-projet-ia-dans-votre-entreprise-etapes-cles-bonnes-pratiques/). AVIA complète ces ressources par une découverte guidée fondée sur sa base ; la seule taille du catalogue n'est pas une preuve d'utilité.
+
+### Lot livré — fluidité après livraison, autorisé le 13 septembre
 
 La finalisation frontend et les cinq corrections UX sont livrées après confirmation du 13 septembre à 09:57. Pages `34746510034` et CI `34746509999` réussies ; backend et frontend Azure Healthy, 100 % du trafic. Les états « locaux » plus bas décrivent la préparation.
 

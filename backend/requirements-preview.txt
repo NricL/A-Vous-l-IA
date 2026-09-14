@@ -1,0 +1,2 @@
+# Additional runtime dependency for reading the independently public catalogue.
+beautifulsoup4==4.13.5

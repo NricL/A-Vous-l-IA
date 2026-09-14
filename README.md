@@ -4,11 +4,19 @@ l’IA.
 
 ## État courant — 13 septembre 2026
 
+**Candidate de test isolée en préparation pour GitHub et Azure personnel**, à la demande du 13 septembre à 20:47. Le nouveau protocole, le RAG **PUBLIC_PAGES** et les parcours en six étapes utilisent uniquement les 1 021 fiches v4.6.1 déjà publiées, pas le classeur General ni la candidate privée v462. Identité visuelle AVIA conservée ; qualification brève, fiche courte, un bouton parcours, puis arrêt du dialogue.
+
+La route prévue est `https://nricl.github.io/A-Vous-l-IA/preview`, avec API Azure sur une révision séparée `qual-20260913-r1`. La racine du site et le trafic principal Azure restent sur la version stable. Les images privées sont construites avant activation ; cette documentation décrit la candidate, **pas une confirmation de mise en ligne ou de promotion**. Configuration et retour arrière dans [`HANDOFF.md`](./HANDOFF.md) et [`.azure/plan.md`](./.azure/plan.md).
+
+La préversion locale réelle reste `http://127.0.0.1:4178/preview`. La portée de certaines suggestions et la latence restent à affiner : déplacer l'hébergement ne supprime pas le coût des appels et du quota des modèles Azure. Le consentement précède ces appels ; aucune promesse de rapidité ni de pertinence universelle.
+
 À Vous l'IA reste destiné à la découverte d'usages par les employés de PME non spécialistes de l'IA. **Le catalogue v461 et ses parcours sont déployés sur le dev**, avec import contrôlé, secteurs issus des métadonnées et conservation des hashes. Voir [`ROADMAP.md`](./ROADMAP.md) et [`HANDOFF.md`](./HANDOFF.md).
 
 Révision backend active : `avoulia-backend--ux-20260913-d02ffad`. Référence utilisateur : https://nricl.github.io/A-Vous-l-IA/. Sources publiées : chatbot `d02ffad`, parcours inchangé `a500a22`. Les cinq correctifs UX sont livrés sur le backend, GitHub Pages et le frontend Azure : 1 021 cas, 14 domaines métier et 71 intentions. Le package Simplon est différé. Ne pas déposer de classeur privé ou d'export de catalogue dans ce dépôt public ; `noindex` et une URL non devinable ne remplacent pas une autorisation d'accès.
 
 Dernier lot livré : cas unique sélectionnable, exemples Q3 limités à quatre situations applicables, besoin initial conservé, consignes de sélection sans hypothèses métier non exprimées (UX-01 à UX-05 dans la roadmap). Catalogue, mapping et pages parcours inchangés.
+
+Le programme complet et l'historique sont conservés dans ROADMAP/CHANGELOG/SUIVI_PROJET : qualification exacte, orientation explicitement confirmée, revue complète privée du catalogue, premier essai faisable, contrôle et réutilisation. La fixture synthétique reste un outil local distinct, désactivé pour la candidate cloud. La candidate de contenu v462 reste séparée de cette livraison de code.
 
 ## Principe projet — Livraison Simplon & traçabilité (À LIRE EN PREMIER)
 Cette application est **co-construite puis livrée à Simplon**, qui l'héberge chez elle.

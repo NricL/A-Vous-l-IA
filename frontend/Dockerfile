@@ -8,6 +8,15 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
+# Public client configuration only. Normal builds stay preview-free by default.
+ARG VITE_AVIA_PREVIEW=false
+ARG VITE_AVIA_PREVIEW_CLOUD=false
+ARG VITE_AVIA_PREVIEW_ORIGIN=
+ARG VITE_AVIA_PREVIEW_HOSTS=
+ENV VITE_AVIA_PREVIEW=${VITE_AVIA_PREVIEW} \
+    VITE_AVIA_PREVIEW_CLOUD=${VITE_AVIA_PREVIEW_CLOUD} \
+    VITE_AVIA_PREVIEW_ORIGIN=${VITE_AVIA_PREVIEW_ORIGIN} \
+    VITE_AVIA_PREVIEW_HOSTS=${VITE_AVIA_PREVIEW_HOSTS}
 RUN npm run build-only
 
 # Étape 2 : serveur nginx

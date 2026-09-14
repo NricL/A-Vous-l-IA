@@ -1,5 +1,57 @@
 # Avoulia — Changelog v1 → v2 (synthèse d'onboarding)
 
+## Candidate de test Azure — préparation du 13 septembre
+
+Hébergement cloud explicite pour PUBLIC_PAGES, distinct du bot stable : origines/HTTPS/pairs proxy contrôlés, authentification Azure par configuration existante sans CLI/fallback, requêtes bornées et sessions monoréplique. Packaging en liste blanche et image finale sans payload privé hérité ; dépendance du lecteur public déclarée, contrôles Python 3.11 et démarrage sous utilisateur non privilégié.
+
+Frontend `/preview` compatible Azure et base GitHub Pages, identité AVIA bleue restaurée, télémétrie désactivée sur tout le périmètre preview. La racine stable ne change pas de flux. L'ouverture cross-site des seuls documents parcours est admise et conserve les contrôles de révision ; import de type HTTP corrigé pour Python 3.11.
+
+La livraison de test a été demandée, pas la promotion du site principal. Les images sont préparées en privé avant aperçu exact/confirmation du lot. La v462 privée n'est pas incluse ; latence et portée de certaines suggestions restent des travaux ouverts. Les mentions « non publié/non déployé » ci-dessous décrivent les étapes historiques.
+
+## Préversion PUBLIC_PAGES — correctif local de récupération et RAG réel
+
+**Non publié/non déployé.** Suppression de la troncature des candidats à5 avant sélection ; plafond conservé après rapprochement des résultats. Filtres métier et identités inchangés. Tests intrafiltre et script de diagnostic borné ajoutés.
+
+Snapshot privé de champs **déjà publiés** :1 021fiches v4.6.1 et4historiques exclues. Embeddings/sélection Azure existants, qualification locale explicite, vérification indépendante de portée, consentement et diagnostic de source. Aucun chargement du classeur General ni de la candidate privée v462 dans ce mode.
+
+Rendu des vrais cas publics dans les nouveaux parcours locaux, sans inventer le mode absent, avec contexte séparé et URL liée à la révision. PUBLIC_API conserve son ancienne page publiée. Télémétrie locale supprimée aussi pour les alias de `/preview`.
+
+Essais réels ont retrouvé le cas marketing attendu et écarté plusieurs correspondances injustifiées. Une suggestion secondaire web reste trop permissive et la latence doit être améliorée avant production. Les contrôles ne constituent pas une certification de toute formulation possible.
+
+## 13 septembre — revue complète privée après autorisation locale
+
+Accès local brut explicitement autorisé à16:43. Copie v461 identique et étiquette préservée, inventaire complet et revue documentaire des1 021cas consolidés dans un classeur de revue labellisé. Aucune modification des cellules source ; propositions et arbitrages restent distincts de leur application.
+
+La documentation de reprise est actualisée sans exporter le contenu des revues. Nouveau diagnostic à traiter : un cas peut être manqué dans le périmètre initial, même si une réorientation retrouve une alternative. Aucun changement applicatif, déploiement ou raccordement au RAG réel dans ce lot.
+
+## 13 septembre — préversion locale du protocole et des parcours
+
+**Non publié, non déployé.** Nouveau serveur `app.preview:create_app` et route frontend `/preview` explicitement activables uniquement en local.16cas fictifs servent à essayer les états/transitions, pas à simuler une couverture réelle des1 021cas ou une recherche RAG.
+
+Choix canoniques, validation des versions/question, rejet des retours périmés et requêtes doubles, saisie déterministe de numéros/libellés, recherche principale séparée de la proposition de réorientation, acceptation/refus et retour arrière. Fiche source courte puis seul bouton parcours ; pas de coaching après sélection.
+
+Raccordement au générateur parcours associé via `preview_parcours.py`, rendu sans lecture de workbook, contexte local distinct, échappement, protections d'origine/loopback et liens liés à la révision sélectionnée. Le frontend conserve les brouillons après erreur sans transition et affiche les erreurs de récupération. Tests spécifiques et essais navigateur locaux, sans changement de production.
+
+Dans le dépôt parcours associé : gabarit et prompts de préparation/vérification/réutilisation révisés avec six étapes inchangées. Les données privées et pages en ligne ne sont pas modifiées. Lecture complète du catalogue encore bloquée ; aucune correction Excel ni revue exhaustive revendiquée.
+
+## 13 septembre à 12:36 — banc QUAL-01 local et recommandations révisées
+
+- Contrat dans HANDOFF ; corpus `backend/tests/fixtures/qualification_reference.json`, banc `backend/scripts/evaluate_qualification.py` et tests `backend/tests/test_qualification_reference.py`.66scénarios mécaniques,63conformes,3écarts cibles visibles,14domaines couverts par numéro/libellé. Pas de précision métier générale ni de correction runtime déduite du résultat.
+-102tests ciblés réussis ; code1 de l'évaluateur maintenu pour ses trois écarts. Entrées invalides, sorties écrasées et appels réseau/données réelles refusés ; absence de Git explicitée dans les contextes exportés. Les futurs paquets de validation doivent inclure le script et sa fixture, pas seulement les tests Python.
+- Premier essai conjoint : réorientation humaine confirmée nécessaire pour retrouver un cas existant classé ailleurs. Proposition ORI-01 ajoutée à la roadmap, sans changement silencieux des filtres et sans implémentation. Maintien des recommandations sur contenu complet, premier essai, contrôle du résultat et réutilisation.
+
+Travaux locaux non publiés. Application `d02ffad`, catalogue v461 et parcours en ligne inchangés ; aucune autorisation de nouveau déploiement à ce stade.
+
+## 13 septembre à 11:55 — roadmap qualification/contenu révisée, non implémentée
+
+**Quoi / pourquoi :** priorité donnée à la bonne qualification et à la fidélité au catalogue, avant le naturel. Qualification explicite domaine/secteur/objectif conservée ; classification automatique par LLM et pivot généraliste exclus du prochain lot. Amélioration de contenu et des parcours prévue sur les **1 021 cas**, et non sur vingt cas seulement.
+
+**Où :** plan détaillé et critères de sortie dans `ROADMAP.md`, implications de protocole et points de reprise dans `HANDOFF.md`, décision et périmètre dans `SUIVI_PROJET.md`, résumés dans README/IMPLEMENTATION_SUMMARY et distinction du déploiement dans `.azure/plan.md`.
+
+**Ordre retenu :** QUAL-01 référence de qualification → QUAL-02 état explicite → QUAL-03 dialogue maîtrisé ; CONT-01 revue complète après fixation des critères, en parallèle lorsque possible → PAR-01 parcours ; puis REC-01 et LIV-01. Les critères distinguent validité technique, pertinence métier et facilité d'usage. Les situations adverses et la conservation des versions/hashes sont explicites.
+
+**Statut :** documentation locale uniquement. Aucun nouveau comportement, code, schéma métier ou contenu source implémenté ; ni nouvelle version Excel ni publication. Le dernier code livré reste `d02ffad`, reçu `e895cab`. Les sections suivantes décrivent les réalisations antérieures.
+
 ## 13 septembre — publication et déploiement du lot UX-01 à UX-05
 
 Commit `d02ffad`, Pages `34746510034` et CI `34746509999` réussies. Backend `avoulia-backend--ux-20260913-d02ffad` et frontend Azure de même suffixe Healthy, 100 % du trafic. Les entrées « locales » ci-dessous décrivent la préparation désormais livrée.

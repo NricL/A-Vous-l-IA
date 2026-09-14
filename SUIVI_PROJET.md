@@ -1,5 +1,65 @@
 # Avoulia V2 — Suivi Projet & Décisions
 
+### 13 septembre à 20:47 — livraison de test GitHub/Azure demandée
+
+Changement de séquence demandé : héberger une candidate isolée puis poursuivre les essais, plutôt que terminer les essais en local. La version stable garde son trafic principal ; pas de promotion automatique. La candidate reste PUBLIC_PAGES v4.6.1, sans la v462 privée, avec identité AVIA et fiche terminale courte suivie du parcours.
+
+Adaptations cloud préparées : authentification par références de secrets existants, origines HTTPS explicites, pairs proxy bornés, une réplique/worker, build context en liste blanche, image finale sans ancien payload privé. La revue a corrigé l'import `Request` requis par Python 3.11 et l'ouverture du lien parcours depuis Pages sans affaiblir les contrôles API/session. Le premier build a révélé la dépendance Beautiful Soup manquante ; elle est désormais déclarée. Images privées construites séparément ; activation publique non encore effectuée à ce point.
+
+Les limites de latence et de périmètre restent ouvertes. Les détails et l'ordre de livraison/rollback sont consignés dans HANDOFF et `.azure/plan.md`. Le dernier reçu stable reste celui du matin ; les comptes rendus suivants sont historiques.
+
+### Suite du travail demandé à17:45 — RAG réel local et candidate privée
+
+Le faux négatif intrafiltre a été expliqué : le cas adapté était dans le pool de26candidats, mais une limite de5 appliquée avant le modèle l'excluait. Correctif dans les sources locales du cœur RAG et régressions associées ; aucun changement du backend déployé.
+
+La préversion `http://127.0.0.1:4178/preview` utilise maintenant les1 021fiches publiques v4.6.1, leurs embeddings et les modèles Azure existants ; la qualification reste pilotée par le code. Consentement préalable, recherche principale filtrée, orientation séparée confirmable, fiche terminale puis nouveau parcours local. Aucun contenu des classeurs General ni de la candidate v462 n'a été exporté dans ce corpus.
+
+Le besoin GenZ initial retrouve son cas marketing sans réorientation. Vérification indépendante ajoutée pour les conditions non exprimées ; tests réels négatifs et positifs réalisés, sans masquer leurs échecs intermédiaires. Limites encore ouvertes : portée trop large d'une suggestion secondaire web et latence70–305secondes selon le flux. La préversion n'est pas déclarée prête pour production.
+
+Les1 021champs de parcours publics ont été rendus en mémoire avec les nouveaux gabarits, contexte séparé et aucune valeur de mode inventée. Quatre pages historiques sont exclues ; source brute privée et index de production distincts. Une revue a aussi identifié et fait corriger l'activation de télémétrie sur certains alias de route locale.
+
+Le travail de contenu a abouti à une candidate privée labellisée, avec arbitrages et journal, sans écraser la v461. Détails conservés dans le classeur, pas dans ce dépôt. Aucun push ni déploiement ; accord après essais conjoints toujours requis.
+
+### 13 septembre — lecture locale autorisée et revue documentaire complète
+
+Après accord explicite à16:43, la v461 a été inspectée, rapprochée de l'empreinte déployée et copiée sans changement d'octet ou d'étiquette. Lecture en mémoire des1 021cas, contrôle de l'inventaire et revue en quatre groupes disjoints, puis consolidation en classeur labellisé. Couverture complète et valeurs avant des propositions rapprochées de la source ; détails réservés aux classeurs de revue, hors dépôt public.
+
+Les propositions ne sont pas appliquées à la base ; aucune nouvelle version source, indexation réelle, connexion de la vraie base au navigateur, publication ou déploiement. Les modes d'exécution et points incertains nécessitent un arbitrage cohérent. La préversion locale reste sur fixtures.
+
+Correction de diagnostic : la lecture directe a trouvé un cas éligible dans le périmètre initial d'un essai resté sans réponse. La réorientation manuelle réussie ne prouvait donc pas que le classement était l'unique cause. Ce faux négatif doit être étudié avant d'automatiser la récupération entre domaines.
+
+### 13 septembre — préversion locale, suite au lancement demandé à13:37
+
+Trois chantiers exécutés séparément (bot, parcours, accès/revue du catalogue), puis intégration et revue de code. Préversion accessible sur `http://127.0.0.1:4178/preview`, serveur indépendant8767, explicitement **16cas fictifs / aucun RAG v461**. Qualification serveur par question/révision et identités, choix boutons/numéros/libellés, réorientation avec acceptation/refus et fiche terminale avec un seul lien vers les six étapes locales.
+
+Gabarits du dépôt parcours modifiés en source seulement : décision d'adéquation, prérequis sans données inventées, contexte local copié séparément, livrable et vérification, comparaison puis réutilisation. Six étapes et champs source préservés ; aucune régénération des1 021pages, aucun classeur modifié.
+
+Revue intégrée : deux défauts corrigés, lien de transfert pouvant changer de cas avec la session et brouillon effacé après choix invalide. Liens désormais liés à une révision ; récupération sans transition conservant la saisie.39tests Python du protocole/rendu et44tests Node preview/legacy réussis, types frontend ; navigation finale sur le serveur réel local jusqu'au parcours avec besoin conservé.
+
+CONT-01 bloqué avant couverture exhaustive :48IDs seulement énumérés dans un essai M365, total/version/champs exacts non certifiés,0revue complète acceptée dans ce lot. Les recommandations portent toujours sur tout le catalogue ; la fixture ne le remplace pas. Pas de push ou déploiement ; code servi `d02ffad` et v461 inchangés. Détails de lancement, limites monoprocessus et condition d'accès aux données dans HANDOFF.
+
+### 13 septembre à 12:36 — référence QUAL-01 et premier essai conjoint
+
+QUAL-01 dispose localement d'un contrat, d'un corpus JSON versionné et d'un évaluateur hors ligne, sans modification du runtime.66scénarios :63conformes et3écarts cibles documentés ;14domaines par numéro/libellé, objectifs fictifs.102tests liés réussis. Les trois écarts sont au niveau des helpers, pas des incidents live établis. Source, limites, provenance des fixtures et commandes dans HANDOFF ; aucune couverture des1 021cas revendiquée par ce banc.
+
+L'essai conjoint a mis en évidence une limite métier distincte : un cas adapté peut se trouver hors du domaine initial pourtant naturel pour l'utilisateur. Une réorientation confirmée a permis au RAG réel de le retrouver. Elle a été préparée manuellement, pas proposée automatiquement par le bot ; pas de modification des filtres à l'insu de l'utilisateur.
+
+ORI-01 est ajouté comme proposition à éprouver : recherche secondaire d'orientation dans la base après une impasse, cas et autre classement expliqués, acceptation avant modification, refus conservant l'état. Les autres recommandations Bpifrance/DGE/France Num restent actives : trouvabilité et contenu des1 021cas, faisabilité du premier essai, contrôle métier, réutilisation et relais humains. La continuité du besoin particulier entre chat et page statique doit également être examinée, sans réécriture du contenu source.
+
+À ce stade : documents et trois fichiers du banc local uniquement ; aucun changement du bot, de la base ou du déploiement. Les essais conjoints se poursuivent sur le parcours ; accord explicite requis avant toute livraison.
+
+### 13 septembre 2026 à 11:55 — prochaines étapes révisées, documentation uniquement
+
+Eneric demande de consigner les recommandations après avoir précisé deux contraintes : améliorer **tout le catalogue et ses 1 021 parcours**, pas un pilote de vingt cas ; conserver la qualification explicite par domaines, qui structure le RAG et distingue AVIA d'un assistant généraliste. La qualité de qualification prime sur le naturel conversationnel. La proposition antérieure de découverte libre ou de classification implicite par le modèle n'est pas retenue.
+
+Programme prévu dans `ROADMAP.md` : QUAL-01 contrat/invariants et référence métier ; QUAL-02 état explicite backend/frontend ; CONT-01 revue de tous les cas, pouvant avancer en parallèle après fixation des critères ; QUAL-03 présentation naturelle maîtrisée ; PAR-01 six étapes plus opérationnelles sur tout le catalogue ; REC-01 robustesse et non-régression métier ; LIV-01 livraison cohérente après autorisation. Aucun de ces lots n'est commencé par cette mise à jour.
+
+Point technique justifiant l'ordre : une partie du code déduit encore l'étape des mots de la question. Le contrôle en lecture seule a confirmé que la formulation actuelle « objectif principal » est reconnue, contrairement à « Pour vos stocks, quelle est votre priorité ? ». Changer seulement les textes ou ajouter des paraphrases LLM ne fiabiliserait pas la qualification. Les choix et leur contexte doivent devenir explicites dans le protocole avant une variation importante de l'interface.
+
+La revue de contenu doit distinguer ambition du cas, premier essai réellement exécuté et déploiement technique, puis prérequis/droits/outils, effort, contrôles et suites. Elle couvre chaque ID, y compris les cas laissés inchangés avec justification. Pas de génération générique présentée comme revue métier exhaustive ; incertitudes explicites et conservation des versions Excel.
+
+Les surfaces documentaires mises à jour sont README, ROADMAP, SUIVI_PROJET, CHANGELOG, HANDOFF, IMPLEMENTATION_SUMMARY et le plan Azure. Les reçus des livraisons restent conservés ; code `d02ffad`, documentation publiée `e895cab`, v461 et parcours inchangés. Pas de modification de code, classeur, mapping, index ou page ; aucun commit, push, appel modèle réel ou déploiement dans ce lot documentaire.
+
 ### 13 septembre 2026 — lot UX publié et déployé, état faisant foi
 
 Publication approuvée à09:57 et effectuée par `d02ffad38720757f53d15b81519d4f282e1b07a5`. Pages `34746510034` et CI `34746509999` réussies. Backend et frontend Azure `--ux-20260913-d02ffad` Healthy, 100 % du trafic. Les cinq correctifs UX-01 à UX-05 sont en ligne ; les paragraphes « locaux » ci-dessous sont historiques.

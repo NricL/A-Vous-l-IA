@@ -1,8 +1,18 @@
 # Avoulia V2 — Implementation Summary (2026-07-10)
 
+**Latest delivery preparation (13 September, requested at 20:47):** isolated GitHub Pages/Azure preview using 1,021 already-public v4.6.1 records, explicit qualification and improved six-step rendering. AVIA branding retained. Cloud transport, pinned Azure authentication, clean image packaging and Python 3.11 compatibility prepared; private images precede the exact publication confirmation. Stable root/traffic remain unchanged. Protected workbooks/private v462 are excluded; semantic-scope and latency issues still block promotion. See HANDOFF and `.azure/plan.md` for configuration and rollback. This is not a deployment receipt.
+
 **Historical scope:** July implementation summary; not the current integration or deployment status.
 
 **Current status (2026-09-13):** v461 and the five UX fixes are deployed on the existing DEV backend revision `avoulia-backend--ux-20260913-d02ffad`; Pages and the Azure frontend carry the same source commit `d02ffad`. Parcours source remains `a500a22`, and workbook, mapping and generated pages are unchanged. Private exports are not served. See [`ROADMAP.md`](./ROADMAP.md), [`SUIVI_PROJET.md`](./SUIVI_PROJET.md) and [`HANDOFF.md`](./HANDOFF.md) for the final receipt and retained rollback images. The Simplon package remains deferred; historical generation instructions below are not the current release recipe.
+
+**Programme invariants:** preserve explicit domain/sector/objective qualification and catalogue grounding. No automatic LLM classification of qualification choices. All 1,021 cases and implementation pages remain in scope, preserving source versions, IDs, filters and six-step order. The intermediate progress notes below are historical; ROADMAP and HANDOFF describe the latest state.
+
+**Progress at12:36:** QUAL-01 offline reference tooling prepared locally (66mechanical scenarios,63conforming,3documented target gaps). Joint trials motivated ORI-01, a proposed separate catalogue-routing recovery with user confirmation, not automatic replacement of active filters. All catalogue/adoption recommendations remain in scope. Neither the new qualification protocol nor routing recovery is implemented or deployed.
+
+**Subsequent local implementation:** executable loopback preview at `http://127.0.0.1:4178/preview`, server8767,16explicitly synthetic cases with qualification/reorientation/terminal-card and six-step rendering. It is NOT connected to the real v461 RAG. Full catalogue review remains blocked on reliable authorized data access. No workbook, public page, production deployment or GitHub publication changed; HANDOFF contains exact run instructions and limitations.
+
+**After explicit raw-local authorization at16:43:** full inventory and documentary review of1,021cases completed in label-preserving audit workbooks. Source cells/formulas remain unchanged; proposed changes are not integrated. Real-preview data exposure remains restricted by classification. Findings require diagnosing in-filter retrieval misses as well as considering confirmed cross-domain recovery.
 
 ---
 

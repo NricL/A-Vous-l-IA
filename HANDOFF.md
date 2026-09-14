@@ -14,7 +14,135 @@ Le mapping et le classeur sont sous `/app/private`, jamais sous la racine web. L
 
 **Rollback du lot UX :** r3 backend, image `sha256:9c356b0643a3313709f434d73505b6c7e98b49fca735ad869983b0e835410c1b`, et frontend v461, image `sha256:dd4598880ea05482eddf5795f81f97e30bfe6b21ff544ecdcfb38e1dadad1930`, conservés. Réactiver/restaurer explicitement l'image souhaitée et son trafic, sans effacer d'index. La reconstruction d'index d'une nouvelle réplique peut demander quelques minutes.
 
-### Reprise du 13 septembre — lot UX-01 à UX-05
+## Candidate de test Azure — préparation demandée à 20:47
+
+La candidate utilise `app.preview:create_app`, pas le backend historique `app.main`. Elle reste séparée de la révision stable : **trafic principal 100% sur `ux-20260913-d02ffad`, candidate accessible uniquement par son URL dédiée**. Ne pas promouvoir automatiquement. Les indications « local seulement / pas d'autorisation » dans l'historique ci-dessous décrivent des étapes antérieures.
+
+Backend prévu : `https://avoulia-backend--qual-20260913-r1.purpleocean-980317d1.francecentral.azurecontainerapps.io`. Frontend Azure prévu : `https://avoulia-frontend--qual-20260913-r1.purpleocean-980317d1.francecentral.azurecontainerapps.io/preview`. Pages prévu : `https://nricl.github.io/A-Vous-l-IA/preview`. La racine garde son API stable et son identité ; seule la route preview reçoit le nouveau flux. Ces URLs sont des cibles, pas un reçu de déploiement.
+
+Configuration backend : `AVIA_PREVIEW_HOSTING=azure_test`, `AVIA_PREVIEW_MODE=public_pages`, `AVIA_PREVIEW_AZURE_AUTH=environment-key`, origines exactes dans `AVIA_PREVIEW_ORIGIN` / `AVIA_PREVIEW_FRONTEND_ORIGIN`, et `AVIA_PREVIEW_APP_URL=https://nricl.github.io/A-Vous-l-IA/preview`. Configurer `AVIA_PREVIEW_TRUSTED_PROXY_CIDRS` d'après les pairs réellement observés, jamais un wildcard ; Uvicorn conserve le pair original avec `--no-proxy-headers`. Vérifier à nouveau les pairs et HTTPS sur la candidate. Les noms d'hôte et CORS sont des limites de transport, pas une authentification utilisateur.
+
+Conserver les modèles existants `gpt-5-mini` et `text-embedding-3-small`, API `2024-08-01-preview`, et les références de secrets Azure existantes ; ne pas passer de clé dans le contexte Docker, les arguments de build, GitHub ou les journaux. Le mode cloud interdit CLI, fixtures et changement de source. En local, le mode `cli-token` exige maintenant `AVIA_PREVIEW_AZURE_SUBSCRIPTION` explicitement défini ; aucun abonnement personnel codé en dur dans le nouveau module.
+
+Frontend : `VITE_AVIA_PREVIEW=true`, `VITE_AVIA_PREVIEW_CLOUD=true`, `VITE_AVIA_PREVIEW_ORIGIN=<origine HTTPS de la candidate backend>` et `VITE_AVIA_PREVIEW_HOSTS=<origine HTTPS exacte du frontend>`. Pages utilise `https://nricl.github.io` et la base `/A-Vous-l-IA/` ; Azure utilise son origine de révision et `/`. Les builds sans flags restent sans preview. `previewEnvironment.ts` partage les règles de route/base et coupe la télémétrie sur les alias et transitions entre site stable et preview.
+
+Préparer un dossier de build neuf avec `scripts/prepare_preview_context.py` : code autorisé, gabarits rapprochés et quatre ressources de cache issues exclusivement des pages déjà publiques. Le Dockerfile `Dockerfile.dev-preview` réutilise les dépendances de l'image stable puis reconstruit une image `FROM scratch`, sans anciens `/app`, `/root`, classeurs, mapping ou index. `requirements-preview.txt` déclare Beautiful Soup ; les contrôles du build s'exécutent sous Python 3.11, puis le démarrage minimal est exercé dans l'image finale sous UID 65532.
+
+**Exploitation limitée :** une seule réplique et un seul worker, sondes TCP sur 8000, sessions en mémoire expirantes. Un redémarrage perd les sessions et invalide leurs liens ; ne pas déployer plusieurs répliques. Les liens parcours sont des liens porteurs liés à session/révision. Leur ouverture document depuis Pages est admise sans `Origin`, sans ouvrir les appels API cross-site ; les liens périmés restent refusés. Le texte du besoin n'est pas dans l'URL.
+
+**Ordre de livraison :** images privées et contrôles, aperçu exact/confirmation de publication, révisions isolées sans promotion, contrôle santé/CORS/ouverture Pages → parcours, puis essais réels et mobiles. Un échec ne déclenche ni fallback vers un faux résultat vide ni bascule sur le site stable. Pour retirer l'essai : remettre le build Pages sans flags et désactiver les deux révisions candidates ; conserver les images et le trafic stable. La candidate privée v462 et le correctif du cœur Chroma ne sont pas déployés dans cette recette preview.
+
+## Historique de conception — qualification d'abord, cadrage du 13 septembre à 11:55
+
+### Raccordement initial de la préversion — PUBLIC_PAGES / RAG local réel
+
+Le mode par défaut de l'instance locale a été raccordé à un snapshot de **1 021fiches déjà publiées v4.6.1**, avec14domaines et4pages historiques exclues. Source distincte des classeurs General : ne jamais mélanger le corpus public et la candidate v462 privée. `mode_execution` et `declencheurs_typiques` ne sont pas disponibles dans les pages extraites ; rester explicite sur cette limite. Le classement local cosine/embeddings et les champs indexés ne sont pas identiques au moteur Chroma déployé.
+
+Modules : `preview_publicsnapshot.py` (lecture des ressources publiques et contrôle de provenance), `preview_public_rag.py` (embeddings, pré-filtres, sélection et vérification), scripts `build_preview_publicsnapshot.py`, `embed_preview_publicsnapshot.py`, `smoke_preview_public_rag.py`. Les identités et versions sont rapprochées ; erreurs de lecture, budget, modèle, JSON ou preuve ne deviennent pas de faux résultats vides. Les besoins et vecteurs de requête restent en mémoire.
+
+Configurer un chemin de cache public explicite dans `AVIA_PREVIEW_PUBLIC_CACHE`, `AVIA_PREVIEW_MODE=public_pages`, les origines loopback8767/4178 et `AVIA_PREVIEW_PARCOURS_ROOT` vers le dépôt parcours rapproché. Lancer le serveur séparé avec `python -B -m uvicorn app.preview:create_app --factory --host 127.0.0.1 --port 8767 --no-access-log`. L'interface `/preview` demande l'accord de transmission du besoin et des champs déjà publiés aux modèles Azure existants. Aucun fichier General n'est lu par ce chemin.
+
+Le protocole code gouverne les domaines/secteurs/objectifs ; les modèles ne les changent pas. La recherche principale filtre avant similarité, examine un pool borné et limite l'affichage après sélection. L'orientation utilise un autre pool distinct, conserve le secteur et exige une confirmation avant nouvelle recherche principale. Le vérificateur reçoit le besoin original et le texte source sans classement/contexte métier ; ses jugements sont contrôlés (IDs, citations exactes, périmètre et contraintes) mais restent des jugements de modèle, non une preuve universelle.
+
+**Correctif intrafiltre dans le cœur historique, local uniquement :** `_build_rag_prompt_from_docs` et `_docs_to_payload` ne coupent plus à5 avant sélection ; `_reconcile_generated_case_list` limite les résultats après rapprochement. Le besoin produit avait26candidats éligibles et son cas adapté figurait au rang lexical8–9. Tests `test_infilter_retrieval.py`, diagnostic opt-in `scripts/diagnose_infilter_retrieval.py`. Ne pas confondre preuve de cette troncature avec une capture exhaustive de l'ordre ANN ou de la réponse brute de production.
+
+**Parcours réels locaux :** PUBLIC_PAGES est rendu par `preview_parcours.py`, sans redirection publique ; PUBLIC_API seul conserve la redirection vers sa page actuelle. Le mode non publié reste `None` ; `render_page` accepte des gabarits explicites de présentation communs pour5/6, sans modifier les champs source. Besoin conservé dans la zone locale, liens liés à la révision, ancienne URL refusée après changement de sélection. Lien public source secondaire sous provenance, un seul CTA principal.
+
+**Limites ouvertes :** une proposition de page web peut encore être admise trop largement ; ne pas résoudre cela en cachant toutes les alternatives ou en ajoutant un mot-clé interdit. Les workflows réels ont pris70–305secondes ; le budget glissant respecte le quota10kTPM existant et un nouveau processus attend son refroidissement initial. Pas de hausse de quota autorisée ni promesse de rapidité. La télémétrie est exclue aussi sur les alias `/preview/` et `/PREVIEW`, et la configuration par défaut sans flag conserve l'ancien frontend.
+
+La candidate de contenu est une copie privée labellisée séparée ; elle conserve IDs, taxonomie, formules et journaux. Aucun de ces changements n'est publié sur GitHub ou déployé. La préversion locale monoprocessus reste une surface d'essai, pas une recette d'hébergement multi-répliques.
+
+### Préversion exécutable — lot demandé à13:37
+
+**URL locale :** `http://127.0.0.1:4178/preview`, backend `http://127.0.0.1:8767`. Mode **SYNTHÉTIQUE / NON PRODUCTION**,16cas fictifs,14domaines ; règles de tâches sur fixtures, aucun modèle/embedding/accès v461. Interface opt-in et serveur séparé de `app.main` : les endpoints et le bot déjà déployés ne changent pas.
+
+Backend : `app/preview.py`, `preview_protocol.py`, `preview_repository.py`, `preview_fixture.json`, `preview_parcours.py`, `preview_theme.py`. Frontend : `src/api/preview.ts`, `src/views/PreviewView.vue` et activation locale dans router/main/Vite. Contrat : phase/question/révision/source, choix canoniques, rejet de commandes périmées et double requête, copie transactionnelle de l'état en cas d'erreur. Les sessions sont en mémoire, limitées et expirent après une heure ; **ce stockage est destiné à cette préversion monoprocessus, pas une architecture validée pour les répliques Azure**.
+
+Le bot qualifie brièvement, propose les cas, puis affiche une fiche courte et **un seul bouton parcours**, sans autre saisie ou coaching après sélection. La réorientation propose un autre classement sans changer l'état jusqu'à acceptation ; un refus conserve les choix. Les numéros et libellés sont résolus uniquement dans la question courante. Le bloc de diagnostic est séparé de l'usage normal.
+
+La page parcours est rendue en mémoire par le générateur du dépôt associé. Le besoin est un complément local modifiable, séparé des champs source et ajouté au texte copié ; pas de données privées dans l'URL ni d'envoi externe. Les liens parcours/handoff portent la révision sélectionnée et refusent un ancien lien après changement de choix, au lieu de servir silencieusement un autre cas. La récupération d'une erreur sans transition préserve les brouillons saisis.
+
+**Lancement backend**, depuis `backend`, avec dépendances existantes et de rendu disponibles : définir `AVIA_PREVIEW_MODE=synthetic`, `AVIA_PREVIEW_ORIGIN=http://127.0.0.1:8767`, `AVIA_PREVIEW_FRONTEND_ORIGIN=http://127.0.0.1:4178`, `AVIA_PREVIEW_PARCOURS_ROOT=<chemin absolu du dépôt parcours rapproché>` ; lancer `python -B -m uvicorn app.preview:create_app --factory --host 127.0.0.1 --port 8767`. L'absence du mode ou du générateur ne déclenche aucun repli vers la production.
+
+**Lancement frontend**, depuis `frontend` : définir `VITE_AVIA_PREVIEW=true` et `VITE_AVIA_PREVIEW_ORIGIN=http://127.0.0.1:8767`, puis `npm run dev -- --host 127.0.0.1 --port 4178 --strictPort`. Garder la préversion sur loopback, jamais via tunnel ou hébergement public. Le port8766 était occupé par un processus système et n'a pas été utilisé.
+
+**Contrôles ciblés finaux :**39tests `tests.test_preview_protocol` et `tests.test_preview_parcours` (racine parcours explicitement configurée),44tests Node `check-preview-state.mjs` et `check-chat-state.mjs`, types frontend. Les contrôles antérieurs ont également parcouru les gabarits aux deux tailles, stockage bloqué et copie manuelle ; la revue a révélé les liens de session mutables et la perte d'une saisie après choix invalide, tous deux corrigés avec reproductions persistantes. Essai navigateur final : choix invalide sans perte du besoin, réorientation confirmée, fiche terminale et six étapes avec contexte intact à390px. Ce résultat **ne prouve pas la pertinence sur les1 021cas**.
+
+**Blocage du catalogue réel :** la lecture M365 disponible n'a pas permis un inventaire complet et des champs exacts liés à une version stable. Le lot de revue exhaustive n'a accepté aucune correction de cas. Il faut une copie de travail autorisée pour traitement local explicite (si les règles de protection le permettent), ou un lecteur protégé de plages exactes. Aucune suppression de protection, export forcé ou modification du classeur partagé.
+
+**Mise à jour après autorisation locale à16:43 :** une copie binaire identique de la v461 a été autorisée et lue intégralement. L'étiquette d'origine a été identifiée via Excel et conservée. Les1 021IDs, champs obligatoires et caches ont été rapprochés ; quatre revues disjointes ont été consolidées dans un classeur labellisé, sans changer les18feuilles originales. Le blocage de lecture ci-dessus est donc levé, mais pas celui de l'exposition dans un artefact non labellisé.
+
+Les propositions de champs doivent encore être arbitrées, particulièrement les modes d'exécution. Les données et jugements détaillés restent dans les classeurs labellisés ; les scripts privés ne contiennent que le traitement générique. Native Excel a préservé les métadonnées et caches ; ne pas passer ces fichiers par une conversion LibreOffice susceptible de perdre l'étiquette. Une revue documentaire assistée ne constitue ni validation réglementaire ni test utilisateur de chaque cas.
+
+La nouvelle lecture invalide l'interprétation trop rapide selon laquelle l'échec de l'essai conjoint s'expliquait seulement par un autre classement. Un cas éligible existe dans le périmètre initial : rechercher la cause de ce faux négatif (récupération, classement, candidats et sélection), sans élargir silencieusement les filtres ni publier les textes de revue. Aucun correctif ou nouvel index réel n'a été appliqué.
+
+Le protocole, les gabarits et le raccordement local sont prêts pour des essais de mécanique/ergonomie. Le connecteur de RAG réel, la revue complète et la migration du runtime restent à terminer avant approbation de livraison.
+
+Depuis la poursuite demandée à12:01, le contrat et le banc mécanique QUAL-01 ont été préparés localement ; depuis12:16, Eneric souhaite des essais conjoints avant toute approbation de déploiement. QUAL-02 et ORI-01 ne sont pas implémentés. Source servie `d02ffad`, reçu publié `e895cab`, catalogue v461 et parcours `a500a22` restent inchangés. `ROADMAP.md` est la référence des travaux à venir ; UX-01 à UX-05 sont déjà livrés.
+
+**Priorité non négociable :** qualification exacte et fidélité au catalogue avant fluidité. Maintenir domaine choisi explicitement, secteur selon les règles existantes, objectif, problème, pré-filtres, IDs, détail verbatim et URLs autoritaires. Le prochain lot exclut la classification automatique de ces choix par LLM. Un clic est une confirmation ; une réponse ambiguë ne l'est pas.
+
+**Piège actuel à traiter avant de varier le texte :** `haystack_rag.py::_detect_expected_step_from_assistant` et `HomeView.vue::detectPhase` reconnaissent des formulations de questions. « Pour vos stocks, quelle est votre priorité ? » ne devient pas une étape objectif par simple reformulation. QUAL-02 doit introduire une représentation explicite de l'étape, de la question, du contexte et des choix canoniques dans `models.py`, les routes HTTP/SSE, `frontend/src/api/chat.ts` et `HomeView.vue`. Les champs de sélection existants sont à réutiliser autant que possible ; les nouveaux noms et le versionnement du contrat restent à concevoir.
+
+Le serveur doit valider l'appartenance d'un choix à la liste offerte pour cette question, son contexte de qualification et la version concernée. Ne pas faire d'un numéro affiché un identifiant durable d'objectif. Prévoir choix périmés, réponses retardées/doubles, listes modifiées, interruptions, historique partiel et correction des parents ; ne pas rétablir silencieusement les champs invalidés. Les anciennes voies de lecture ne doivent rester que pour une compatibilité explicitement bornée, pas redevenir la source d'autorité du nouveau flux.
+
+QUAL-01 établit les invariants et attentes avant comparaison. QUAL-03 améliore ensuite la présentation par des formulations maîtrisées, sans nouveau modèle ni appel LLM à chaque question. Le problème original, y compris ses négations/exclusions, reste disponible ; une reformulation ne le remplace pas. L'absence de cas donne une sortie explicite et une possibilité de correction, jamais une réponse générale hors catalogue.
+
+CONT-01 porte sur **les 1 021 cas**, avec couverture et journal par ID. Travailler en lots internes n'autorise pas une clôture sur vingt cas. Améliorer les champs existants en distinguant cible, premier livrable et déploiement, ainsi que données accessibles/autorisées, calculs ou outils requis, limites et validation. Tout classement métier à corriger doit être tracé et arbitré ; pas de refonte de taxonomie implicite. La v461 est conservée ; une modification produit un nouveau classeur versionné, jamais un écrasement.
+
+PAR-01 conserve les six étapes : réponses adaptées aux questions, adéquation non déclarée automatiquement, données fictives distinguées des données manquantes, résultat attendu et contrôle métier. Reprendre `pipeline/genere.py` et `templates/page.html.j2` du dépôt parcours associé, pas le générateur historique backend. Les changements préexistants des worktrees parcours restent à préserver. REC-01 distingue couverture structurelle exhaustive et pertinence sémantique évaluée sur demandes réalistes ; LIV-01 réunit source/index/mapping/pages cohérents et rollback après les accords de publication requis.
+
+### Contrat de référence QUAL-01 — version 1, 13 septembre
+
+**Périmètre :** règles à préserver ou à rendre explicites dans QUAL-02. Le code en service n'est pas modifié par cette spécification. La conformité mécanique, l'adéquation métier et le confort utilisateur sont trois dimensions différentes ; aucune ne prouve les deux autres.
+
+| État logique | Entrée qui autorise la transition | Sortie attendue |
+|---|---|---|
+| Domaine à choisir | Choix explicite parmi les 14 domaines ; jamais un secteur ou un récit métier pris pour un domaine | Secteur si applicable, sinon objectif |
+| Secteur à choisir | Choix reconnu dans la liste offerte pour le domaine ; « Autre » selon l'éligibilité existante | Objectifs applicables à cette combinaison |
+| Objectif à choisir | Choix dans la liste offerte pour le domaine/secteur | Problème à demander, ou recherche si un besoin exploitable a déjà été exprimé |
+| Problème à préciser | Description libre utile, conservant contexte, négations et exclusions | Recherche limitée par les choix validés ; jamais invention d'une qualification |
+| Résultats | Liste réconciliée de cas effectivement issus du catalogue filtré | Sélection de l'un des IDs réellement affichés, puis fiche exacte |
+| Fiche et parcours | Identité sélectionnée et mapping valide | Détail verbatim et URL autoritaire ; aucune URL devinée depuis le numéro |
+| Clarification / aucun cas | Choix ambigu, contexte insuffisant ou recherche sans cas adéquat | Qualification conservée, correction possible, pas de remplissage hors périmètre |
+| Requête interrompue / réponse périmée | Échec ou réponse ne correspondant plus à la question courante | Pas de nouvel état validé sur simple erreur ; reprise explicite |
+
+**Invariants :**
+
+1. Un domaine est un choix métier explicite, pas la profession ou le secteur déduits par le modèle.
+2. Un numéro appartient à une question et à ses options : il n'est jamais réutilisé pour l'étape suivante, ni remappé après un changement de liste. Le prochain protocole doit porter cette identité ; le texte seul ne suffit pas.
+3. Les valeurs retenues doivent être autorisées dans la combinaison courante. Un champ non vide ne prouve ni son appartenance au catalogue ni sa pertinence métier.
+4. Changer le domaine invalide secteur, objectif et résultats ; changer le secteur invalide objectif et résultats ; changer l'objectif invalide les résultats. Répéter le même choix ne détruit pas les dépendances valides.
+5. Le besoin donné avant qualification n'est pas perdu ni redemandé inutilement. Une nouvelle clarification utile prévaut ; les anciennes réponses Q3 liées à des choix abandonnés ne doivent pas ressurgir.
+6. « Oui », un métier seul, un numéro inconnu, une négation ou une hésitation ne constituent pas par eux-mêmes une nouvelle qualification.
+7. La recherche utilise les filtres validés ; l'absence de résultat ne les relâche pas. Les affirmations et bénéfices restent ancrés dans le contenu source.
+8. Texte affiché, IDs sélectionnables, ordre, fiche et URL doivent correspondre. La réponse détail peut conserver toute la liste de candidats : son identité s'apprécie par le contenu du cas et l'URL autoritaire, pas par l'exigence d'une liste de longueur un.
+9. Les domaines sans Q1.5 restent sans question secteur ; les secteurs ajoutés aux menus viennent des métadonnées, sans renuméroter silencieusement un ancien choix.
+10. Une paraphrase de question, un double clic, un délai réseau ou une modification du catalogue ne doit pas changer la signification d'un choix déjà fait. Les limites actuelles à cette règle seront rapportées comme écarts, pas cachées par une moyenne de succès.
+
+**Référence métier :** pour une demande vague ou multi-intention, la réponse attendue peut être une clarification ou plusieurs qualifications acceptables. Les scénarios techniques à objectifs fictifs mesurent le routage et la conservation de l'état, pas la pertinence des 1 021 cas. Toute référence de cas réels doit identifier sa version source et expliciter le statut des attentes (hypothèse, revue experte, validation utilisateur). Aucun taux de précision global ne doit être déduit du seul banc hors ligne.
+
+**Essais ensemble avant déploiement, demande du 13 septembre à 12:16 :** le contrat/corpus de référence a été préparé, mais QUAL-02 n'est pas implémenté. Organiser d'abord une répétition explicitement simulée du dialogue à partir des choix canoniques, puis une préversion technique isolée avec les vraies transitions et filtres. Le diagnostic de test doit distinguer choix confirmé, problème original, filtre réellement appliqué, candidats récupérés et cas affichés ; ne pas envoyer de contenu privé dans un service tiers pour la démonstration. Un accord sur la conversation simulée ne vaut pas preuve de fonctionnement RAG ni autorisation de déployer : Eneric veut donner son accord après les essais.
+
+### Exécuter et interpréter la référence QUAL-01 locale
+
+Fichiers : `backend/tests/fixtures/qualification_reference.json`, `backend/scripts/evaluate_qualification.py`, `backend/tests/test_qualification_reference.py`. Depuis `backend`, `python -B scripts/evaluate_qualification.py --output "<dossier-prive-existant>\qual01-nouveau.json"` produit un rapport neuf, refuse l'écrasement et n'appelle ni réseau, ni modèle, ni catalogue réel. Codes retour :0 pour les vérifications mesurées conformes,1 pour écarts observés,2 pour erreur d'entrée/exécution ; les exigences non évaluées sont séparées.
+
+Référence v1.0.0 :66scénarios,63conformes,3écarts au niveau des helpers (question reformulée non reconnue, numéro d'objectif réinterprété après changement d'ordre, collision avec le préfixe d'un libellé fictif).14domaines testés par numéro et libellé, objectifs volontairement fictifs. Le premier brouillon de fixture heurtait cette collision lexicale ; la provenance décrit l'isolation de la collision dans une sonde dédiée, dont l'échec reste visible. Les attentes n'exigent pas que les bugs persistent.
+
+Commande ciblée exécutée avec `PYTHONPATH=tests` : `python -B -m unittest test_qualification_reference test_chat_regressions test_chat_relevance -q`,102tests réussis. Le succès de ces tests vérifie notamment le banc ; il n'annule pas le code1 de l'évaluation, ni les huit dimensions non mesurées. Empreintes de source et version Python dans le rapport ; un export sans Git l'indique explicitement et conserve les hashes.
+
+Pour une future validation d'image avec cette suite, exporter aussi **la fixture JSON et `scripts/evaluate_qualification.py`** dans le contexte de tests. Les anciens scripts de staging ne copiant que `test_*.py` et le banc de pertinence ne suffisent pas. Le rapport de baseline reste privé ; il ne décrit pas une panne du site ni une mesure exhaustive de pertinence.
+
+### ORI-01 et continuité d'adoption — enseignement de l'essai conjoint
+
+Le filtre principal peut être correct et exclure un cas placé dans un autre domaine que celui choisi naturellement. La proposition ORI-01 ajoute une recherche secondaire d'orientation, sans altérer les sélections actives : `piste proposée → acceptation/refus → revalidation des choix → recherche principale`. Un refus ne change rien ; une acceptation ne permet pas d'inventer un secteur. Les métadonnées et le cas doivent être authentiques, la correspondance directe et les prérequis absents ne doivent pas être supposés.
+
+La preuve conjointe concerne une demande inchangée d'adaptation de descriptions produit à une audience : aucun cas en Marketing, puis cas adapté retrouvé après réorientation commerciale confirmée. Cette réorientation a été préparée manuellement via lecture du catalogue, pas par le bot. La future capacité automatisée reste à construire/évaluer ; ne pas confondre ce résultat avec la réussite du nouveau protocole.
+
+Ne pas abandonner CONT-01/PAR-01 au profit du seul routage : le transfert vers un parcours doit rendre le premier essai faisable et son résultat vérifiable. Le contexte propre à l'utilisateur, absent des pages statiques actuelles, doit rester un complément explicite au contenu source, sans URL contenant le problème libre ni envoi à un service tiers. Tous les1 021cas restent dans le périmètre ; relais humains et réutilisation sont conservés comme suites du parcours, pas comme assistant généraliste.
+
+### Historique du lot livré UX-01 à UX-05
 
 Les cinq frictions post-livraison ont été corrigées et livrées : sélection du cas unique, exemples Q3 trop denses avec pipes bruts, filtre d'exemples Cabinet & conseil, besoin initial du magasin redemandé et suggestion secondaire supposant une saisonnalité. Le classement et les formulations source restent inchangés ; le calibrage de pertinence général reste ouvert.
 

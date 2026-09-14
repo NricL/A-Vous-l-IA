@@ -1270,15 +1270,14 @@ def _build_rag_prompt_from_docs(
         ]
     )
     
-    # LOGIQUE CENTRALISÉE : déterminer les cas réellement affichés (jusqu'à 5, jamais plus que ce qui est fourni).
-    # Ne jamais forcer un minimum : s'il y a moins de cas réels, on les affiche tels quels
-    # plutôt que de laisser le modèle en inventer pour atteindre un quota.
-    displayed_cases = docs[:5] if docs else []
+    # Le budget de retrieval borne les candidats ; la limite de cinq porte sur
+    # les résultats APRÈS sélection, pas sur les cas que le modèle peut examiner.
+    candidate_docs = docs
     
     identified_cases_summary = ""
-    if displayed_cases:
+    if candidate_docs:
         lines = []
-        for i, d in enumerate(displayed_cases, start=1):
+        for i, d in enumerate(candidate_docs, start=1):
             case = _doc_to_case_dict(d, i - 1)
             title = _case_display_title(case)
             description = str(case.get("description_cas_utilisation") or case.get("content") or "").strip()
@@ -1286,9 +1285,9 @@ def _build_rag_prompt_from_docs(
         identified_cases_summary = "\n".join(lines)
     
     cases_extra_context = ""
-    if displayed_cases and not _should_omit_multi_case_structured_context(query, last_suggested_cases):
+    if candidate_docs and not _should_omit_multi_case_structured_context(query, last_suggested_cases):
         blocks: list[str] = []
-        for i, d in enumerate(displayed_cases, start=1):
+        for i, d in enumerate(candidate_docs, start=1):
             ex = _case_extra_fields_from_meta(getattr(d, "meta", None) or {})
             blk = _format_case_extra_block(ex)
             if blk:
@@ -1300,9 +1299,9 @@ def _build_rag_prompt_from_docs(
                 + "\n\n".join(blocks)
             )
 
-    if displayed_cases:
+    if candidate_docs:
         candidates = []
-        for i, doc in enumerate(displayed_cases, 1):
+        for i, doc in enumerate(candidate_docs, 1):
             case = _doc_to_case_dict(doc, i - 1)
             candidates.append({
                 "numero": i,
@@ -1358,7 +1357,7 @@ def _build_rag_prompt_from_docs(
         identified_cases_summary=identified_cases_summary,
         cases_extra_context=cases_extra_context,
         conversation_history=conversation_history or "",
-        documents=displayed_cases,  # Passer les cas AFFICHÉS (3-5), pas tous les docs du RAG
+        documents=candidate_docs,
         q3_triggers_affichage=q3_triggers_affichage or "",
     )
 
@@ -2590,15 +2589,10 @@ def _retrieve_docs_for_question(
 
 
 def _docs_to_payload(docs: list) -> tuple[list[str], list[str], list[str], list[dict[str, str | None]]]:
-    """Transforme les docs en (sources, suggested_case_ids, full_contents, case_extras).
-
-    IMPORTANT : le payload de sélection doit refléter EXACTEMENT les cas affichés à l'utilisateur.
-    Le prompt de niveau 1 n'affiche jamais plus de 5 cas ; on borne donc aussi ici à 5 pour éviter
-    tout décalage entre liste visible et choix acceptés.
-    """
-    displayed_docs = (docs or [])[:5]
-    case_dicts = [_doc_to_case_dict(d, i) for i, d in enumerate(displayed_docs)]
-    sources = [d.content[:400] + "..." if len(d.content) > 400 else d.content for d in displayed_docs]
+    """Inventaire aligné des candidats, à réconcilier avant toute réponse HTTP/SSE."""
+    candidate_docs = docs or []
+    case_dicts = [_doc_to_case_dict(d, i) for i, d in enumerate(candidate_docs)]
+    sources = [d.content[:400] + "..." if len(d.content) > 400 else d.content for d in candidate_docs]
     suggested_case_ids = [c["id"] for c in case_dicts]
     full_contents = [c["content"] for c in case_dicts]
     case_extras = [_case_extras_from_case_dict(c) for c in case_dicts]
@@ -2639,7 +2633,7 @@ def _reconcile_generated_case_list(answer: str, cases: list[dict]) -> tuple[str,
             continue
         end = headings[pos + 1].start() if pos + 1 < len(headings) else len(text)
         blocks[index] = text[heading.end():end].strip().rstrip("- \n")
-    indices = sorted(blocks)
+    indices = sorted(blocks)[:5]
     if not indices:
         return NO_MATCH_MESSAGE, []
     rendered = [
@@ -3206,7 +3200,7 @@ def query_rag_haystack(
         replies = gen_result.get("replies", [])
         answer = _reply_to_text(replies[0]) if replies else "Aucune réponse générée."
     if docs:
-        cases = [_doc_to_case_dict(doc, i) for i, doc in enumerate(docs[:5])]
+        cases = [_doc_to_case_dict(doc, i) for i, doc in enumerate(docs)]
         answer, retained = _reconcile_generated_case_list(answer, cases)
         sources = [sources[i] for i in retained]
         suggested_case_ids = [suggested_case_ids[i] for i in retained]
