@@ -61,13 +61,22 @@
                                     <p>Voici les pistes proposées pour votre besoin. Choisissez celle à approfondir.</p>
                                     <article v-for="(c, ci) in msg.suggestedCases" :key="c.id" class="case-card">
                                         <h3>{{ c.cas_utilisation || `Piste ${ci + 1}` }}</h3>
-                                        <p class="source-text">{{ c.value_presentation?.description || c.description_cas_utilisation || c.content }}</p>
+                                        <template v-if="c.value_presentation?.editorial">
+                                            <p><strong>Gain recherché — hypothèse :</strong> {{ c.value_presentation.editorial.claims.gain.text || c.value_presentation.editorial.claims.gain.unknown_reason }}</p>
+                                            <p><strong>Premier livrable :</strong> {{ c.value_presentation.editorial.claims.deliverable.text || c.value_presentation.editorial.claims.deliverable.unknown_reason }}</p>
+                                            <p><strong>Quand en juger :</strong> {{ c.value_presentation.horizon }}</p>
+                                        </template>
+                                        <p v-else class="source-text">{{ c.value_presentation?.description || c.description_cas_utilisation || c.content }}</p>
                                         <p><strong>Effort indiqué :</strong> {{ c.effort || 'Non précisé' }}</p>
                                         <details v-if="c.value_presentation" class="value-notes">
                                             <summary>Premier essai et conditions d'intérêt</summary>
+                                            <template v-if="c.value_presentation.editorial">
+                                                <p><strong>Description — source :</strong></p>
+                                                <p class="source-text">{{ c.value_presentation.description }}</p>
+                                            </template>
                                             <p><strong>Première action — source :</strong></p>
                                             <p class="source-text">{{ c.value_presentation.first_action || 'Non précisée dans les informations servies.' }}</p>
-                                            <p><strong>Horizon de valeur :</strong> {{ c.value_presentation.horizon }}</p>
+                                            <p v-if="!c.value_presentation.editorial"><strong>Horizon de valeur :</strong> {{ c.value_presentation.horizon }}</p>
                                             <p>{{ c.value_presentation.useful_when }}</p>
                                             <p>{{ c.value_presentation.tradeoff }}</p>
                                             <small>{{ c.value_presentation.limit }}</small>
@@ -80,6 +89,11 @@
                                     </article>
                                 </template>
                                 <span v-else class="msg-text">{{ msg.content }}</span>
+                                <div v-if="selectedValue(msg)?.editorial" class="value-notes">
+                                    <p><strong>Gain recherché — hypothèse :</strong> {{ selectedValue(msg).editorial.claims.gain.text || selectedValue(msg).editorial.claims.gain.unknown_reason }}</p>
+                                    <p><strong>Premier livrable :</strong> {{ selectedValue(msg).editorial.claims.deliverable.text || selectedValue(msg).editorial.claims.deliverable.unknown_reason }}</p>
+                                    <p><strong>Quand en juger :</strong> {{ selectedValue(msg).horizon }}</p>
+                                </div>
                                 <details v-if="selectedValue(msg)" class="value-notes">
                                     <summary>Valeur à vérifier lors de votre essai</summary>
                                     <p><strong>Première action — source :</strong></p>

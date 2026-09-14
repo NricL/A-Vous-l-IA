@@ -159,7 +159,7 @@ def _build_suggested_cases(
             SuggestedCase(
                 id=ids[i],
                 content=full_contents[i],
-                value_presentation=value_presentation(ex),
+                value_presentation=value_presentation(ex, ids[i]),
                 case_hash=parcours_info.get("case_hash"),
                 parcours_url=parcours_info.get("parcours_url"),
                 parcours_cta_label=parcours_info.get("cta_label"),

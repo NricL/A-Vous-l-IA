@@ -156,18 +156,63 @@ input:focus-visible,summary:focus-visible,textarea:focus-visible,select:focus-vi
   </div>
   <a class="tester-rapidement" href="#prompt-demarrage">Tester rapidement</a>
 </header>
-<!-- value-entry:source-value-1 -->
+<!-- value-entry:editorial-value-2 -->
 <section class="carte" aria-labelledby="valeur-titre">
-  <h2 id="valeur-titre">Ce que vous pouvez essayer</h2>
-  <p><b>Première action — source :</b></p>
-  <p class="source">Choisir une user story récemment livrée qui n&#39;a pas de test automatisé. Ouvrir un assistant IA autorisé par votre organisation et lui fournir la description fonctionnelle, les critères d&#39;acceptation et la structure des pages concernées, puis lui demander de générer un script de test Cypress complet avec données synthétiques. Astuce : dans votre demande à l&#39;IA, précisez (1) votre rôle et contexte — ex. « Je suis développeur dans une PME, nous utilisons Cypress pour nos tests e2e mais la couverture est de 30% » (2) la tâche exacte attendue (3) le format de sortie souhaité — ex. « script Cypress complet avec fixtures de données, assertions et commentaires » (4) les contraintes — ex. « compatible Cypress 13, données anonymes, pas d&#39;appel API externe ». Attention : ne jamais utiliser de vraies données utilisateur dans les tests. Vérifier : exécuter le test en environnement de test avant de l&#39;intégrer à la CI/CD. Livrable : script de test Cypress fonctionnel avec données synthétiques.</p>
+  <h2 id="valeur-titre">Ce que ce cas pourrait vous apporter</h2>
+  <p><b>Gain recherché — hypothèse :</b> Génère un script de test structuré à partir d&#39;une user story, plutôt qu&#39;une écriture manuelle limitant la couverture.</p>
+  <p><b>Premier livrable :</b> Un script de test Cypress avec données synthétiques, à exécuter en environnement de test avant intégration CI/CD.</p>
+  <p><b>Quand en juger :</b> Utile une fois exécuté en environnement de test, pas avant son passage en intégration continue.</p>
+  <p class="note">Hypothèses rédigées à partir des descriptions, actions et précautions publiées, à vérifier dans votre contexte. Gain mesuré et durée avant valeur non établis ; aucun délai de rentabilité annoncé.</p>
   <details>
-    <summary>Valeur et effort : ce qui reste à vérifier</summary>
+    <summary>Conditions, contreparties et première action</summary>
     <div class="contenu">
-      <p><b>Horizon de valeur :</b> Non établi pour ce cas. Évaluez l'intérêt après un premier résultat relu, puis plusieurs usages si nécessaire.</p>
-      <p>À essayer si cette tâche correspond à votre besoin, avec les éléments nécessaires et un outil autorisé. Comparez ensuite à votre pratique habituelle.</p>
-      <p>Mettez en balance la préparation, la relecture et les corrections avec l'utilité du résultat. Un effort faible n'est pas une preuve de gain.</p>
-      <p class="note">Description et première action issues du catalogue, sans promesse de gain mesuré. Aucun délai de rentabilité établi.</p>
+      <p><b>Utile si :</b> Pertinent pour une user story récemment livrée qui n&#39;a pas encore de test automatisé.</p>
+      <p><b>À mettre en balance :</b> Interdit d&#39;utiliser de vraies données utilisateur dans les tests, au profit de données synthétiques uniquement.</p>
+      <p><b>Première action — source :</b></p>
+      <p class="source">Choisir une user story récemment livrée qui n&#39;a pas de test automatisé. Ouvrir un assistant IA autorisé par votre organisation et lui fournir la description fonctionnelle, les critères d&#39;acceptation et la structure des pages concernées, puis lui demander de générer un script de test Cypress complet avec données synthétiques. Astuce : dans votre demande à l&#39;IA, précisez (1) votre rôle et contexte — ex. « Je suis développeur dans une PME, nous utilisons Cypress pour nos tests e2e mais la couverture est de 30% » (2) la tâche exacte attendue (3) le format de sortie souhaité — ex. « script Cypress complet avec fixtures de données, assertions et commentaires » (4) les contraintes — ex. « compatible Cypress 13, données anonymes, pas d&#39;appel API externe ». Attention : ne jamais utiliser de vraies données utilisateur dans les tests. Vérifier : exécuter le test en environnement de test avant de l&#39;intégrer à la CI/CD. Livrable : script de test Cypress fonctionnel avec données synthétiques.</p>
+      <p class="note">L'effort indiqué dans le catalogue n'est ni une mesure de gain ni un délai avant valeur.</p>
+    </div>
+  </details>
+  <details>
+    <summary>Passages source utilisés pour ces hypothèses</summary>
+    <div class="contenu">
+      
+      <p><b>Gain :</b>
+        
+        <span>Description — « Les tests end-to-end sont écrits manuellement, la couverture est faible »</span>
+        
+        
+      </p>
+      
+      <p><b>Livrable :</b>
+        
+        <span>Première action — « Livrable : script de test Cypress fonctionnel avec données synthétiques »</span>
+        
+        
+      </p>
+      
+      <p><b>Condition d&#39;observation :</b>
+        
+        <span>Première action — « exécuter le test en environnement de test avant de l&#39;intégrer à la CI/CD »</span>
+        
+        
+      </p>
+      
+      <p><b>Situation utile :</b>
+        
+        <span>Première action — « Choisir une user story récemment livrée qui n&#39;a pas de test automatisé »</span>
+        
+        
+      </p>
+      
+      <p><b>Contrepartie :</b>
+        
+        <span>Première action — « ne jamais utiliser de vraies données utilisateur dans les tests »</span>
+        
+        
+      </p>
+      
+      <p class="note">Ces extraits permettent de retrouver les appuis de rédaction ; ils ne prouvent pas un résultat dans votre organisation.</p>
     </div>
   </details>
   <p class="note">Préparez les entrées à l'étape 2, produisez à l'étape 4, puis comparez le résultat à votre pratique à l'étape 5.</p>

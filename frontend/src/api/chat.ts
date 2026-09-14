@@ -68,7 +68,7 @@ export interface SuggestedCase {
   effort?: string
   value_presentation?: {
     version: string
-    status: 'source_only'
+    status: 'source_only' | 'editorial_hypothesis'
     description: string | null
     first_action: string | null
     effort: string | null
@@ -76,6 +76,18 @@ export interface SuggestedCase {
     tradeoff: string
     useful_when: string
     limit: string
+    editorial?: {
+      status: 'editorial_hypothesis'
+      label: string
+      source_fingerprint: string
+      horizon_kind: string
+      unknown_fields: string[]
+      claims: Record<'gain' | 'deliverable' | 'horizon' | 'useful_when' | 'tradeoff', {
+        text: string | null
+        evidence: { field: string; quote: string }[]
+        unknown_reason: string | null
+      }>
+    }
   }
 }
 
