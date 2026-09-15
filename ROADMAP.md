@@ -6,6 +6,14 @@ repo pour rester traçable côté Eneric **et** côté Simplon.
 
 **Dernière mise à jour :** 2026-09-15
 
+**12:17 — accès direct après choix livré :** titre du cas sélectionné puis lien
+parcours, sans répéter le déplieur précédent. Identité vérifiée par l'URL serveur ;
+fallback explicite si correspondance absente/ambiguë. Historique/API inchangés,
+pas d'accélération du modèle revendiquée. Source `4fbbd24`, frontend
+`v463-handoff-20260915-r1` sain à100%, rollback détails r1 ;51tests frontend,
+recette réelle320/390/1280 et Pages/CI réussis. Détails dans `HANDOFF.md`.
+Kit/gel restent en pause ; aucune modification backend, base, éditorial ou parcours.
+
 **11:07 — libellé livré :** « Plus de détails » remplace uniquement « Premier essai »
 sur les cartes proposées. Source `57f59c6`, frontend `v463-details-20260915-r1`
 sain à100%, rollback compact r1 ;46tests frontend et recette réelle Azure/Pages

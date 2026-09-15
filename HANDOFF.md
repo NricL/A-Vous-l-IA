@@ -1,5 +1,30 @@
 # Avoulia V2 — Implementation Handover Guide for Simplon
 
+## Accès direct après choix — 15 septembre, demande12:17 livrée
+
+Après « Choisir cette piste » ou son numéro, la réponse confirmée affiche le
+**titre source du cas puis le bouton parcours existant**, sans répéter description,
+valeur ou accordéon. « Plus de détails » reste disponible dans les cartes précédentes ;
+le feedback reste sous le lien. Titre déterminé uniquement par correspondance unique
+entre l'URL désignée par le serveur et les métadonnées du même message. Si cette
+identité manque, est ambiguë ou sans titre, l'ancien affichage explicite est conservé :
+aucun cas ou lien deviné. Historique brut, requêtes, libellé/URL du CTA et ouverture
+manuelle dans un nouvel onglet inchangés. Il s'agit de priorité visuelle, pas d'une
+réduction du temps de réponse du modèle.
+
+Source `4fbbd24`, frontend `v463-handoff-20260915-r1` sain à100%, build `dd3d`,
+digest `a16be7062be07fc084167dee7064fdbf0b8ff27a9a0922fb96ab01f9c799c204`.
+Rollback actif : détails r1 (`60f86f60…339c668`) ; backend accessibilité r1 inchangé.
+Pages `34958051205` et CI `34958051185` réussies.51tests frontend, typage/build ;
+fixture explicite : une/plusieurs pistes, dernier cas, texte malveillant échappé,
+fallbacks, historique et retour aux cartes. Recettes réelles candidate/Azure/Pages :
+dernier des3cas, clic et numéro, titre+CTA visibles à320/390/1280px, focus sur la
+confirmation, aucune duplication. Rechargement ordinaire et assets exacts vérifiés.
+Reçu/captures : `_local-trace/2026-09-15-direct-handoff/`.
+Backend, base, éditorial, parcours, prompts et fichiers privés inchangés.
+**Kit/gel toujours en pause** ; ce terme « accès direct » ne désigne pas une livraison Simplon.
+Pas de certification WCAG exhaustive ni de nouveau test lecteur d'écran.
+
 ## Libellé des détails — 15 septembre, demande11:07 livrée
 
 Seul le résumé des cartes proposées passe de « Premier essai » à **« Plus de détails »**.

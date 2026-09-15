@@ -1,5 +1,19 @@
 # Avoulia V2 — Suivi Projet & Décisions
 
+### 15septembre — accès direct après choix demandé à12:17, livré
+
+Titre source puis CTA parcours immédiatement dans la réponse confirmée ; pas de
+nouvelle répétition des détails des cartes. URL et libellé CTA serveur préservés,
+fallback ancien si identité non établie, historique brut/API inchangés.
+Source `4fbbd24`, frontend `v463-handoff-20260915-r1` sain à100%, build `dd3d`,
+digest `a16be7062be07fc084167dee7064fdbf0b8ff27a9a0922fb96ab01f9c799c204`.
+Rollback détails r1 actif ; backend accessibilité r1 inchangé.
+51tests frontend, typage/build, fixtures et recettes réelles candidate/Azure/Pages,
+clic/numéro et320/390/1280px réussis. Pages `34958051205`, CI `34958051185`.
+Reçu : `_local-trace/2026-09-15-direct-handoff/deployment-receipt.json`.
+Priorité d'affichage uniquement, pas de gain de latence annoncé. Base/éditorial/
+parcours inchangés, kit et gel en pause, classeur/prototypes exclus.
+
 ### 15septembre — libellé demandé à11:07, livré
 
 « Plus de détails » remplace uniquement le résumé « Premier essai » des cartes.
