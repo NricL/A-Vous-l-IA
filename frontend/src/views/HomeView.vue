@@ -86,7 +86,9 @@
                                         </button>
                                     </article>
                                 </template>
-                                <span v-else class="msg-text">{{ msg.content }}</span>
+                                <h3 v-else-if="selectedCase(msg)" class="selected-case-title">{{ selectedCase(msg).cas_utilisation }}</h3>
+                                <template v-else>
+                                <span class="msg-text">{{ msg.content }}</span>
                                 <div v-if="selectedValue(msg)?.editorial" class="value-notes">
                                     <p><strong>Gain recherché — hypothèse :</strong> {{ selectedValue(msg).editorial.claims.gain.text || selectedValue(msg).editorial.claims.gain.unknown_reason }}</p>
                                     <p><strong>Premier livrable :</strong> {{ selectedValue(msg).editorial.claims.deliverable.text || selectedValue(msg).editorial.claims.deliverable.unknown_reason }}</p>
@@ -101,6 +103,7 @@
                                     <p>{{ selectedValue(msg).tradeoff }}</p>
                                     <small>{{ selectedValue(msg).limit }}</small>
                                 </details>
+                                </template>
                                 <div
                                     v-if="msg.role !== 'user' && messagePhase(msg) !== 4 && i === lastAssistantIndex && !loading && choicesFor(msg).length"
                                     class="choice-chips"
@@ -497,8 +500,16 @@ function contextLabel(value, phase) {
 }
 
 function selectedValue(msg) {
-    if (!msg.parcoursUrl) return null
-    return msg.suggestedCases?.find(c => c.parcours_url === msg.parcoursUrl)?.value_presentation || null
+    if (!msg.parcoursUrl || !Array.isArray(msg.suggestedCases)) return null
+    return msg.suggestedCases.find(c => c?.parcours_url === msg.parcoursUrl)?.value_presentation || null
+}
+
+function selectedCase(msg) {
+    if (msg.role !== 'assistant' || !msg.parcoursUrl || !Array.isArray(msg.suggestedCases)) return null
+    const matches = msg.suggestedCases.filter(c => c?.parcours_url === msg.parcoursUrl)
+    if (matches.length !== 1) return null
+    const selected = matches[0]
+    return typeof selected.cas_utilisation === 'string' && selected.cas_utilisation.trim() ? selected : null
 }
 
 /**
@@ -850,7 +861,7 @@ async function submit(forcedText = null, retryRequest = null) {
 <style>
     .msg small { display: block; margin-top: 6px; }
     .case-card { border: 1px solid #63758c; border-radius: 10px; padding: 14px; margin-top: 4px; background: #243b55; color: #f0f4fa; }
-    .case-card h3 { font-size: 16px; line-height: 1.4; margin-bottom: 8px; }
+    .case-card h3, .selected-case-title { font-size: 16px; line-height: 1.4; margin-bottom: 8px; }
     .case-card p, .value-notes p { margin: 8px 0; }
     .case-gain-label { display: block; color: #c5d9f2; font-size: 11px; font-weight: 600; margin-bottom: 2px; }
     .case-card .case-trial { margin: 4px 0 0; }

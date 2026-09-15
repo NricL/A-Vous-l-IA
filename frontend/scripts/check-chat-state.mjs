@@ -17,9 +17,9 @@ const setup = parse(homeSource).descriptor.scriptSetup.content
   .replace(/import \{([^}]+)\} from 'vue'/, 'const {$1} = vue')
   .replace(/import \{([^}]+)\} from '@\/api\/chat'/, 'const {$1} = api')
 const expose = `
-return { submit, goBackToStep, messages, loading, currentPhase, showStepper, steps, selectedDomainCode,
+return { submit, goBackToStep, messages, input, loading, currentPhase, showStepper, steps, selectedDomainCode,
   selectedSector, selectedIntention, lastSuggestedCases, pendingAction, pendingUseCaseId, choicesFor, lastAssistantIndex,
-  failedTurn, error, retryLastRequest, selectedValue, messagesBox, chatInputRef, revealReply }
+  failedTurn, error, retryLastRequest, selectedValue, selectedCase, messagesBox, chatInputRef, revealReply }
 `
 const createSetup = new Function('vue', 'api', 'document', setup + expose)
 
@@ -278,6 +278,71 @@ const followupCase = {
   content: 'Autre cas fictif.',
   cas_utilisation: 'Suivre les actions',
   parcours_url: 'https://example.test/action-followup.html',
+}
+
+test('selected handoff renders escaped title before the single existing CTA, with verbose fallback only', () => {
+  const branch = homeSource.split('<h3 v-else-if="selectedCase(msg)"')[1].split('<div\n')[0]
+  assert.match(branch, /class="selected-case-title">\{\{ selectedCase\(msg\)\.cas_utilisation \}\}<\/h3>/)
+  assert.match(branch, /<template v-else>\s*<span class="msg-text">\{\{ msg\.content \}\}<\/span>/)
+  assert.ok(branch.indexOf('<template v-else>') < branch.indexOf('selectedValue(msg)'))
+  assert.equal(homeSource.match(/class="parcours-cta"/g).length, 1)
+  assert.doesNotMatch(homeSource, /v-html/)
+  assert.match(homeSource, /:href="msg.parcoursUrl"/)
+})
+
+test('selected handoff follows the unique exact URL even for the last case and malicious title text', t => {
+  const f = fixture(t)
+  const last = { ...followupCase, cas_utilisation: '<img src=x onerror=alert(1)> & suivi' }
+  const msg = { role: 'assistant', content: 'Réponse longue inchangée', parcoursUrl: last.parcours_url,
+    suggestedCases: [stockCase, last] }
+  assert.equal(f.home.selectedCase(msg), last)
+  assert.equal(msg.content, 'Réponse longue inchangée')
+  assert.equal(f.home.selectedCase({ ...msg, suggestedCases: [last] }), last)
+})
+
+test('unmapped, missing, ambiguous and untitled selections keep the original response fallback', t => {
+  const f = fixture(t)
+  const msg = { role: 'assistant', content: 'Ce que ça vous apporte : détails source.',
+    parcoursUrl: stockCase.parcours_url, suggestedCases: [stockCase] }
+  for (const patch of [
+    { parcoursUrl: null }, { parcoursUrl: followupCase.parcours_url },
+    { suggestedCases: undefined }, { suggestedCases: [] }, { suggestedCases: [null] },
+    { suggestedCases: [stockCase, { ...stockCase }] }, { role: 'user' },
+    { suggestedCases: [{ ...stockCase, cas_utilisation: '' }] },
+    { suggestedCases: [{ ...stockCase, cas_utilisation: '  ' }] },
+  ]) assert.equal(f.home.selectedCase({ ...msg, ...patch }), null)
+})
+
+for (const mode of ['card', 'typed']) {
+  test(`compact handoff preserves ${mode} numeric request and raw history for later turns`, async t => {
+    const f = fixture(t)
+    const list = f.home.submit('Besoin fictif')
+    await vue.nextTick()
+    f.token('Choisissez une piste à approfondir.')
+    f.done({ suggested_cases: [stockCase, followupCase], pending_action: 'select_case' })
+    await list
+    if (mode === 'typed') f.home.input.value = '2'
+    const detail = mode === 'card' ? f.home.submit('2') : f.home.submit()
+    await vue.nextTick()
+    const raw = 'Ce que ça vous apporte : contenu détaillé à conserver pour le contexte.'
+    f.token(raw)
+    f.done({ suggested_cases: [stockCase, followupCase], parcours_url: followupCase.parcours_url,
+      parcours_cta_label: 'Ouvrir mon guide', pending_action: null })
+    await detail
+    const msg = f.home.messages.value.at(-1)
+    assert.equal(f.requests[1].message, '2')
+    assert.equal(f.home.selectedCase(msg).id, followupCase.id)
+    assert.equal(msg.content, raw)
+    assert.equal(msg.parcoursCtaLabel, 'Ouvrir mon guide')
+    const next = f.home.submit('Précision')
+    await vue.nextTick()
+    assert.equal(f.requests[2].history.at(-1).content, raw)
+    f.done({})
+    await next
+    assert.equal(f.home.selectedCase(msg).id, followupCase.id, 'historical selected response remains independent')
+    f.home.goBackToStep(4)
+    assert.deepEqual(f.home.lastSuggestedCases.value.map(c => c.id), [stockCase.id, followupCase.id])
+  })
 }
 
 for (const text of [
