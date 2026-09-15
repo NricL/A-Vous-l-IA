@@ -1,5 +1,35 @@
 # Avoulia V2 — Implementation Handover Guide for Simplon
 
+## Secteur générique en dernier — demande du15septembre à14:04, publiée
+
+`get_q15_choices` affiche le socle de secteurs dans son ordre existant, puis les
+compléments du catalogue triés, puis **une seule option « Autre / Non spécifique »**.
+Les alias/dédoublonnages, trois domaines sans question secteur et filtres restent
+inchangés. Le rappel de numérotation du prompt backend est aligné ; aucun prompt de
+parcours n'est modifié. Les numéros des compléments et d'« Autre » peuvent changer.
+Le résolveur historique existant lit le libellé réellement affiché avant de résoudre
+un ancien numéro ; les régressions couvrent aussi un état client périmé contradictoire.
+Sans liste affichée dans l'historique, un numéro seul utilise la liste courante.
+
+Source `c455375`, CI `34967241738` réussie ; backend `v463-sector-last-20260915-r1`
+sain à100%, build `dd3f`, image
+`acravoulia97186.azurecr.io/avoulia-backend@sha256:a484c75310824f8a7c021715823c5a55f94cf9eaba5539cbe5ef5887fcc701b8`.
+Retour arrière actif : clarté r2 (`d34b30d8…d0964ed4`).
+118tests locaux puis dans l'image Python3.11 ;14domaines/11menus secteur vérifiés
+en HTTP et SSE,190contrôles de sélection candidate puis190principale (numéros,
+libellés et anciens menus). Recette réelle Pages après rechargement : Achats,
+« Agroalimentaire » en6 et « Autre » en8, chacun sélectionne le bon secteur.
+1 025empreintes de pages héritées inchangées dans l'image et sur les deux URL ;
+configuration Azure, frontend handoff r1, base, taxonomie et filtres inchangés.
+
+Deux HTTP500 initiaux lors de la première qualification parallèle candidate ont
+disparu lors des recontrôles séquentiel puis parallèle complets ; cause non établie,
+consignée dans le reçu, pas présentée comme un correctif réalisé. Les timeouts TLS
+de lecture ont été retentés de façon bornée, sans masquer les échecs finaux.
+Reçu : `_local-trace/2026-09-15-sector-last/deployment-receipt.json`.
+Aucun classeur lu, prototypes exclus, aucun nouveau build frontend/Pages.
+**Kit Simplon/gel toujours en pause** ; tests métier et réserves taxonomiques hors lot.
+
 ## Parcours clarifiés — demande du 15 septembre à12:38–12:39, publiée
 
 **État vérifié le15septembre à13:22 (Paris) :** backend

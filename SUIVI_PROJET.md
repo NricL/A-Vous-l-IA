@@ -1,5 +1,21 @@
 # Avoulia V2 — Suivi Projet & Décisions
 
+### 15septembre — « Autre / Non spécifique » en dernier, demande14:04 livrée
+
+Ordre Q1.5 : socle inchangé → compléments triés → option générique unique en dernier.
+Numéros des compléments/Autre ajustés ; ancien numéro interprété selon le libellé
+affiché dans l'historique, même avec un état client périmé. Pas de changement de filtre,
+d'alias, de taxonomie ou de question pour les trois domaines sans secteur.
+Source `c455375`, CI `34967241738`, backend `v463-sector-last-20260915-r1` sain à100%,
+build `dd3f`, digest `a484c75310824f8a7c021715823c5a55f94cf9eaba5539cbe5ef5887fcc701b8`.
+Rollback clarté r2 actif ; frontend handoff r1 et1 025pages inchangés.
+118tests locaux/image,14domaines/11menus et190sélections HTTP/SSE candidate puis
+principale ; clics réels Pages Achats6→Agroalimentaire et8→Autre réussis.
+Deux500 initiaux de recette candidate non reproduits au recontrôle complet, cause
+non établie ; détails dans `HANDOFF.md` et reçu
+`_local-trace/2026-09-15-sector-last/deployment-receipt.json`.
+Aucun classeur lu ; prototypes exclus ; **kit/gel en pause**.
+
 ### 15septembre — clarification complète demandée à12:38–12:39, livrée
 
 1 021parcours publics actualisés :3 774préparations autonomes,1 021productions

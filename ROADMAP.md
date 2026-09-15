@@ -6,6 +6,15 @@ repo pour rester traçable côté Eneric **et** côté Simplon.
 
 **Dernière mise à jour :** 2026-09-15
 
+**14:04 — secteur générique en dernier livré :** socle existant, compléments triés,
+puis une seule option « Autre / Non spécifique ». Les anciens numéros sont résolus
+selon leur liste affichée dans l'historique, sans modifier les filtres ni la taxonomie.
+Source `c455375`, backend `v463-sector-last-20260915-r1` sain à100%, build `dd3f`,
+rollback clarté r2 actif.118tests locaux/image ;14domaines,190sélections HTTP/SSE
+par environnement et recette Pages Achats réussis.1 025pages clarté/historiques
+inchangées ; frontend handoff r1 conservé. CI `34967241738`. Détails et incident
+transitoire de recette dans `HANDOFF.md`. Kit/gel en pause.
+
 **12:38–12:39 — nettoyage des parcours livré :**1 021parcours actualisés sans lecture
 de classeur ;3 774prompts de préparation,1 021de production et1 021de réutilisation
 autonomes. Une progression en six étapes, production en4, vérification en5 et consigne
