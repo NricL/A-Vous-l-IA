@@ -139,6 +139,8 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--ligne);
   font-size:13px;color:var(--sourdine)}
 footer a{color:var(--action)}
 input:focus-visible,summary:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--action);outline-offset:2px}
+summary:focus-visible{outline-offset:-3px}
+.copie-statut{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 </style>
 </head>
 <body>
@@ -680,6 +682,7 @@ Termine chaque livrable par : « À faire valider en interne avant usage. »</pr
 </footer>
 
 </div>
+<p id="copie-statut" class="copie-statut" role="status" aria-atomic="true"></p>
 <script>
 (function(){
   function ouvrirPrompt(){
@@ -739,13 +742,15 @@ Termine chaque livrable par : « À faire valider en interne avant usage. »</pr
   }
 
   // boutons copier
+  var statutCopie=document.getElementById('copie-statut');
   document.querySelectorAll('[data-copie]').forEach(function(btn){
     btn.addEventListener('click',function(){
+      statutCopie.textContent='';
       var ticket=btn.closest('.ticket');
       var precedent=ticket.querySelector('[data-copie-manuelle]');
       if(precedent) precedent.remove();
       var txt=ticket.querySelector('pre').textContent;
-      function ok(){ btn.textContent="Copié ✓"; setTimeout(function(){btn.textContent="Copier";},2000); }
+      function ok(){ btn.textContent="Copié ✓"; statutCopie.textContent="Texte copié. Collez-le vous-même dans votre assistant IA autorisé."; setTimeout(function(){btn.textContent="Copier";},2000); }
       function secours(){
         var t=document.createElement('textarea'); t.value=txt; t.setAttribute('readonly','');
         t.style.position='fixed'; t.style.opacity='0'; document.body.appendChild(t);
@@ -760,6 +765,7 @@ Termine chaque livrable par : « À faire valider en interne avant usage. »</pr
           manuel.value=txt; manuel.readOnly=true; manuel.setAttribute('aria-label','Texte à copier manuellement');
           manuel.setAttribute('data-copie-manuelle',''); ticket.appendChild(manuel);
           manuel.focus(); manuel.select();
+          statutCopie.textContent="Copie automatique indisponible. Le texte est sélectionné pour une copie manuelle.";
         }
       }
       if(navigator.clipboard&&navigator.clipboard.writeText){

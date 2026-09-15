@@ -47,7 +47,7 @@
                         <span v-if="selectedIntention"> · {{ contextLabel(selectedIntention, 2) }}</span>
                         <small>Les étapes cochées ci-dessus permettent de corriger vos choix et de refaire la suite.</small>
                     </div>
-                    <div class="chat-messages" id="chatMessages" ref="messagesBox" role="log" aria-label="Conversation" :aria-busy="loading">
+                    <div class="chat-messages" id="chatMessages" ref="messagesBox" role="log" aria-label="Conversation" tabindex="0" :aria-busy="loading">
                         <template v-if="!messages.length">
                             <div class="msg msg-bot">Chargement…</div>
                         </template>
@@ -55,7 +55,8 @@
                             <div
                                 v-for="(msg, i) in messages"
                                 :key="`${i}-${msg.role}`"
-                                :class="['msg', msg.role === 'user' ? 'msg-user' : 'msg-bot']"
+                                :class="['msg', msg.role === 'user' ? 'msg-user' : 'msg-bot', { 'msg-cases': messagePhase(msg) === 4 && msg.suggestedCases?.length }]"
+                                :tabindex="msg.role === 'user' ? null : -1"
                             >
                                 <template v-if="messagePhase(msg) === 4 && msg.suggestedCases?.length">
                                     <p>Voici les pistes proposées pour votre besoin. Choisissez celle à approfondir.</p>
@@ -83,7 +84,7 @@
                                         </details>
                                         <button v-if="i === lastAssistantIndex" type="button" class="chip choice-chip"
                                             :disabled="loading" @click="submit(String(ci + 1))"
-                                            :aria-label="`Choisir : ${c.cas_utilisation || `piste ${ci + 1}`}`">
+                                            :aria-label="`Choisir cette piste : ${c.cas_utilisation || `piste ${ci + 1}`}`">
                                             Choisir cette piste
                                         </button>
                                     </article>
@@ -154,16 +155,14 @@
                             </div>
                         </template>
 
-                        <div v-if="loading" class="waiting-status" role="status">
-                            Réponse en cours. Vous pourrez poursuivre dès sa réception.
-                        </div>
-
-                        <div v-if="error" class="msg msg-bot" role="alert">
+                    </div>
+                    <div class="waiting-status" role="status" aria-atomic="true"
+                        v-text="loading ? 'Réponse en cours. Vous pourrez poursuivre dès sa réception.' : ''"></div>
+                        <div v-if="error" class="chat-error msg msg-bot" role="alert">
                             <p>La réponse n'a pas pu être confirmée : {{ error }}</p>
                             <button v-if="failedTurn" type="button" class="chip choice-chip" :disabled="loading" @click="retryLastRequest">Réessayer la même demande</button>
                             <small>Vos choix sont conservés. Réessayer envoie une nouvelle requête ; une précédente exécution peut avoir continué côté serveur.</small>
                         </div>
-                    </div>
                     <form class="chat-input-bar" @submit.prevent="submit()">
                         <input
                             ref="chatInputRef"
@@ -461,7 +460,7 @@
         </div>
 
         <!-- ══════ FOOTER ══════ -->
-        <footer>
+        <footer class="home-footer">
             <p class="footer-legal">Ce chatbot est op&eacute;r&eacute; par <a href="https://www.simplon.co"
                     target="_blank">Simplon</a>, avec le soutien technologique de <a
                     href="https://www.microsoft.com/fr-fr" target="_blank">Microsoft</a>. Il fournit des id&eacute;es
@@ -676,7 +675,7 @@ function goBackToStep(stepIndex) {
     error.value = null
     failedTurn.value = null
     loading.value = false
-    nextTick(() => { scrollToBottom(); chatInputRef.value?.focus() })
+    revealReply(true)
 }
 
 const lastSuggestedCases = ref(null)
@@ -689,6 +688,25 @@ const pendingUseCaseId = ref(null)
 function scrollToBottom() {
     nextTick(() => {
         if (messagesBox.value) messagesBox.value.scrollTop = messagesBox.value.scrollHeight
+    })
+}
+
+function revealReply(force = false) {
+    nextTick(() => {
+        const box = messagesBox.value
+        if (!box || typeof document === 'undefined') return
+        const active = document.activeElement
+        // A completed request must not take focus back from another part of the page.
+        if (!force && active && active !== document.body && active !== chatInputRef.value
+            && !active.classList?.contains('chat-send')) return
+        const target = error.value
+            ? box.parentElement?.querySelector('.chat-error button')
+            : Array.from(box.querySelectorAll('.msg-bot')).at(-1)
+        if (!target) return
+        if (!error.value) {
+            box.scrollTop += target.getBoundingClientRect().top - box.getBoundingClientRect().top - 16
+        }
+        target.focus({ preventScroll: true })
     })
 }
 
@@ -716,8 +734,7 @@ Dans quel domaine travaillez-vous principalement ?`,
         }]
     }
 
-    scrollToBottom()
-    nextTick(() => chatInputRef.value?.focus())
+    // Leave the welcome and its first choices visible without taking initial focus.
 })
 
 async function retryLastRequest() {
@@ -752,7 +769,7 @@ async function submit(forcedText = null, retryRequest = null) {
         failedTurn.value = { request, messages: previousMessages }
         messages.value = [...previousMessages, userMessage]
         loading.value = false
-        nextTick(() => { scrollToBottom(); chatInputRef.value?.focus() })
+        revealReply()
     }
     loading.value = true
     input.value = ''
@@ -777,7 +794,6 @@ async function submit(forcedText = null, retryRequest = null) {
                             ...messages.value.slice(0, idx),
                             { role: 'assistant', content: prev.content + token },
                         ]
-                        scrollToBottom()
                     }
                 },
                 onDone(payload) {
@@ -816,10 +832,7 @@ async function submit(forcedText = null, retryRequest = null) {
                     }
 
                     loading.value = false
-                    nextTick(() => {
-                        scrollToBottom()
-                        chatInputRef.value?.focus()
-                    })
+                    revealReply()
                 },
                 onError(msg) {
                     fail(msg)
@@ -835,15 +848,21 @@ async function submit(forcedText = null, retryRequest = null) {
 <style>
     .context-summary { padding: 10px 16px; background: var(--blue-light); font-size: 13px; overflow-wrap: anywhere; }
     .context-summary small, .msg small { display: block; margin-top: 6px; }
-    .case-card { border: 1px solid var(--gray-200); border-radius: 10px; padding: 14px; margin-top: 12px; background: var(--white); }
+    .case-card { border: 1px solid var(--gray-200); border-radius: 10px; padding: 14px; margin-top: 12px; background: var(--white); color: var(--gray-800); }
     .case-card h3 { font-size: 16px; line-height: 1.4; margin-bottom: 8px; }
     .case-card p, .value-notes p { margin: 8px 0; }
     .source-text { white-space: pre-wrap; overflow-wrap: anywhere; }
     .value-notes { margin: 10px 0; }
     .value-notes summary { cursor: pointer; padding: 10px 0; min-height: 44px; font-weight: 600; }
-    .case-card .choice-chip { margin-top: 10px; }
-    .waiting-status { padding: 12px; color: var(--gray-600); }
+    .case-card .choice-chip { margin-top: 10px; color: var(--blue-dark); background: var(--blue-light); border-color: var(--blue); }
+    .case-card .choice-chip:hover { color: var(--blue-dark); background: var(--blue-light); }
+    .waiting-status { padding: 12px; color: #b8c7da; font-size: 13px; flex-shrink: 0; }
+    .waiting-status:empty { padding: 0; }
+    .chat-error { flex-shrink: 0; margin: 8px 16px; }
+    .chat-window .case-card :focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+    .chat-window .chat-messages:focus-visible, .chat-window .msg-bot:focus-visible { outline: 2px solid #b4d2ff; outline-offset: -3px; }
     .chat-window .choice-chip { min-height: 44px; }
+    .chat-window .msg-cases { max-width: 100%; }
     .chat-window :focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
     *,
     *::before,
@@ -858,7 +877,7 @@ async function submit(forcedText = null, retryRequest = null) {
         --gray-50: #f8f8f7;
         --gray-100: #ededeb;
         --gray-200: #d9d8d4;
-        --gray-400: #9b9a95;
+        --gray-400: #686760;
         --gray-600: #5c5b57;
         --gray-800: #2e2d2b;
         --gray-900: #1a1a18;
@@ -952,7 +971,7 @@ async function submit(forcedText = null, retryRequest = null) {
 
     .hero-partner-label {
         font-size: 11px;
-        color: rgba(255, 255, 255, 0.35);
+        color: #b8c7da;
         font-weight: 500;
         letter-spacing: 0.3px;
         white-space: nowrap;
@@ -1239,7 +1258,7 @@ async function submit(forcedText = null, retryRequest = null) {
 
     .case-feedback-q {
         font-size: 12px;
-        color: var(--muted, #6b7280);
+        color: #b8c7da;
     }
 
     .fb-btn {
@@ -1492,7 +1511,7 @@ async function submit(forcedText = null, retryRequest = null) {
     }
 
     .chat-input::placeholder {
-        color: rgba(255, 255, 255, 0.22);
+        color: #b8c7da;
     }
 
     .chat-send {
@@ -1552,7 +1571,7 @@ async function submit(forcedText = null, retryRequest = null) {
 
     .ai-disclaimer p {
         font-size: 10.5px;
-        color: rgba(255, 255, 255, 0.28);
+        color: #b8c7da;
         line-height: 1.55;
     }
 
@@ -1668,7 +1687,7 @@ async function submit(forcedText = null, retryRequest = null) {
 
     .stat-label {
         font-size: 13px;
-        color: rgba(255, 255, 255, 0.38);
+        color: #b8c7da;
     }
 
     /* ══════ REMERCIEMENTS ══════ */
@@ -1866,9 +1885,9 @@ async function submit(forcedText = null, retryRequest = null) {
     }
 
     /* ══════ FOOTER ══════ */
-    footer {
+    .home-footer {
         background: var(--hero-bg);
-        color: rgba(255, 255, 255, 0.35);
+        color: #b8c7da;
         padding: 2rem 5rem;
         font-size: 12px;
         display: flex;
@@ -1882,13 +1901,13 @@ async function submit(forcedText = null, retryRequest = null) {
         max-width: 680px;
     }
 
-    footer a {
-        color: rgba(255, 255, 255, 0.45);
+    .home-footer a {
+        color: #b8c7da;
         text-decoration: none;
         transition: color .15s;
     }
 
-    footer a:hover {
+    .home-footer a:hover {
         color: rgba(255, 255, 255, 0.85);
     }
 
@@ -1899,15 +1918,15 @@ async function submit(forcedText = null, retryRequest = null) {
         flex-wrap: wrap;
     }
 
-    .footer-links a {
+    .home-footer .footer-links a {
         font-size: 11.5px;
         font-weight: 600;
         letter-spacing: 0.3px;
         text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.35);
+        color: #b8c7da;
     }
 
-    .footer-links a:hover {
+    .home-footer .footer-links a:hover {
         color: rgba(255, 255, 255, 0.75);
     }
 
@@ -1928,6 +1947,12 @@ async function submit(forcedText = null, retryRequest = null) {
         transform: translateY(0);
     }
 
+    @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        *, *::before, *::after { animation: none !important; transition: none !important; }
+        .reveal { opacity: 1; transform: none; }
+    }
+
     /* ══════ RESPONSIVE ══════ */
     @media (max-width: 960px) {
         .hero {
@@ -1946,7 +1971,8 @@ async function submit(forcedText = null, retryRequest = null) {
         }
 
         .chat-window {
-            height: 400px;
+            height: min(640px, calc(100svh - 64px));
+            min-height: 400px;
         }
 
         .ai-disclaimer {
@@ -1987,7 +2013,7 @@ async function submit(forcedText = null, retryRequest = null) {
             padding-right: 1.5rem;
         }
 
-        footer {
+        .home-footer {
             padding: 1.5rem;
         }
 

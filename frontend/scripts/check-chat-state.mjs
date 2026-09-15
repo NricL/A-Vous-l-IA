@@ -19,11 +19,20 @@ const setup = parse(homeSource).descriptor.scriptSetup.content
 const expose = `
 return { submit, goBackToStep, messages, loading, currentPhase, showStepper, steps, selectedDomainCode,
   selectedSector, selectedIntention, lastSuggestedCases, pendingAction, pendingUseCaseId, choicesFor, lastAssistantIndex,
-  failedTurn, error, retryLastRequest, selectedValue }
+  failedTurn, error, retryLastRequest, selectedValue, messagesBox, chatInputRef, revealReply }
 `
-const createSetup = new Function('vue', 'api', setup + expose)
+const createSetup = new Function('vue', 'api', 'document', setup + expose)
 
-function fixture(t) {
+test('homepage footer contrast is isolated from global legal-view footer rules', () => {
+  assert.match(homeSource, /<footer class="home-footer">/)
+  const styles = parse(homeSource).descriptor.styles.map(style => style.content).join('\n')
+  for (const selector of ['.home-footer', '.home-footer a', '.home-footer .footer-links a']) {
+    const rule = styles.slice(styles.indexOf(`${selector} {`)).split('}')[0]
+    assert.match(rule, /color:\s*#b8c7da;/)
+  }
+})
+
+function fixture(t, document) {
   let callbacks
   let finish
   const requests = []
@@ -38,6 +47,7 @@ function fixture(t) {
         await new Promise(resolve => { finish = resolve })
       },
     },
+    document,
   ))
   home.messages.value = [
     { role: 'assistant', content: 'Dans quel domaine travaillez-vous ?' },
@@ -56,6 +66,54 @@ function fixture(t) {
     error: message => { callbacks.onError(message); finish() },
   }
 }
+
+  test('completed response starts at its beginning and receives focus, not the input', async t => {
+    const body = {}
+    const f = fixture(t, { body, activeElement: body })
+    let focused = 0
+    const reply = { getBoundingClientRect: () => ({ top: 150 }), focus: () => focused++ }
+    f.home.messagesBox.value = { scrollTop: 20, getBoundingClientRect: () => ({ top: 100 }),
+      querySelectorAll: () => [reply] }
+    f.home.revealReply()
+    await vue.nextTick()
+    assert.equal(f.home.messagesBox.value.scrollTop, 54)
+    assert.equal(focused, 1)
+  })
+
+  test('response completion preserves focus and reading position outside the input', async t => {
+    const f = fixture(t, { body: {}, activeElement: { classList: { contains: () => false } } })
+    f.home.messagesBox.value = { scrollTop: 12, querySelectorAll: () => { throw Error('stolen focus') } }
+    f.home.revealReply()
+    await vue.nextTick()
+    assert.equal(f.home.messagesBox.value.scrollTop, 12)
+  })
+
+  test('streaming text no longer pushes the reader to the bottom on every token', async t => {
+    const f = fixture(t)
+    const request = f.home.submit('besoin fictif')
+    await vue.nextTick()
+    await vue.nextTick()
+    f.home.messagesBox.value = { scrollTop: 17, scrollHeight: 999 }
+    f.token('Premier paragraphe')
+    await vue.nextTick()
+    assert.equal(f.home.messagesBox.value.scrollTop, 17)
+    f.done({})
+    await request
+  })
+
+  test('failure focuses exact retry only while focus remains available to chat', async t => {
+    const body = {}
+    const f = fixture(t, { body, activeElement: body })
+    let focused = 0
+    f.home.messagesBox.value = { parentElement: { querySelector: selector => {
+      assert.equal(selector, '.chat-error button')
+      return { focus: () => focused++ }
+    } } }
+    f.home.error.value = 'Erreur simulée'
+    f.home.revealReply()
+    await vue.nextTick()
+    assert.equal(focused, 1)
+  })
 
 function state(home) {
   return [home.selectedDomainCode.value, home.selectedSector.value, home.selectedIntention.value]
