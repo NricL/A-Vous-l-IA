@@ -1,5 +1,53 @@
 # Avoulia V2 — Implementation Handover Guide for Simplon
 
+## Parcours clarifiés — demande du 15 septembre à12:38–12:39, publiée
+
+**État vérifié le15septembre à13:22 (Paris) :** backend
+`v463-clarity-20260915-r2` sain à100%, build `dd3e`, image
+`acravoulia97186.azurecr.io/avoulia-backend@sha256:d34b30d85f20381c42cba0d7e2ef4d6b41991cf2310dc027b22bdee6d0964ed4`.
+Rollback conservé : backend accessibilité r1 (`7b313f2a…fe1545`).
+Frontend `v463-handoff-20260915-r1` inchangé à100% ; aucun redéploiement Pages requis.
+Sources publiées : chatbot `ff92a77`, générateur privé `de22410`.
+CI publique `34962170775` réussie.
+
+Les1 021parcours actuels suivent toujours les six étapes, mais chaque action est
+désormais au bon endroit : préparer une seule entrée en2, produire à partir des
+contenus collés en4, vérifier le résultat en5, créer une consigne réutilisable en6.
+Les3 774prompts de préparation,1 021de production et1 021de réutilisation donnent
+leur contexte, entrées, résultat et gestion des informations absentes dans le texte
+copié lui-même. Aucun historique de conversation ni connaissance des étapes requis.
+Le raccourci de production en bas est supprimé ; son ancre directe reste accessible.
+
+L'entrée présente gain potentiel, résultat et condition d'observation, sans les deux
+accordéons techniques. Conditions utiles et contreparties sont replacées en1 et3.
+« Gardez le lien… » et « Revenir volontairement à ce cas » sont supprimés.
+La réutilisation repose sur une consigne à copier dans une nouvelle conversation ;
+agent/GPT/skill est une possibilité facultative selon l'outil et son offre, pas une
+condition ni une automatisation promise. Validation humaine et précautions conservées.
+Ces choix remplacent les descriptions historiques contraires ci-dessous.
+
+Publication issue uniquement des HTML déjà approuvés : aucun classeur lu ou modifié.
+Identités, URL, faits/précautions source et5 105champs éditoriaux avec provenance
+inchangés ; quatre pages historiques conservées octet pour octet. Sélection/RAG,
+taxonomie, modèles, environnement et échelle Azure inchangés.
+Le premier staging r1, jamais promu, a été désactivé après détection d'un changement
+de namespace Chroma par l'ancien helper ; r2 recopie exactement la configuration stable.
+
+Validation :52tests ciblés (40publics/backend +12générateur), contrôles structurels
+sur les5 816prompts et revue sémantique de38cas couvrant14domaines. Ce n'est pas une
+exécution du corpus dans des IA externes ni une recette métier utilisateur.
+Les1 025empreintes HTTP candidate puis principale correspondent au manifeste ;
+anciens validateurs de cache renouvelés, six chemins privés404. Deux scénarios API
+synthétiques réels et un parcours réel Pages → troisième cas → page actualisée réussis.
+26contrôles navigateur par passage local/candidate/principal : clavier,320/390/1280px,
+copie exacte transmise à l'API, repli manuel et bilan non conservé. Le navigateur de
+test ne restitue pas son presse-papiers natif ; aucune réussite de cette relecture
+ni certification WCAG exhaustive n'est revendiquée.
+
+Reçu et preuves : `_local-trace/2026-09-15-parcours-clarity/deployment-receipt.json`.
+Classeur local modifié et prototypes non publiés exclus. **Kit Simplon/gel en pause** ;
+réserves taxonomiques et tests métier restent hors de cette livraison.
+
 ## Accès direct après choix — 15 septembre, demande12:17 livrée
 
 Après « Choisir cette piste » ou son numéro, la réponse confirmée affiche le

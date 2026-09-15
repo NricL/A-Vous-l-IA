@@ -1,5 +1,27 @@
 # Avoulia V2 — Suivi Projet & Décisions
 
+### 15septembre — clarification complète demandée à12:38–12:39, livrée
+
+1 021parcours publics actualisés :3 774préparations autonomes,1 021productions
+placées en4,1 021consignes de réutilisation en6. Suppression des accordéons techniques
+de l'entrée, du détour de production en bas et de la conservation du lien de retour.
+Réutilisation simple par copier-coller ; assistants personnalisés seulement facultatifs,
+sans promesse d'exécution automatique. Six étapes, sources et5 105champs éditoriaux
+avec provenance conservés ; quatre historiques identiques, aucun classeur lu.
+
+Sources `ff92a77`/générateur `de22410` publiées, CI `34962170775` réussie.
+Backend `v463-clarity-20260915-r2` sain à100%, build `dd3e`,
+digest `d34b30d85f20381c42cba0d7e2ef4d6b41991cf2310dc027b22bdee6d0964ed4`.
+Rollback accessibilité r1 conservé ; frontend handoff r1 inchangé.
+52tests,5 816prompts contrôlés,38revues sémantiques/14domaines,1 025empreintes
+candidate puis principale, deux scénarios API réels et chemin Pages→parcours réussis.
+Clavier/reflow/copie exacte et repli manuel vérifiés ; relecture du presse-papiers natif
+non vérifiable dans ce navigateur. Ni exécution externe de tout le corpus, ni recette
+métier ou conformité certifiée. RAG/modèles/taxonomie inchangés.
+Reçu : `_local-trace/2026-09-15-parcours-clarity/deployment-receipt.json`.
+Classeur/prototypes exclus ; **kit/gel en pause**. Détails et staging r1 écarté dans
+`HANDOFF.md`. Les anciens parcours décrits ci-dessous sont historiques.
+
 ### 15septembre — accès direct après choix demandé à12:17, livré
 
 Titre source puis CTA parcours immédiatement dans la réponse confirmée ; pas de

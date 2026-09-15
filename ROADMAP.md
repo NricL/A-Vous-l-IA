@@ -6,6 +6,18 @@ repo pour rester traçable côté Eneric **et** côté Simplon.
 
 **Dernière mise à jour :** 2026-09-15
 
+**12:38–12:39 — nettoyage des parcours livré :**1 021parcours actualisés sans lecture
+de classeur ;3 774prompts de préparation,1 021de production et1 021de réutilisation
+autonomes. Une progression en six étapes, production en4, vérification en5 et consigne
+portable en6 ; suppression des deux accordéons techniques et de la conservation du lien.
+Agent/GPT/skill facultatif, sans promesse d'automatisation ou de fonctionnalité gratuite.
+Sources `ff92a77`/générateur `de22410`, backend `v463-clarity-20260915-r2` sain à100%,
+build `dd3e` ; frontend handoff r1 conservé.52tests,38revues sémantiques/14domaines,
+1 025empreintes candidate/principal et parcours réel Pages vérifiés ; CI `34962170775`.
+Source métier,5 105champs éditoriaux, sélection/RAG et quatre historiques inchangés.
+Détails/limites dans `HANDOFF.md`. Kit/gel toujours en pause ; recette métier à poursuivre.
+Ce jalon remplace les dispositions historiques de retour par lien et de prompt en bas.
+
 **12:17 — accès direct après choix livré :** titre du cas sélectionné puis lien
 parcours, sans répéter le déplieur précédent. Identité vérifiée par l'URL serveur ;
 fallback explicite si correspondance absente/ambiguë. Historique/API inchangés,
