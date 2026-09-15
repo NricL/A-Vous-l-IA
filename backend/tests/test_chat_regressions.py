@@ -647,8 +647,8 @@ class IndexedSectorMenuTests(SyntheticRagTests):
             meta={"domaine": domain or self.domain, field: sector, "intention": INTENTIONS[0]},
         )
 
-    def test_indexed_sector_extends_menu_without_changing_existing_numbers(self):
-        original = rag.SECTEURS_PAR_DOMAINE[self.domain] + ["Autre / Non spécifique"]
+    def test_indexed_sectors_precede_other_without_changing_canonical_order(self):
+        original = list(rag.SECTEURS_PAR_DOMAINE[self.domain])
         docs = [
             self.doc("Atelier Zêta"), self.doc("Atelier Alpha"),
             self.doc("atelier zeta"), self.doc("btp"), self.doc("Services et artisanat"),
@@ -656,20 +656,64 @@ class IndexedSectorMenuTests(SyntheticRagTests):
             self.doc("Hôtellerie et tourisme", field="secteur_activité"),
             self.doc("Atelier Interdit", domain="production"),
         ]
-        expected = original + ["Atelier Alpha", "Atelier Zêta", "Hôtellerie & tourisme"]
+        expected = original + ["Atelier Alpha", "Atelier Zêta", "Hôtellerie & tourisme", "Autre / Non spécifique"]
         for corpus in (docs, list(reversed(docs))):
             with patch.object(rag, "_fetch_documents_for_domaine", return_value=corpus) as metadata:
                 choices = rag.get_q15_choices(self.domain)
             self.assertEqual(choices, expected)
             metadata.assert_called_once_with(self.domain, metadata_only=True)
-        self.assertEqual(rag.SECTEURS_PAR_DOMAINE[self.domain], original[:-1])
+        self.assertEqual(rag.SECTEURS_PAR_DOMAINE[self.domain], original)
+
+    def test_other_is_unique_and_last_for_every_sector_domain_and_numeric_choice(self):
+        for domain, original in rag.SECTEURS_PAR_DOMAINE.items():
+            if domain in rag.DOMAINES_SANS_SECTEURS or not original:
+                continue
+            docs = [self.doc(sector, domain=domain) for sector in (
+                "Atelier Zêta", "Atelier Alpha", "Autre", "Non spécifique",
+                "Autre / Non spécifique", "multi-sectoriel", "Atelier Alpha; Autre",
+            )]
+            with self.subTest(domain=domain), patch.object(rag, "_fetch_documents_for_domaine", return_value=docs):
+                choices = rag.get_q15_choices(domain)
+                self.assertEqual(choices, original + ["Atelier Alpha", "Atelier Zêta", "Autre / Non spécifique"])
+                self.assertEqual(choices.count("Autre / Non spécifique"), 1)
+                for number, label in enumerate(choices, 1):
+                    for reply in (str(number), label, f"{number}. {label}"):
+                        self.assertEqual(
+                            rag._resolve_selection_state(reply, domain, None, None, expected_step="sector"),
+                            (domain, label, None),
+                        )
+
+    def test_predeployment_menu_numbers_keep_their_displayed_sector(self):
+        original = rag.SECTEURS_PAR_DOMAINE[self.domain]
+        old_choices = original + ["Autre / Non spécifique", "Atelier Alpha", "Atelier Zêta"]
+        old_menu = "\n".join(f"{i}. {label}" for i, label in enumerate(old_choices, 1))
+        history = [assistant(DOMAIN_QUESTION), user("13"), assistant(SECTOR_QUESTION + "\n" + old_menu)]
+        with patch.object(rag, "_fetch_documents_for_domaine",
+                          return_value=[self.doc("Atelier Alpha"), self.doc("Atelier Zêta")]):
+            current = rag.get_q15_choices(self.domain)
+            for label in ("Autre / Non spécifique", "Atelier Alpha", "Atelier Zêta"):
+                number = str(old_choices.index(label) + 1)
+                self.assertNotEqual(current[int(number) - 1], label)
+                for reply in (number, f"{number}. {label}", label):
+                    with self.subTest(label=label, reply=reply):
+                        self.assertEqual(rag._get_sector_from_history(history + [user(reply)]), label)
+                        self.assertEqual(
+                            rag._resolve_current_selection_state(history, reply, self.domain, None, None)[1:],
+                            (self.domain, label, None),
+                        )
+                        self.assertEqual(
+                            rag._selection_state_from_history_and_client(
+                                history + [user(reply)], self.domain, current[int(number) - 1], None
+                            ),
+                            (self.domain, label, None),
+                        )
 
     def test_compounds_and_multisector_use_same_rules_in_menu_q2_and_prefilters(self):
         compound = "Atelier Alpha / BTP; Santé et médico-social | Multi sectoriel"
         docs = [self.doc(compound), self.doc("Autre / Non spécifique; BTP")]
         with patch.object(rag, "_fetch_documents_for_domaine", return_value=docs):
             choices = rag.get_q15_choices(self.domain)
-            self.assertEqual(choices[-1], "Atelier Alpha")
+            self.assertEqual(choices[-2:], ["Atelier Alpha", "Autre / Non spécifique"])
             self.assertEqual(len(choices), len(rag.SECTEURS_PAR_DOMAINE[self.domain]) + 2)
             for sector in ("Atelier Alpha", "BTP", "Santé & médico-social"):
                 self.assertTrue(rag._doc_matches_sector(docs[0], sector))
@@ -748,7 +792,7 @@ class IndexedSectorMenuTests(SyntheticRagTests):
             self.assertIsNone(rag._get_sector_from_history(history))
 
     def test_markdown_sector_numbers_replay_the_displayed_label_after_refresh(self):
-        number = len(rag.SECTEURS_PAR_DOMAINE[self.domain]) + 2
+        number = len(rag.SECTEURS_PAR_DOMAINE[self.domain]) + 1
         for line in (
             f"**{number}.** Atelier Zêta",
             f"**{number}**. **Atelier Zêta**",
@@ -778,7 +822,8 @@ class IndexedSectorMenuTests(SyntheticRagTests):
             patch.object(rag, "_retrieve_docs_for_question") as retrieve,
         ):
             menu = rag._get_secteur_choices_affichage([], self.domain)
-            number = str(rag.get_q15_choices(self.domain).index("Atelier Alpha") + 1)
+            choices = rag.get_q15_choices(self.domain)
+            self.assertEqual(choices[-1], "Autre / Non spécifique")
             for entry in (rag.get_rag_prompt_and_sources, rag.query_rag_haystack):
                 result = entry("13", [assistant(DOMAIN_QUESTION)])
                 response = result[8] if entry == rag.get_rag_prompt_and_sources else result[0]
@@ -786,11 +831,17 @@ class IndexedSectorMenuTests(SyntheticRagTests):
                 self.assertIn("dans quel secteur", response)
                 if entry == rag.get_rag_prompt_and_sources:
                     self.assertIn("prochaine question non résolue : Q1.5", result[0])
-                result = entry(number, [
-                    assistant(DOMAIN_QUESTION), user("13"), assistant(SECTOR_QUESTION + "\n" + menu),
-                ])
-                state = result[5:8] if entry == rag.get_rag_prompt_and_sources else result[8:11]
-                self.assertEqual(state, (self.domain, "Atelier Alpha", None))
+                old_choices = rag.SECTEURS_PAR_DOMAINE[self.domain] + ["Autre / Non spécifique", "Atelier Alpha"]
+                old_menu = "\n".join(f"{i}. {label}" for i, label in enumerate(old_choices, 1))
+                for displayed_choices, displayed_menu in ((choices, menu), (old_choices, old_menu)):
+                    for label in ("Atelier Alpha", "Autre / Non spécifique"):
+                        for reply in (str(displayed_choices.index(label) + 1), label):
+                            result = entry(reply, [
+                                assistant(DOMAIN_QUESTION), user("13"),
+                                assistant(SECTOR_QUESTION + "\n" + displayed_menu),
+                            ])
+                            state = result[5:8] if entry == rag.get_rag_prompt_and_sources else result[8:11]
+                            self.assertEqual(state, (self.domain, label, None))
             generator.assert_not_called()
             retrieve.assert_not_called()
 

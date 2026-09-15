@@ -68,7 +68,7 @@ def _strip_use_case_codes(text: str) -> str:
 
 
 def get_q15_choices(domaine_code: str) -> list[str] | None:
-    """Complète Q1.5 depuis le catalogue, sans renuméroter les choix historiques."""
+    """Complète Q1.5 depuis le catalogue, puis place « Autre » en dernier."""
     if domaine_code in DOMAINES_SANS_SECTEURS or domaine_code not in SECTEURS_PAR_DOMAINE:
         return None
     secteurs = SECTEURS_PAR_DOMAINE[domaine_code]
@@ -89,7 +89,7 @@ def get_q15_choices(domaine_code: str) -> list[str] | None:
                     continue
                 # Choix stable même si les chunks/variantes arrivent dans un autre ordre.
                 additions[key] = min(additions.get(key, sector), sector)
-    return choices + [additions[key] for key in sorted(additions)]
+    return secteurs + [additions[key] for key in sorted(additions)] + ["Autre / Non spécifique"]
 
 
 def _get_domaine_label(domaine_code: str) -> str:
@@ -929,8 +929,8 @@ Si déclenchée, tu poses EXACTEMENT :
 "Pour mieux cibler mes recommandations, pouvez-vous me
 dire dans quel secteur vous opérez ? Répondez avec le numéro du choix. (optionnel)"
 et tu fournis la liste des secteurs possibles numérotée (1..N) pour le domaine donné.
-RAPPEL : La numérotation est celle fournie par le backend, y compris la position
-historique de « Autre / Non spécifique ». Des secteurs supplémentaires peuvent suivre.
+RAPPEL : La numérotation est celle fournie par le backend. Les secteurs supplémentaires
+précèdent « Autre / Non spécifique », toujours proposé en dernier.
 
 Règle stricte :
 - Le backend valide les sélections à partir du catalogue courant.
