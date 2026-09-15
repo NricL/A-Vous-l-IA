@@ -6,6 +6,25 @@ repo pour rester traçable côté Eneric **et** côté Simplon.
 
 **Dernière mise à jour :** 2026-09-15
 
+## Correctif compact — 15 septembre, demande10:28 livrée
+
+La présentation blanche et le bandeau de contexte de la consolidation précédente
+sont remplacés : cartes bleu nuit, titre et gain potentiel seuls au premier regard ;
+les détails restent sous « Premier essai ». Valeurs confirmées sous Domaine/Secteur/
+Objectif, sans changer leurs actions de retour. Texte éditorial, API, base, backend,
+sélection et parcours inchangés.
+
+Source `e2b3fe2`, frontend Azure `v463-compact-20260915-r1` sain à100%,
+build `dd3b`, digest `d8eb2bb8deb2bdbabfac2bef5a40484d98b2a3192d810a179d1d4038d8be38b3`.
+Rollback frontend : accessibilité r2 ; backend accessibilité r1 inchangé.
+Pages `34948147883` et CI `34948147776` réussies ;46tests frontend, typage/build,
+recette réelle candidate et Pages, cas unique simulé, clavier/contrastes et
+320/390/1280px vérifiés. Détails dans `HANDOFF.md` et reçu local
+`_local-trace/2026-09-15-compact-cards/deployment-receipt.json`.
+
+**Le kit reste en pause depuis10:23.** Aucun packaging repris ni gel actualisé ;
+un éventuel instantané précédent demeure historique face à cette UI plus récente.
+
 ## Consolidation finale — 15 septembre, livrée
 
 Choix confirmé à06:31, pause à06:50, reprise à08:24 : les modifications en attente

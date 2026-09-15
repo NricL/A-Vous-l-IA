@@ -1,5 +1,41 @@
 # Avoulia V2 — Implementation Handover Guide for Simplon
 
+## Correctif d'affichage compact — 15 septembre 2026, livré
+
+Demande de10:28 après pause du kit à10:23. Ce lot **remplace le choix visuel des
+cartes blanches et du bandeau de contexte** décrit dans la consolidation ci-dessous.
+Cartes bleu nuit : titre source et gain potentiel inchangé, puis « Premier essai »
+replié par défaut (livrable, effort, horizon, sources et conditions conservés).
+Le bouton de choix reste hors de l'accordéon. Domaine, secteur et objectif confirmés
+s'affichent sous leurs libellés existants, avec retour clavier et noms accessibles complets.
+Aucun résumé généré, changement de sélection, requête, backend, base ou parcours.
+
+- Source fonctionnelle : `e2b3fe25a528b51bb58ee6be8590c2e5388787d9` (deux fichiers frontend).
+- Frontend Azure : `v463-compact-20260915-r1`, sain à100%, build ACR `dd3b`,
+  image `acravoulia97186.azurecr.io/avoulia-frontend@sha256:d8eb2bb8deb2bdbabfac2bef5a40484d98b2a3192d810a179d1d4038d8be38b3`.
+- Rollback frontend conservé actif : `v463-accessibility-20260915-r2`,
+  digest `e668fbf950688e5f833d975ea1751e64eb0fa69bf1cfb7f9732173639efb632f`.
+- Backend inchangé, sain à100% : `v463-accessibility-20260915-r1`,
+  digest `7b313f2a1a12d95bd2ea7fadfc56154b8be0057dfdb9b32bf306c11438fe1545`.
+- Pages `34948147883` et CI `34948147776` réussies.46tests frontend,
+  typage et build validés ; contexte image limité aux quatre fichiers dist et Dockerfile.
+- Candidate à0% avant recette/promotion ; scénario marketing réel avec3propositions,
+  puis Pages principal avec5propositions, titres/gains identiques à l'API, choix→CTA
+  unique→URL du cas préservés. Proposition unique testée séparément en simulation.
+- Clavier « Premier essai »,320/390/1280px sans débordement ni contexte tronqué ;
+  contrastes carte10,39, libellé/accordéon7,96, choix7,77, valeurs d'étape9,80.
+  Assets Azure exacts, six HTML backend dont quatre historiques inchangés,
+  chemins privés404 et rechargement ordinaire Pages/Azure vérifiés.
+
+Disponible sur [GitHub Pages](https://nricl.github.io/A-Vous-l-IA/) et
+[Azure](https://avoulia-frontend.purpleocean-980317d1.francecentral.azurecontainerapps.io/).
+Preuves : `_local-trace/2026-09-15-compact-cards/deployment-receipt.json`,
+captures `candidate-real-1280.png` et `main-pages-real-390.png` dans la même trace locale.
+Pas de certification WCAG ni d'essai avec lecteur d'écran réel.
+Classeur privé et prototypes préexistants non lus/modifiés/publiés.
+**Kit Simplon toujours en pause :** aucun packaging ni mise à jour du gel ;
+tout instantané antérieur à ce correctif est historique, pas le nouvel état UI livré.
+
 ## Consolidation finale —15septembre2026
 
 **Livré, sans nouveau packaging Simplon.** Reprise de la pause06:50 après accord

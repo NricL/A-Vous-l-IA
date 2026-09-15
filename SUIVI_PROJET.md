@@ -1,5 +1,25 @@
 # Avoulia V2 — Suivi Projet & Décisions
 
+### 15septembre — correctif compact demandé à10:28, livré
+
+Source `e2b3fe2` : seules les deux sources frontend changent. Cartes bleu nuit,
+titre/gain potentiel au premier regard, détails conservés dans « Premier essai » ;
+valeurs confirmées sous Domaine/Secteur/Objectif plutôt qu'un bandeau séparé.
+Ce choix remplace les cartes blanches et le contexte séparé du lot précédent.
+
+Frontend `v463-compact-20260915-r1`, sain à100%, build `dd3b`,
+digest `d8eb2bb8deb2bdbabfac2bef5a40484d98b2a3192d810a179d1d4038d8be38b3`.
+Rollback accessibilité frontend r2 actif ; backend accessibilité r1 inchangé à100%.
+Pages `34948147883` / CI `34948147776` réussies.46tests frontend et typage/build ;
+recette candidate réelle3cas puis Pages5cas, cas unique simulé, accordéon clavier,
+contrastes≥4,5 et320/390/1280px sans débordement ni contexte tronqué.
+Cache/rechargement ordinaire vérifiés, six HTML backend inchangés, chemins privés404.
+Pas de modification éditoriale, base, runtime ou parcours, pas de lecteur d'écran
+réel ni certification revendiqués. Classeur et prototypes préexistants exclus.
+Reçu : `_local-trace/2026-09-15-compact-cards/deployment-receipt.json`.
+**Kit en pause depuis10:23, non repris.** Aucun packaging ni gel actualisé ;
+un gel antérieur reste un instantané historique, pas cette nouvelle révision UI.
+
 ### 15septembre — consolidation finale reprise et livrée
 
 Choix06:31, pause06:50, reprise08:24 : modifications conservées et état distant
