@@ -63,7 +63,7 @@
                                         </template>
                                         <p v-else class="source-text">{{ c.value_presentation?.description || c.description_cas_utilisation || c.content }}</p>
                                         <details class="value-notes case-trial">
-                                            <summary>Premier essai</summary>
+                                            <summary>Plus de détails</summary>
                                             <p><strong>Effort indiqué :</strong> {{ c.effort || 'Non précisé' }}</p>
                                             <p v-if="c.value_presentation?.editorial"><strong>Premier livrable :</strong> {{ c.value_presentation.editorial.claims.deliverable.text || c.value_presentation.editorial.claims.deliverable.unknown_reason }}</p>
                                             <template v-if="c.value_presentation">

@@ -39,7 +39,8 @@ test('case selection keeps only title and potential gain outside first-trial dis
   assert.match(visible, /<h3>/)
   assert.match(visible, /Gain potentiel/)
   assert.doesNotMatch(visible, /Premier livrable|Quand en juger|Effort indiqué/)
-  for (const label of ['Premier essai', 'Premier livrable', 'Quand en juger', 'Effort indiqué']) {
+  assert.match(disclosure, /<summary>Plus de détails<\/summary>/)
+  for (const label of ['Premier livrable', 'Quand en juger', 'Effort indiqué']) {
     assert.ok(disclosure.includes(label), label)
   }
   assert.doesNotMatch(card.split('<details')[1].split('>')[0], /\bopen\b/)
