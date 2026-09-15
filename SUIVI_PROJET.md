@@ -1,5 +1,30 @@
 # Avoulia V2 — Suivi Projet & Décisions
 
+### 15septembre — consolidation finale reprise et livrée
+
+Choix06:31, pause06:50, reprise08:24 : modifications conservées et état distant
+relu avant écriture. Backend `v463-accessibility-20260915-r1` / frontend
+`v463-accessibility-20260915-r2` sains à100%, builds `dd38`/`dd3a`.
+Source publique `1efdaa6`, gabarits privés `c67b422`.
+Pages `34938049102` et CI `34938049142` réussis (239tests,5ignorés).
+
+Contraste des cartes/choix et textes d'aide, focus de lecture/clavier, erreurs/
+attente et copie annoncées, nom accessible conforme au libellé visible corrigés.
+Un conflit CSS réellement détecté sur la candidate r1 a motivé la r2 du seul
+frontend : pied de page isolé des vues légales, r1 jamais promue.
+Ratios≥4,5 pour les textes normaux testés ; mobile320/390 et bureau1280 sans overflow.
+164tests locaux backend/gabarits,152dans l'image,43frontend, typage/build.
+Fixture d'erreurs/reprise distincte des essais réels API et navigateur ;
+Pages→plusieurs cartes→bon parcours, copie réelle, bilan non conservé et cache
+ancien rechargé normalement vérifiés. Détails/critères WCAG dans `HANDOFF.md`.
+
+Overlay1 021pages : champs sources, prompts, six étapes et éditorial inchangés ;
+quatre historiques intacts. Aucun classeur ouvert ni publié, modification privée
+préexistante et prototypes conservés. Bot/base/taxonomie inchangés ; rollback
+éditorial r2 conservé. Pas de certification ni de test avec lecteur d'écran réel.
+Reçu durable : `_local-trace/2026-09-15-accessibility/deployment-receipt.json`.
+**Lot clos** ; essais métier/taxonomie à Eneric, packaging Simplon non lancé.
+
 ### 14septembre — complément éditorial des1 021cas
 
 `editorial-value-2` :5 105champs qualitatifs rédigés depuis les seuls HTML déjà publics,

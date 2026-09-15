@@ -1,5 +1,62 @@
 # Avoulia V2 — Implementation Handover Guide for Simplon
 
+## Consolidation finale —15septembre2026
+
+**Livré, sans nouveau packaging Simplon.** Reprise de la pause06:50 après accord
+à08:24 ; inspection ARM/ACR avant écriture, aucune livraison de ce lot déjà présente.
+Source publique `1efdaa64956a4acfef8757ff242503e2fa68d5a1`,
+gabarits privés `c67b422c5f1ed33bdf6d23e2a32cdbfda83a9cbf`.
+
+| Composant | Révision à100%, saine | Build | Digest SHA-256 |
+|---|---|---|---|
+| Backend | `v463-accessibility-20260915-r1` | `dd38` | `7b313f2a1a12d95bd2ea7fadfc56154b8be0057dfdb9b32bf306c11438fe1545` |
+| Frontend Azure | `v463-accessibility-20260915-r2` | `dd3a` | `e668fbf950688e5f833d975ea1751e64eb0fa69bf1cfb7f9732173639efb632f` |
+
+Images dans `acravoulia97186.azurecr.io/avoulia-backend` et `avoulia-frontend`.
+Rollback conservé pour les deux : `v463-editorial-20260914-r2`,
+digests backend `0f8d4b28a954544fee1ecf3011053aeb6ee7e5b0bb42f1de6568718706184326`
+et frontend `44673a32d567bed7c70346d568f576b29378aa2ee00769a8e666b66ed2e7b6b3`.
+Candidates vérifiées à0% avant promotion. Pages `34938049102` et
+CI `34938049142` réussies.
+
+**Barrières corrigées et critères ciblés :**
+- **Majeure — contraste (1.4.3)** : texte clair hérité sur cartes blanches,
+  choix et petits textes peu lisibles. Ratios mesurés : cartes/titres13,76,
+  choix6,85, contexte12,01, avertissement7,86, liens footer9,56, seuil4,5 pour
+  ces tailles normales. La recette candidate a découvert une surcharge globale
+  des vues légales : `.home-footer` protège la correction, y compris en mobile.
+  Frontend r1/build `dd39` non promu ; contexte et reçu conservés.
+- **Majeure — lecture/focus (2.4.3,2.4.7)** : plus de focus volé au chargement,
+  plus de saut permanent au bas de la réponse en streaming. La fin de réponse
+  révèle son début sans reprendre le focus d'une autre zone ; journal parcourable
+  au clavier, reprise exacte après erreur, focus d'accordéon intérieur non rogné.
+- **Majeure — annonces (4.1.3)** : attente hors du journal `aria-busy`, erreur
+  unique hors de sa région live ; statut de copie présent avant sa mise à jour.
+- **Majeure — commande vocale (2.5.3)** : « Choisir cette piste » est inclus
+  dans le nom accessible, avec le titre source pour distinguer les boutons.
+- **Confort/reflow (1.4.10)** : contrôles320/390/1280px sans débordement horizontal ;
+  réduction des animations respectée, sans revendiquer un audit global.
+
+**Validation :**152tests backend +12gabarits localement,152dans l'image,
+43frontend, typage/build. CI publique :239tests dont5ignorés.
+Fixture explicitement simulée :43contrôles, erreurs/reprise/clipboard indisponible,
+pas de RAG. Vérifications réelles séparées : API candidate marketing/BTP,
+identité HTTP/SSE et contenu API/parcours ; navigateur candidate puis Pages principal
+sans interception réseau, plusieurs cartes→fiche→CTA unique→bon parcours.
+Copie réelle du lien et des prompts vérifiée ; seuls CRLF natifs Windows normalisés
+pour la comparaison. Bilan non stocké et remis à zéro au rechargement.
+Neuf hashes HTML distants dont les quatre historiques, cinq chemins privés404,
+assets frontend exacts, anciens validateurs de cache retournant200 et onglet Pages
+ancien rechargé normalement. Pas de lecteur d'écran réel, d'audit WCAG exhaustif
+ou de validation métier revendiqués.
+
+**Intégrité :** overlay réversible sur1 021HTML déjà publics, sources/prompts/
+six étapes/couche éditoriale préservés ; runtime, filtres, modèles et base inchangés.
+Aucun classeur lu, modifié ou publié. Workbook utilisateur modifié préexistant et
+prototypes locaux exclus des commits/contextes. Les5 105hypothèses restent des
+contenus IA sourcés, non des résultats mesurés. Adoption/taxonomie restent à Eneric.
+Reçus et preuves : `_local-trace/2026-09-15-accessibility/deployment-receipt.json`.
+
 ## Complément éditorial —14septembre2026
 
 **Azure livré :** backend et frontend `v463-editorial-20260914-r2`, sains à100%.

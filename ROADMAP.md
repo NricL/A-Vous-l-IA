@@ -4,7 +4,39 @@
 Décisions prises en tant que Product Owner (Eneric) ; ce fichier est versionné dans le
 repo pour rester traçable côté Eneric **et** côté Simplon.
 
-**Dernière mise à jour :** 2026-09-14
+**Dernière mise à jour :** 2026-09-15
+
+## Consolidation finale — 15 septembre, livrée
+
+Choix confirmé à06:31, pause à06:50, reprise à08:24 : les modifications en attente
+ont été conservées. Avant toute écriture distante, la reprise a vérifié les révisions
+et builds : le socle éditorial du14septembre était encore seul à100%.
+
+**ACC-01 consolidé et publié :** backend `v463-accessibility-20260915-r1`,
+frontend Azure `v463-accessibility-20260915-r2`, chacun sain à100%, et GitHub Pages
+`34938049102` réussi. Source `1efdaa6`, gabarit privé `c67b422`.
+Le frontend r1 n'a jamais reçu le trafic principal : la recette réelle a détecté
+une collision CSS des vues légales qui annulait le contraste du pied de page ;
+la r2 isole ce style, sans modifier ces vues ni le bot.
+
+- Contrastes texte normal ≥4,5:1 : cartes/titres13,76, choix6,85, contexte12,01,
+  avertissement7,86, liens de pied de page9,56. Clavier, focus et retour à la première
+  ligne de réponse vérifiés ; erreur/attente hors du journal occupé, reprise exacte.
+- Accordéons : focus visible non rogné ; copie du prompt annoncée, secours manuel
+  préservé. Mise en page testée à320/390/1280px, réduction des animations respectée.
+- Critères ciblés : WCAG2.2 1.4.3,1.4.10,2.4.3,2.4.7,2.5.3,4.1.3.
+  Pas de certification globale ni d'essai avec un lecteur d'écran réel.
+- Preuves :164tests locaux backend/gabarits,152dans l'image,43frontend,
+  typage/build ; CI `34938049142` réussie,239tests dont5ignorés.
+  Recette réelle Pages→plusieurs cartes→fiche→bon parcours, presse-papiers réel,
+  anciens validateurs HTTP et rechargement ordinaire sans cache-buster vérifiés.
+
+Les1 021pages conservent exactement leurs sources/prompts/contenus éditoriaux ;
+quatre historiques inchangées. Base, sélection, taxonomie, modèles et quotas inchangés.
+Les deux révisions `v463-editorial-20260914-r2` restent le rollback.
+Reçu : `_local-trace/2026-09-15-accessibility/deployment-receipt.json`.
+**Consolidation terminée** ; adoption métier/taxonomie restent à Eneric,
+packaging Simplon non lancé. Les5 105hypothèses ne sont toujours pas des gains mesurés.
 
 ## Programme actif — valeur visible et expérience de choix, accord à18:15
 
@@ -38,7 +70,7 @@ restent différés ; le présent cadrage n'autorise pas leur lancement.
 | 4 — PASSAGE-01 | Passage vers l'outil d'exécution | Expliquer où utiliser le prompt et la différence entre orientation AVIA et exécution dans l'assistant autorisé choisi | Parcours générique conservé, aucun transfert automatique du besoin ni connexion imposée à un outil | Livré dans les1 021parcours |
 | 5 — RETOUR-01 | Refaire un cas | Conservation volontaire du lien et accès court aux éléments utiles lors d'une utilisation suivante | Sans compte obligatoire, stockage de conversation ou partage automatique ; ne pas présenter les cases locales comme une sauvegarde complète | Livré : copie volontaire du lien sans contexte |
 | Transversal — CONFIANCE-01 | Promesse cohérente | Revoir « personnalisé », « cas vérifiés », « RGPD », efforts et délais affichés | Distinguer contenu relu, bénéfice potentiel, résultat observé et obligations de l'opérateur ; pas de certification implicite | Vitrine et nouvelles surfaces corrigées ; texte du bot conservé |
-| Transversal — ACC-01 | Accessibilité pratique | Clavier, focus, annonces des réponses/erreurs, lisibilité des listes et confort mobile | Contrôles ciblés sur chaque nouvelle surface, sans revendiquer une conformité globale non auditée | Contrôles ciblés passés, pas d'audit global |
+| Transversal — ACC-01 | Accessibilité pratique | Clavier, focus, annonces des réponses/erreurs, lisibilité des listes et confort mobile | Contrôles ciblés sur chaque nouvelle surface, sans revendiquer une conformité globale non auditée | Consolidé et déployé le15septembre : contrastes, focus, annonces, mobile ; limites d'audit ci-dessus |
 
 ### VAL-01 — cadre de valeur et de « ROI potentiel »
 
