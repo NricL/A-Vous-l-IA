@@ -135,7 +135,7 @@ class ParcoursTemplateTests(unittest.TestCase):
             self.assertIn(case[field], text)
         for value in case["questions"] + case["prereqs"] + case["guardrails_liste"]:
             self.assertIn(value, text)
-        prompt = page.pre[-1]
+        prompt = page.pre[-2]
         self.assertEqual(prompt, self.generator.prompt_principal(case))
         self.assertIn(case["guardrails"], prompt)
         self.assertIn("Texte source : Je suis dirigeant.", prompt)
@@ -144,22 +144,25 @@ class ParcoursTemplateTests(unittest.TestCase):
     def test_generic_role_is_completable_in_all_prompt_wrappers(self):
         page = PageParser(self.render(synthetic_case()))
         for prompt in page.pre:
-            self.assertTrue(prompt.startswith("Mon rôle : [votre fonction ou rôle dans l'entreprise]."))
+            self.assertTrue(prompt.startswith("Tu m'aides à "))
+            self.assertIn("[", prompt)
         self.assertNotIn("Je suis dirigeant d'une PME/TPE française.", "".join(page.text))
         self.assertNotIn("la version gratuite suffit", "".join(page.text))
-        self.assertIn("assistant IA autorisé par votre organisation", "".join(page.text))
+        self.assertIn("assistant IA autorisé", "".join(page.text))
 
     def test_visible_shortcut_targets_existing_accessible_prompt(self):
         html = self.render(synthetic_case())
         page = PageParser(html)
-        links = [attrs for tag, attrs in page.elements if tag == "a" and attrs.get("href") == "#prompt-demarrage"]
-        self.assertEqual(len(links), 2)
+        links = [attrs for tag, attrs in page.elements if tag == "a" and attrs.get("href") == "#commencer"]
+        self.assertEqual(len(links), 1)
         self.assertIn("tester-rapidement", links[0]["class"])
-        self.assertLess(html.index(">Tester rapidement</a>"), html.index('data-etape="1"'))
+        self.assertLess(html.index(">Commencer le parcours</a>"), html.index('data-etape="1"'))
         targets = [attrs for _, attrs in page.elements if attrs.get("id") == "prompt-demarrage"]
         self.assertEqual(len(targets), 1)
         self.assertEqual(targets[0]["tabindex"], "-1")
-        self.assertEqual(targets[0]["aria-label"], "Votre prompt de démarrage")
+        self.assertEqual(targets[0]["aria-label"], "Votre prompt de production")
+        self.assertLess(html.index('data-etape="4"'), html.index('id="prompt-demarrage"'))
+        self.assertLess(html.index('id="prompt-demarrage"'), html.index('data-etape="5"'))
         self.assertIn("scroll-margin-top:90px", html)
 
     @unittest.skipUnless(shutil.which("node"), "Node required for DOM event-handler checks")

@@ -148,8 +148,12 @@ class EditorialContractTests(unittest.TestCase):
         original = (APP_ROOT / "static/parcours" / page).read_text(encoding="utf-8")
         rendered, record = transform(original, page, template)
         value = editorial_for(record["case_id"], {SOURCE_FIELDS[k]: v for k, v in record["fields"].items()})
-        for claim in value["claims"].values():
+        for name in ("gain", "deliverable", "horizon"):
+            claim = value["claims"][name]
             self.assertIn(claim["text"], html.unescape(rendered))
+        entry = rendered.split("<!-- /value-entry -->")[0]
+        self.assertNotIn("<details>", entry)
+        self.assertNotIn("Passages source utilisés", entry)
         self.assertIn("editorial-value-2", rendered)
         self.assertNotIn("source-value-1", rendered.split("<!-- /value-entry -->")[0])
         self.assertEqual((Path(root) / "pipeline/value_editorial.py").read_bytes(),

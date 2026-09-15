@@ -39,16 +39,6 @@ h1{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:clamp(
 #prompt-demarrage:focus{outline:3px solid var(--action);outline-offset:4px}
 a:focus-visible{outline:2px solid var(--action);outline-offset:4px}
 
-/* ---------- quick win (accordion en bas) ---------- */
-.quickwin-accordion{margin-top:26px;background:var(--carte);border:1px solid var(--ligne);border-radius:12px;overflow:hidden}
-.quickwin-accordion summary{cursor:pointer;list-style:none;padding:16px 18px;display:flex;align-items:center;gap:10px;
-  font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:18px;border:none;background:var(--carte)}
-.quickwin-accordion summary::-webkit-details-marker{display:none}
-.quickwin-accordion summary .chevron{color:var(--sourdine);transition:transform .2s;font-size:13px;margin-left:auto}
-.quickwin-accordion[open] summary .chevron{transform:rotate(90deg)}
-.quickwin-accordion .contenu-qw{padding:2px 18px 18px;border-top:1px solid var(--ligne)}
-.quickwin-accordion p{margin:8px 0;max-width:62ch}
-.quickwin-accordion .note{font-size:13.5px;color:var(--sourdine)}
 .transition{margin:26px 0 4px;font-weight:600;max-width:62ch}
 
 /* ---------- barre de progression ---------- */
@@ -156,72 +146,20 @@ summary:focus-visible{outline-offset:-3px}
     <span class="puce">Effort : Moyen</span>
     <span class="puce sensible">Données : Données clients</span>
   </div>
-  <a class="tester-rapidement" href="#prompt-demarrage">Tester rapidement</a>
+  <a class="tester-rapidement" href="#commencer">Commencer le parcours</a>
 </header>
+
+
 <!-- value-entry:editorial-value-2 -->
 <section class="carte" aria-labelledby="valeur-titre">
   <h2 id="valeur-titre">Ce que ce cas pourrait vous apporter</h2>
-  <p><b>Gain recherché — hypothèse :</b> Repérer les sujets récurrents dans les emails pour orienter les vérifications et les priorités du service client.</p>
-  <p><b>Premier livrable :</b> Une synthèse mensuelle des tendances emails clients avec principaux motifs et délais, à croiser avec le ressenti de l&#39;équipe.</p>
+  <p><b>Gain potentiel :</b> Repérer les sujets récurrents dans les emails pour orienter les vérifications et les priorités du service client.</p>
+  <p><b>Résultat à préparer :</b> Une synthèse mensuelle des tendances emails clients avec principaux motifs et délais, à croiser avec le ressenti de l&#39;équipe.</p>
   <p><b>Quand en juger :</b> Cette synthèse n&#39;est fiable qu&#39;après recoupement avec le ressenti de l&#39;équipe et vérification des calculs sur l&#39;échantillon.</p>
-  <p class="note">Hypothèses rédigées à partir des descriptions, actions et précautions publiées, à vérifier dans votre contexte. Gain mesuré et durée avant valeur non établis ; aucun délai de rentabilité annoncé.</p>
-  <details>
-    <summary>Conditions, contreparties et première action</summary>
-    <div class="contenu">
-      <p><b>Utile si :</b> Pertinent quand de nombreux emails clients arrivent chaque mois sans visibilité sur les sujets récurrents.</p>
-      <p><b>À mettre en balance :</b> Suppose de ne transmettre que des extraits nécessaires sans identifiants inutiles et de vérifier catégories et calculs sur l&#39;échantillon.</p>
-      <p><b>Première action — source :</b></p>
-      <p class="source">Exporter 50 emails clients du dernier mois (objet, corps et horodatages disponibles, après dépersonnalisation). Ouvrir un assistant IA autorisé par votre organisation et lui fournir ces emails, puis lui demander d&#39;identifier les 5 sujets les plus fréquents et les délais moyens par catégorie. Astuce : dans votre demande à l&#39;IA, précisez (1) votre rôle et contexte — ex. « Je suis responsable service client d&#39;une PME e-commerce de 25 salariés » (2) la tâche exacte attendue (3) le format de sortie souhaité — ex. « synthèse : top 5 motifs avec fréquence, délai moyen et recommandation d&#39;amélioration » (4) les contraintes — ex. « analyse factuelle, pas de suppositions ». Vérifier : croiser avec le ressenti de l&#39;équipe. Livrable : synthèse mensuelle des tendances emails clients.</p>
-      <p class="note">L'effort indiqué dans le catalogue n'est ni une mesure de gain ni un délai avant valeur.</p>
-    </div>
-  </details>
-  <details>
-    <summary>Passages source utilisés pour ces hypothèses</summary>
-    <div class="contenu">
-      
-      <p><b>Gain :</b>
-        
-        <span>Précautions — « Calculer les délais uniquement lorsque les horodatages de réception et de réponse sont disponibles »</span>
-        
-        <span>Description — « Vous recevez 200 emails clients par mois mais ne savez pas quels sujets reviennent le plus ? L&#39;IA analyse vos emails pour identifier les tendances, les motifs récurrents et les délais de réponse. Votre équipe priorise mieux et traite les causes racines. »</span>
-        
-        
-      </p>
-      
-      <p><b>Livrable :</b>
-        
-        <span>Première action — « synthèse mensuelle des tendances emails clients »</span>
-        
-        
-      </p>
-      
-      <p><b>Condition d&#39;observation :</b>
-        
-        <span>Première action — « croiser avec le ressenti de l&#39;équipe »</span>
-        
-        
-      </p>
-      
-      <p><b>Situation utile :</b>
-        
-        <span>Description — « ne savez pas quels sujets reviennent le plus »</span>
-        
-        
-      </p>
-      
-      <p><b>Contrepartie :</b>
-        
-        <span>Précautions — « Ne transmettre que des extraits nécessaires et autorisés, sans identifiants inutiles »</span>
-        
-        
-      </p>
-      
-      <p class="note">Ces extraits permettent de retrouver les appuis de rédaction ; ils ne prouvent pas un résultat dans votre organisation.</p>
-    </div>
-  </details>
-  <p class="note">Préparez les entrées à l'étape 2, produisez à l'étape 4, puis comparez le résultat à votre pratique à l'étape 5.</p>
+  <p class="note">Le bénéfice dépend de votre situation : vérifiez-le lors de votre essai.</p>
 </section>
 <!-- /value-entry -->
+
 
 <section class="carte">
   <h2>Commencez par un petit essai</h2>
@@ -229,7 +167,7 @@ summary:focus-visible{outline-offset:-3px}
   <p>Choisissez une tâche limitée. À l'étape 4, préparez un premier résultat à relire, pas un déploiement complet.</p>
   <ul>
     <li>Utilisez un assistant IA autorisé, avec des données autorisées ou un exemple clairement fictif.</li>
-    <li>Copiez le prompt et remplacez les [crochets] par vos informations, sans données personnelles identifiables.</li>
+    <li>Pour chaque aide, copiez le prompt et remplacez les [crochets] par vos informations autorisées. Il peut être utilisé dans une nouvelle conversation.</li>
     <li>Vérifiez le résultat avant usage. S'il est utile, gardez votre méthode pour la prochaine fois.</li>
   </ul>
   <p>Le parcours reste générique : vous l'adaptez vous-même. Aucun besoin échangé dans le chatbot n'est repris automatiquement.</p>
@@ -237,12 +175,13 @@ summary:focus-visible{outline-offset:-3px}
 
 <!-- ================= ÉTAPE 1 (validation d'abord) ================= -->
 <div class="parcours">
-  <section class="etape" data-etape="1">
+  <section class="etape" data-etape="1" id="commencer">
     <div class="marqueur"><span>1</span></div>
     <details open>
       <summary><span class="titre">Vérifiez que c'est le bon moment</span><span class="duree">2 min</span><span class="chevron">▶</span></summary>
       <div class="contenu">
         <p>Ces questions de la fiche sont des pistes de réflexion, pas un score d'adéquation. Comparez le cas à votre besoin et à vos contraintes.</p>
+        <p><b>Utile si :</b> Pertinent quand de nombreux emails clients arrivent chaque mois sans visibilité sur les sujets récurrents.</p>
         
         <ul class="reflexion">
         
@@ -286,6 +225,7 @@ summary:focus-visible{outline-offset:-3px}
       <div class="contenu">
         <p>Repérez ce que vous avez déjà et ce qu'il vous manque. Pour chaque élément, choisissez « disponible », « à préparer » ou « fictif ». Cochez quand il est prêt pour votre essai.</p>
         <p class="note">Ici, vous préparez les entrées, pas encore le résultat du cas. Si un élément est déjà disponible et autorisé, gardez-le tel quel : le prompt d'aide est facultatif.</p>
+        <p class="note">Avant d'utiliser une aide IA, vérifiez les règles incluses dans son prompt. Un document existant doit rester dans son circuit autorisé ; une trame ou un statut de disponibilité ne remplace pas son contenu.</p>
         <p class="note">L'IA peut proposer une trame ou un exemple clairement fictif, pas fabriquer un historique de ventes, des résultats observés ou des preuves. Sans données réelles nécessaires, l'essai reste fictif : il ne démontre pas l'efficacité du cas.</p>
         
         <div class="coche">
@@ -305,8 +245,7 @@ summary:focus-visible{outline-offset:-3px}
           <summary>Besoin d'aide pour préparer cet élément ?</summary>
           <div class="ticket mini">
           <div class="bandeau"><span>Prompt de préparation</span><button type="button" data-copie>Copier</button></div>
-          <pre>Mon rôle : [votre fonction ou rôle dans l&#39;entreprise].
-Étape 2 — préparer une entrée, pas encore réaliser le cas.
+          <pre>Tu m&#39;aides à préparer UNE entrée de travail, sans produire le résultat final.
 Domaine métier du cas : Service &amp; relation client.
 Mon objectif prioritaire est : Suivre et améliorer la qualité de service.
 Contexte secteur : Multi-sectoriel.
@@ -314,30 +253,27 @@ Cas d&#39;usage cible : Analyse des e-mails du service client.
 
 Élément source à préparer : Export de 50 à 100 emails clients récents (anonymisés)
 
-Première action prévue à l&#39;étape 4 — référence de périmètre, à ne pas exécuter ici :
+Action finale visée — référence de périmètre, à ne pas exécuter ici :
 Exporter 50 emails clients du dernier mois (objet, corps et horodatages disponibles, après dépersonnalisation). Ouvrir un assistant IA autorisé par votre organisation et lui fournir ces emails, puis lui demander d&#39;identifier les 5 sujets les plus fréquents et les délais moyens par catégorie. Astuce : dans votre demande à l&#39;IA, précisez (1) votre rôle et contexte — ex. « Je suis responsable service client d&#39;une PME e-commerce de 25 salariés » (2) la tâche exacte attendue (3) le format de sortie souhaité — ex. « synthèse : top 5 motifs avec fréquence, délai moyen et recommandation d&#39;amélioration » (4) les contraintes — ex. « analyse factuelle, pas de suppositions ». Vérifier : croiser avec le ressenti de l&#39;équipe. Livrable : synthèse mensuelle des tendances emails clients.
 
-Aide-moi uniquement à obtenir ou à préciser cet élément pour pouvoir l&#39;utiliser à l&#39;étape 4. Réutilise les informations que j&#39;ai déjà fournies dans cette conversation ; ne me les redemande pas. Si la même pièce couvre plusieurs entrées, référence-la sans la refaire. S&#39;il manque des informations indispensables, pose quelques questions simples centrées sur cet élément, mon activité et l&#39;usage prévu, au plus trois à la fois. Les informations optionnelles restent optionnelles.
+Mes informations pour cet élément : [collez les faits ou extraits autorisés ; précisez ce qui existe, ce qui est à créer et ce qui manque].
+Mon rôle et les contraintes utiles : [à compléter si nécessaire].
+Les crochets non complétés ne sont pas des données. Travaille à partir des informations collées dans cette demande, sans supposer connaître un parcours ou une autre conversation.
 
-Choisis UN SEUL format adapté à l&#39;entrée parmi les formats ci-dessous ; ne produis pas successivement toutes ces rubriques. Va à l&#39;essentiel, sans reprendre le contexte du cas, les consignes ou une stratégie dans ta réponse.
-Formats possibles :
-- Profil ou description : prépare une fiche courte avec périmètre, caractéristiques connues, besoins ou attentes déclarés, critères ou contraintes et inconnues. Distingue observations réelles, cible ou choix souhaité et hypothèses à valider ; ne déduis pas de préférences ou de caractéristiques personnelles non fournies.
-- Objectif, budget ou contraintes : prépare un brief de cadrage avec les choix déclarés, valeurs et limites confirmées, puis les décisions restant à faire valider.
-- Brouillon ou modèle explicitement à créer : rédige seulement ce document d&#39;entrée ou sa trame, à partir de mes réponses, sans réaliser sa transformation finale.
-- Données, historique, document existant ou référence : prépare un tableau de collecte (information ou document, source à confirmer, période ou version, format, disponible ou à obtenir). Utilise seulement les contenus réellement fournis ; ne prétends pas avoir consulté un fichier, une source ou effectué des calculs sans accès effectif. Un contrat, une procédure, une preuve ou une règle en vigueur ne se remplace pas par un texte plausible. Conserve l&#39;original séparé de tes annotations : ne corrige ni ne transforme une entrée qui doit être analysée ou réécrite ensuite. Si tu ne sais pas si le document existe ou doit être créé, demande-le.
-- Outil, accès ou autorisation : prépare une checklist des disponibilités et validations à obtenir, sans demander de mot de passe ou de clé, ni installer ou connecter quoi que ce soit.
-- Simple règle ou condition, plutôt qu&#39;une entrée : indique comment vérifier son respect et son statut ; ne fabrique pas un document pour remplir cette rubrique.
+Choisis UN SEUL format adapté : fiche courte pour un profil ou un objectif ; brouillon pour une entrée explicitement à créer ; tableau de collecte pour des données ou documents existants manquants ; checklist de disponibilité pour un outil, un accès ou une autorisation. Pour une simple règle, indique seulement comment vérifier son respect. Si le contenu utilisable est fourni, conserve-le sans le refaire ; annote les manques séparément. Un contrat, un historique, une procédure en vigueur ou une preuve ne se remplace pas par un texte plausible. N&#39;ajoute pas de collecte de données sans nécessité et ne déduis pas de caractéristiques personnelles ou commerciales non fournies. Un exemple fictif n&#39;est produit que sur demande explicite ou si les restrictions de l&#39;action finale l&#39;imposent ; il reste séparé des informations confirmées.
 
-Ta réponse est UNE fiche « Entrée préparée pour l&#39;étape 4 », sans la répéter dans une seconde synthèse :
-1. Contenu utilisable — le format choisi, rempli seulement avec mes informations ; une trame vide suffit si les faits manquent.
-2. À compléter ou confirmer — seulement les manques utiles et leur prochaine action. Ne rends pas une précision facultative bloquante et n&#39;ajoute pas de nouvelles données démographiques ou commerciales à collecter sans nécessité pour cet élément.
-3. Sources et statut — origine, période/périmètre connus, faits, choix déclarés ou hypothèses distingués ; indique prêt, partiel ou bloqué et pourquoi.
-Ne complète pas les inconnues par un portrait ou des chiffres fictifs. Un exemple fictif n&#39;est produit que sur demande explicite pour cet élément ou si le premier essai l&#39;impose ; il reste séparé des informations confirmées.
-N&#39;invente jamais d&#39;historique de ventes, de résultats observés ni de preuves. Ne réalise pas encore le livrable final du cas. Si cet élément correspond lui-même au résultat à produire, signale-le et rassemble seulement les entrées nécessaires ; sa réalisation reste à l&#39;étape 4.
+Réponds par UNE fiche « Entrée préparée », sans seconde synthèse :
+1. Contenu utilisable — informations confirmées dans le format choisi, ou trame avec les champs manquants marqués [à compléter]. Sépare l&#39;original de tes annotations.
+2. À compléter — seulement les manques utiles et comment les obtenir.
+3. Sources et statut — origine, période/périmètre connus ; prêt, partiel ou bloqué et pourquoi.
+Si un manque critique empêche de choisir le bon format ou de respecter les règles, pose au maximum trois questions précises dans une seule liste et attends les réponses. Sinon, produis la fiche avec les inconnues marquées, sans questionnaire préalable. Ne rends pas une précision facultative bloquante.
+Ne réalise pas encore le livrable final. Si cet élément désigne lui-même le résultat final, signale-le et identifie seulement les informations nécessaires à sa réalisation.
+Règles source à respecter impérativement :
+Ne transmettre que des extraits nécessaires et autorisés, sans identifiants inutiles. Calculer les délais uniquement lorsque les horodatages de réception et de réponse sont disponibles ; sinon les signaler comme inconnus. Vérifier les catégories et calculs sur l&#39;échantillon.
 
-Utilise uniquement un outil autorisé et des données dont le partage est autorisé, sans données personnelles identifiables. Les restrictions du premier essai et les règles de confidentialité s&#39;appliquent dès cette préparation, même si un exemple générique de collecte semble plus large. Un prérequis cité n&#39;est pas une autorisation de le transmettre : si le cas impose une préparation locale ou des données fictives/agrégées, ne demande pas les données brutes ; recueille seulement leur disponibilité ou le résultat autorisé et validé. Aucun envoi, publication, modification de système ni action automatique. Les règles du cas ci-dessous encadrent la préparation ; elles ne demandent pas de réaliser la stratégie, l&#39;analyse ou le déploiement maintenant.
-Règles source à respecter impérativement : Ne transmettre que des extraits nécessaires et autorisés, sans identifiants inutiles. Calculer les délais uniquement lorsque les horodatages de réception et de réponse sont disponibles ; sinon les signaler comme inconnus. Vérifier les catégories et calculs sur l&#39;échantillon.
-Termine le livrable par : « À faire valider en interne avant usage. »</pre>
+Utilise uniquement des données dont le partage est autorisé dans un outil autorisé. Ne demande ni données personnelles identifiables, ni mot de passe, ni clé d&#39;accès. Une pièce citée n&#39;est pas une autorisation de la transmettre : si une préparation locale ou des données fictives/agrégées sont imposées, demande seulement le contenu autorisé ou le statut de disponibilité. En cas de conflit, suspends la partie concernée et explique pourquoi.
+N&#39;invente jamais d&#39;historique de ventes, de résultats observés ni de preuves. Distingue faits fournis, choix déclarés, hypothèses et exemple explicitement fictif. Ne prétends pas consulter des fichiers, vérifier des sources ou effectuer des calculs sans accès effectif ; indique les contrôles impossibles. Aucun envoi, publication, connexion, modification de système ni déclenchement automatique. Une validation humaine reste nécessaire avant usage.
+Termine par : « À faire valider en interne avant usage. »</pre>
           </div>
         </details>
         
@@ -358,8 +294,7 @@ Termine le livrable par : « À faire valider en interne avant usage. »</pre>
           <summary>Besoin d'aide pour préparer cet élément ?</summary>
           <div class="ticket mini">
           <div class="bandeau"><span>Prompt de préparation</span><button type="button" data-copie>Copier</button></div>
-          <pre>Mon rôle : [votre fonction ou rôle dans l&#39;entreprise].
-Étape 2 — préparer une entrée, pas encore réaliser le cas.
+          <pre>Tu m&#39;aides à préparer UNE entrée de travail, sans produire le résultat final.
 Domaine métier du cas : Service &amp; relation client.
 Mon objectif prioritaire est : Suivre et améliorer la qualité de service.
 Contexte secteur : Multi-sectoriel.
@@ -367,30 +302,27 @@ Cas d&#39;usage cible : Analyse des e-mails du service client.
 
 Élément source à préparer : Catégories de demandes existantes si disponibles
 
-Première action prévue à l&#39;étape 4 — référence de périmètre, à ne pas exécuter ici :
+Action finale visée — référence de périmètre, à ne pas exécuter ici :
 Exporter 50 emails clients du dernier mois (objet, corps et horodatages disponibles, après dépersonnalisation). Ouvrir un assistant IA autorisé par votre organisation et lui fournir ces emails, puis lui demander d&#39;identifier les 5 sujets les plus fréquents et les délais moyens par catégorie. Astuce : dans votre demande à l&#39;IA, précisez (1) votre rôle et contexte — ex. « Je suis responsable service client d&#39;une PME e-commerce de 25 salariés » (2) la tâche exacte attendue (3) le format de sortie souhaité — ex. « synthèse : top 5 motifs avec fréquence, délai moyen et recommandation d&#39;amélioration » (4) les contraintes — ex. « analyse factuelle, pas de suppositions ». Vérifier : croiser avec le ressenti de l&#39;équipe. Livrable : synthèse mensuelle des tendances emails clients.
 
-Aide-moi uniquement à obtenir ou à préciser cet élément pour pouvoir l&#39;utiliser à l&#39;étape 4. Réutilise les informations que j&#39;ai déjà fournies dans cette conversation ; ne me les redemande pas. Si la même pièce couvre plusieurs entrées, référence-la sans la refaire. S&#39;il manque des informations indispensables, pose quelques questions simples centrées sur cet élément, mon activité et l&#39;usage prévu, au plus trois à la fois. Les informations optionnelles restent optionnelles.
+Mes informations pour cet élément : [collez les faits ou extraits autorisés ; précisez ce qui existe, ce qui est à créer et ce qui manque].
+Mon rôle et les contraintes utiles : [à compléter si nécessaire].
+Les crochets non complétés ne sont pas des données. Travaille à partir des informations collées dans cette demande, sans supposer connaître un parcours ou une autre conversation.
 
-Choisis UN SEUL format adapté à l&#39;entrée parmi les formats ci-dessous ; ne produis pas successivement toutes ces rubriques. Va à l&#39;essentiel, sans reprendre le contexte du cas, les consignes ou une stratégie dans ta réponse.
-Formats possibles :
-- Profil ou description : prépare une fiche courte avec périmètre, caractéristiques connues, besoins ou attentes déclarés, critères ou contraintes et inconnues. Distingue observations réelles, cible ou choix souhaité et hypothèses à valider ; ne déduis pas de préférences ou de caractéristiques personnelles non fournies.
-- Objectif, budget ou contraintes : prépare un brief de cadrage avec les choix déclarés, valeurs et limites confirmées, puis les décisions restant à faire valider.
-- Brouillon ou modèle explicitement à créer : rédige seulement ce document d&#39;entrée ou sa trame, à partir de mes réponses, sans réaliser sa transformation finale.
-- Données, historique, document existant ou référence : prépare un tableau de collecte (information ou document, source à confirmer, période ou version, format, disponible ou à obtenir). Utilise seulement les contenus réellement fournis ; ne prétends pas avoir consulté un fichier, une source ou effectué des calculs sans accès effectif. Un contrat, une procédure, une preuve ou une règle en vigueur ne se remplace pas par un texte plausible. Conserve l&#39;original séparé de tes annotations : ne corrige ni ne transforme une entrée qui doit être analysée ou réécrite ensuite. Si tu ne sais pas si le document existe ou doit être créé, demande-le.
-- Outil, accès ou autorisation : prépare une checklist des disponibilités et validations à obtenir, sans demander de mot de passe ou de clé, ni installer ou connecter quoi que ce soit.
-- Simple règle ou condition, plutôt qu&#39;une entrée : indique comment vérifier son respect et son statut ; ne fabrique pas un document pour remplir cette rubrique.
+Choisis UN SEUL format adapté : fiche courte pour un profil ou un objectif ; brouillon pour une entrée explicitement à créer ; tableau de collecte pour des données ou documents existants manquants ; checklist de disponibilité pour un outil, un accès ou une autorisation. Pour une simple règle, indique seulement comment vérifier son respect. Si le contenu utilisable est fourni, conserve-le sans le refaire ; annote les manques séparément. Un contrat, un historique, une procédure en vigueur ou une preuve ne se remplace pas par un texte plausible. N&#39;ajoute pas de collecte de données sans nécessité et ne déduis pas de caractéristiques personnelles ou commerciales non fournies. Un exemple fictif n&#39;est produit que sur demande explicite ou si les restrictions de l&#39;action finale l&#39;imposent ; il reste séparé des informations confirmées.
 
-Ta réponse est UNE fiche « Entrée préparée pour l&#39;étape 4 », sans la répéter dans une seconde synthèse :
-1. Contenu utilisable — le format choisi, rempli seulement avec mes informations ; une trame vide suffit si les faits manquent.
-2. À compléter ou confirmer — seulement les manques utiles et leur prochaine action. Ne rends pas une précision facultative bloquante et n&#39;ajoute pas de nouvelles données démographiques ou commerciales à collecter sans nécessité pour cet élément.
-3. Sources et statut — origine, période/périmètre connus, faits, choix déclarés ou hypothèses distingués ; indique prêt, partiel ou bloqué et pourquoi.
-Ne complète pas les inconnues par un portrait ou des chiffres fictifs. Un exemple fictif n&#39;est produit que sur demande explicite pour cet élément ou si le premier essai l&#39;impose ; il reste séparé des informations confirmées.
-N&#39;invente jamais d&#39;historique de ventes, de résultats observés ni de preuves. Ne réalise pas encore le livrable final du cas. Si cet élément correspond lui-même au résultat à produire, signale-le et rassemble seulement les entrées nécessaires ; sa réalisation reste à l&#39;étape 4.
+Réponds par UNE fiche « Entrée préparée », sans seconde synthèse :
+1. Contenu utilisable — informations confirmées dans le format choisi, ou trame avec les champs manquants marqués [à compléter]. Sépare l&#39;original de tes annotations.
+2. À compléter — seulement les manques utiles et comment les obtenir.
+3. Sources et statut — origine, période/périmètre connus ; prêt, partiel ou bloqué et pourquoi.
+Si un manque critique empêche de choisir le bon format ou de respecter les règles, pose au maximum trois questions précises dans une seule liste et attends les réponses. Sinon, produis la fiche avec les inconnues marquées, sans questionnaire préalable. Ne rends pas une précision facultative bloquante.
+Ne réalise pas encore le livrable final. Si cet élément désigne lui-même le résultat final, signale-le et identifie seulement les informations nécessaires à sa réalisation.
+Règles source à respecter impérativement :
+Ne transmettre que des extraits nécessaires et autorisés, sans identifiants inutiles. Calculer les délais uniquement lorsque les horodatages de réception et de réponse sont disponibles ; sinon les signaler comme inconnus. Vérifier les catégories et calculs sur l&#39;échantillon.
 
-Utilise uniquement un outil autorisé et des données dont le partage est autorisé, sans données personnelles identifiables. Les restrictions du premier essai et les règles de confidentialité s&#39;appliquent dès cette préparation, même si un exemple générique de collecte semble plus large. Un prérequis cité n&#39;est pas une autorisation de le transmettre : si le cas impose une préparation locale ou des données fictives/agrégées, ne demande pas les données brutes ; recueille seulement leur disponibilité ou le résultat autorisé et validé. Aucun envoi, publication, modification de système ni action automatique. Les règles du cas ci-dessous encadrent la préparation ; elles ne demandent pas de réaliser la stratégie, l&#39;analyse ou le déploiement maintenant.
-Règles source à respecter impérativement : Ne transmettre que des extraits nécessaires et autorisés, sans identifiants inutiles. Calculer les délais uniquement lorsque les horodatages de réception et de réponse sont disponibles ; sinon les signaler comme inconnus. Vérifier les catégories et calculs sur l&#39;échantillon.
-Termine le livrable par : « À faire valider en interne avant usage. »</pre>
+Utilise uniquement des données dont le partage est autorisé dans un outil autorisé. Ne demande ni données personnelles identifiables, ni mot de passe, ni clé d&#39;accès. Une pièce citée n&#39;est pas une autorisation de la transmettre : si une préparation locale ou des données fictives/agrégées sont imposées, demande seulement le contenu autorisé ou le statut de disponibilité. En cas de conflit, suspends la partie concernée et explique pourquoi.
+N&#39;invente jamais d&#39;historique de ventes, de résultats observés ni de preuves. Distingue faits fournis, choix déclarés, hypothèses et exemple explicitement fictif. Ne prétends pas consulter des fichiers, vérifier des sources ou effectuer des calculs sans accès effectif ; indique les contrôles impossibles. Aucun envoi, publication, connexion, modification de système ni déclenchement automatique. Une validation humaine reste nécessaire avant usage.
+Termine par : « À faire valider en interne avant usage. »</pre>
           </div>
         </details>
         
@@ -411,8 +343,7 @@ Termine le livrable par : « À faire valider en interne avant usage. »</pre>
           <summary>Besoin d'aide pour préparer cet élément ?</summary>
           <div class="ticket mini">
           <div class="bandeau"><span>Prompt de préparation</span><button type="button" data-copie>Copier</button></div>
-          <pre>Mon rôle : [votre fonction ou rôle dans l&#39;entreprise].
-Étape 2 — préparer une entrée, pas encore réaliser le cas.
+          <pre>Tu m&#39;aides à préparer UNE entrée de travail, sans produire le résultat final.
 Domaine métier du cas : Service &amp; relation client.
 Mon objectif prioritaire est : Suivre et améliorer la qualité de service.
 Contexte secteur : Multi-sectoriel.
@@ -420,30 +351,27 @@ Cas d&#39;usage cible : Analyse des e-mails du service client.
 
 Élément source à préparer : Délais de réponse moyens observés
 
-Première action prévue à l&#39;étape 4 — référence de périmètre, à ne pas exécuter ici :
+Action finale visée — référence de périmètre, à ne pas exécuter ici :
 Exporter 50 emails clients du dernier mois (objet, corps et horodatages disponibles, après dépersonnalisation). Ouvrir un assistant IA autorisé par votre organisation et lui fournir ces emails, puis lui demander d&#39;identifier les 5 sujets les plus fréquents et les délais moyens par catégorie. Astuce : dans votre demande à l&#39;IA, précisez (1) votre rôle et contexte — ex. « Je suis responsable service client d&#39;une PME e-commerce de 25 salariés » (2) la tâche exacte attendue (3) le format de sortie souhaité — ex. « synthèse : top 5 motifs avec fréquence, délai moyen et recommandation d&#39;amélioration » (4) les contraintes — ex. « analyse factuelle, pas de suppositions ». Vérifier : croiser avec le ressenti de l&#39;équipe. Livrable : synthèse mensuelle des tendances emails clients.
 
-Aide-moi uniquement à obtenir ou à préciser cet élément pour pouvoir l&#39;utiliser à l&#39;étape 4. Réutilise les informations que j&#39;ai déjà fournies dans cette conversation ; ne me les redemande pas. Si la même pièce couvre plusieurs entrées, référence-la sans la refaire. S&#39;il manque des informations indispensables, pose quelques questions simples centrées sur cet élément, mon activité et l&#39;usage prévu, au plus trois à la fois. Les informations optionnelles restent optionnelles.
+Mes informations pour cet élément : [collez les faits ou extraits autorisés ; précisez ce qui existe, ce qui est à créer et ce qui manque].
+Mon rôle et les contraintes utiles : [à compléter si nécessaire].
+Les crochets non complétés ne sont pas des données. Travaille à partir des informations collées dans cette demande, sans supposer connaître un parcours ou une autre conversation.
 
-Choisis UN SEUL format adapté à l&#39;entrée parmi les formats ci-dessous ; ne produis pas successivement toutes ces rubriques. Va à l&#39;essentiel, sans reprendre le contexte du cas, les consignes ou une stratégie dans ta réponse.
-Formats possibles :
-- Profil ou description : prépare une fiche courte avec périmètre, caractéristiques connues, besoins ou attentes déclarés, critères ou contraintes et inconnues. Distingue observations réelles, cible ou choix souhaité et hypothèses à valider ; ne déduis pas de préférences ou de caractéristiques personnelles non fournies.
-- Objectif, budget ou contraintes : prépare un brief de cadrage avec les choix déclarés, valeurs et limites confirmées, puis les décisions restant à faire valider.
-- Brouillon ou modèle explicitement à créer : rédige seulement ce document d&#39;entrée ou sa trame, à partir de mes réponses, sans réaliser sa transformation finale.
-- Données, historique, document existant ou référence : prépare un tableau de collecte (information ou document, source à confirmer, période ou version, format, disponible ou à obtenir). Utilise seulement les contenus réellement fournis ; ne prétends pas avoir consulté un fichier, une source ou effectué des calculs sans accès effectif. Un contrat, une procédure, une preuve ou une règle en vigueur ne se remplace pas par un texte plausible. Conserve l&#39;original séparé de tes annotations : ne corrige ni ne transforme une entrée qui doit être analysée ou réécrite ensuite. Si tu ne sais pas si le document existe ou doit être créé, demande-le.
-- Outil, accès ou autorisation : prépare une checklist des disponibilités et validations à obtenir, sans demander de mot de passe ou de clé, ni installer ou connecter quoi que ce soit.
-- Simple règle ou condition, plutôt qu&#39;une entrée : indique comment vérifier son respect et son statut ; ne fabrique pas un document pour remplir cette rubrique.
+Choisis UN SEUL format adapté : fiche courte pour un profil ou un objectif ; brouillon pour une entrée explicitement à créer ; tableau de collecte pour des données ou documents existants manquants ; checklist de disponibilité pour un outil, un accès ou une autorisation. Pour une simple règle, indique seulement comment vérifier son respect. Si le contenu utilisable est fourni, conserve-le sans le refaire ; annote les manques séparément. Un contrat, un historique, une procédure en vigueur ou une preuve ne se remplace pas par un texte plausible. N&#39;ajoute pas de collecte de données sans nécessité et ne déduis pas de caractéristiques personnelles ou commerciales non fournies. Un exemple fictif n&#39;est produit que sur demande explicite ou si les restrictions de l&#39;action finale l&#39;imposent ; il reste séparé des informations confirmées.
 
-Ta réponse est UNE fiche « Entrée préparée pour l&#39;étape 4 », sans la répéter dans une seconde synthèse :
-1. Contenu utilisable — le format choisi, rempli seulement avec mes informations ; une trame vide suffit si les faits manquent.
-2. À compléter ou confirmer — seulement les manques utiles et leur prochaine action. Ne rends pas une précision facultative bloquante et n&#39;ajoute pas de nouvelles données démographiques ou commerciales à collecter sans nécessité pour cet élément.
-3. Sources et statut — origine, période/périmètre connus, faits, choix déclarés ou hypothèses distingués ; indique prêt, partiel ou bloqué et pourquoi.
-Ne complète pas les inconnues par un portrait ou des chiffres fictifs. Un exemple fictif n&#39;est produit que sur demande explicite pour cet élément ou si le premier essai l&#39;impose ; il reste séparé des informations confirmées.
-N&#39;invente jamais d&#39;historique de ventes, de résultats observés ni de preuves. Ne réalise pas encore le livrable final du cas. Si cet élément correspond lui-même au résultat à produire, signale-le et rassemble seulement les entrées nécessaires ; sa réalisation reste à l&#39;étape 4.
+Réponds par UNE fiche « Entrée préparée », sans seconde synthèse :
+1. Contenu utilisable — informations confirmées dans le format choisi, ou trame avec les champs manquants marqués [à compléter]. Sépare l&#39;original de tes annotations.
+2. À compléter — seulement les manques utiles et comment les obtenir.
+3. Sources et statut — origine, période/périmètre connus ; prêt, partiel ou bloqué et pourquoi.
+Si un manque critique empêche de choisir le bon format ou de respecter les règles, pose au maximum trois questions précises dans une seule liste et attends les réponses. Sinon, produis la fiche avec les inconnues marquées, sans questionnaire préalable. Ne rends pas une précision facultative bloquante.
+Ne réalise pas encore le livrable final. Si cet élément désigne lui-même le résultat final, signale-le et identifie seulement les informations nécessaires à sa réalisation.
+Règles source à respecter impérativement :
+Ne transmettre que des extraits nécessaires et autorisés, sans identifiants inutiles. Calculer les délais uniquement lorsque les horodatages de réception et de réponse sont disponibles ; sinon les signaler comme inconnus. Vérifier les catégories et calculs sur l&#39;échantillon.
 
-Utilise uniquement un outil autorisé et des données dont le partage est autorisé, sans données personnelles identifiables. Les restrictions du premier essai et les règles de confidentialité s&#39;appliquent dès cette préparation, même si un exemple générique de collecte semble plus large. Un prérequis cité n&#39;est pas une autorisation de le transmettre : si le cas impose une préparation locale ou des données fictives/agrégées, ne demande pas les données brutes ; recueille seulement leur disponibilité ou le résultat autorisé et validé. Aucun envoi, publication, modification de système ni action automatique. Les règles du cas ci-dessous encadrent la préparation ; elles ne demandent pas de réaliser la stratégie, l&#39;analyse ou le déploiement maintenant.
-Règles source à respecter impérativement : Ne transmettre que des extraits nécessaires et autorisés, sans identifiants inutiles. Calculer les délais uniquement lorsque les horodatages de réception et de réponse sont disponibles ; sinon les signaler comme inconnus. Vérifier les catégories et calculs sur l&#39;échantillon.
-Termine le livrable par : « À faire valider en interne avant usage. »</pre>
+Utilise uniquement des données dont le partage est autorisé dans un outil autorisé. Ne demande ni données personnelles identifiables, ni mot de passe, ni clé d&#39;accès. Une pièce citée n&#39;est pas une autorisation de la transmettre : si une préparation locale ou des données fictives/agrégées sont imposées, demande seulement le contenu autorisé ou le statut de disponibilité. En cas de conflit, suspends la partie concernée et explique pourquoi.
+N&#39;invente jamais d&#39;historique de ventes, de résultats observés ni de preuves. Distingue faits fournis, choix déclarés, hypothèses et exemple explicitement fictif. Ne prétends pas consulter des fichiers, vérifier des sources ou effectuer des calculs sans accès effectif ; indique les contrôles impossibles. Aucun envoi, publication, connexion, modification de système ni déclenchement automatique. Une validation humaine reste nécessaire avant usage.
+Termine par : « À faire valider en interne avant usage. »</pre>
           </div>
         </details>
         
@@ -464,8 +392,7 @@ Termine le livrable par : « À faire valider en interne avant usage. »</pre>
           <summary>Besoin d'aide pour préparer cet élément ?</summary>
           <div class="ticket mini">
           <div class="bandeau"><span>Prompt de préparation</span><button type="button" data-copie>Copier</button></div>
-          <pre>Mon rôle : [votre fonction ou rôle dans l&#39;entreprise].
-Étape 2 — préparer une entrée, pas encore réaliser le cas.
+          <pre>Tu m&#39;aides à préparer UNE entrée de travail, sans produire le résultat final.
 Domaine métier du cas : Service &amp; relation client.
 Mon objectif prioritaire est : Suivre et améliorer la qualité de service.
 Contexte secteur : Multi-sectoriel.
@@ -473,34 +400,31 @@ Cas d&#39;usage cible : Analyse des e-mails du service client.
 
 Élément source à préparer : Horodatages de réception et de première réponse, si les délais doivent être calculés
 
-Première action prévue à l&#39;étape 4 — référence de périmètre, à ne pas exécuter ici :
+Action finale visée — référence de périmètre, à ne pas exécuter ici :
 Exporter 50 emails clients du dernier mois (objet, corps et horodatages disponibles, après dépersonnalisation). Ouvrir un assistant IA autorisé par votre organisation et lui fournir ces emails, puis lui demander d&#39;identifier les 5 sujets les plus fréquents et les délais moyens par catégorie. Astuce : dans votre demande à l&#39;IA, précisez (1) votre rôle et contexte — ex. « Je suis responsable service client d&#39;une PME e-commerce de 25 salariés » (2) la tâche exacte attendue (3) le format de sortie souhaité — ex. « synthèse : top 5 motifs avec fréquence, délai moyen et recommandation d&#39;amélioration » (4) les contraintes — ex. « analyse factuelle, pas de suppositions ». Vérifier : croiser avec le ressenti de l&#39;équipe. Livrable : synthèse mensuelle des tendances emails clients.
 
-Aide-moi uniquement à obtenir ou à préciser cet élément pour pouvoir l&#39;utiliser à l&#39;étape 4. Réutilise les informations que j&#39;ai déjà fournies dans cette conversation ; ne me les redemande pas. Si la même pièce couvre plusieurs entrées, référence-la sans la refaire. S&#39;il manque des informations indispensables, pose quelques questions simples centrées sur cet élément, mon activité et l&#39;usage prévu, au plus trois à la fois. Les informations optionnelles restent optionnelles.
+Mes informations pour cet élément : [collez les faits ou extraits autorisés ; précisez ce qui existe, ce qui est à créer et ce qui manque].
+Mon rôle et les contraintes utiles : [à compléter si nécessaire].
+Les crochets non complétés ne sont pas des données. Travaille à partir des informations collées dans cette demande, sans supposer connaître un parcours ou une autre conversation.
 
-Choisis UN SEUL format adapté à l&#39;entrée parmi les formats ci-dessous ; ne produis pas successivement toutes ces rubriques. Va à l&#39;essentiel, sans reprendre le contexte du cas, les consignes ou une stratégie dans ta réponse.
-Formats possibles :
-- Profil ou description : prépare une fiche courte avec périmètre, caractéristiques connues, besoins ou attentes déclarés, critères ou contraintes et inconnues. Distingue observations réelles, cible ou choix souhaité et hypothèses à valider ; ne déduis pas de préférences ou de caractéristiques personnelles non fournies.
-- Objectif, budget ou contraintes : prépare un brief de cadrage avec les choix déclarés, valeurs et limites confirmées, puis les décisions restant à faire valider.
-- Brouillon ou modèle explicitement à créer : rédige seulement ce document d&#39;entrée ou sa trame, à partir de mes réponses, sans réaliser sa transformation finale.
-- Données, historique, document existant ou référence : prépare un tableau de collecte (information ou document, source à confirmer, période ou version, format, disponible ou à obtenir). Utilise seulement les contenus réellement fournis ; ne prétends pas avoir consulté un fichier, une source ou effectué des calculs sans accès effectif. Un contrat, une procédure, une preuve ou une règle en vigueur ne se remplace pas par un texte plausible. Conserve l&#39;original séparé de tes annotations : ne corrige ni ne transforme une entrée qui doit être analysée ou réécrite ensuite. Si tu ne sais pas si le document existe ou doit être créé, demande-le.
-- Outil, accès ou autorisation : prépare une checklist des disponibilités et validations à obtenir, sans demander de mot de passe ou de clé, ni installer ou connecter quoi que ce soit.
-- Simple règle ou condition, plutôt qu&#39;une entrée : indique comment vérifier son respect et son statut ; ne fabrique pas un document pour remplir cette rubrique.
+Choisis UN SEUL format adapté : fiche courte pour un profil ou un objectif ; brouillon pour une entrée explicitement à créer ; tableau de collecte pour des données ou documents existants manquants ; checklist de disponibilité pour un outil, un accès ou une autorisation. Pour une simple règle, indique seulement comment vérifier son respect. Si le contenu utilisable est fourni, conserve-le sans le refaire ; annote les manques séparément. Un contrat, un historique, une procédure en vigueur ou une preuve ne se remplace pas par un texte plausible. N&#39;ajoute pas de collecte de données sans nécessité et ne déduis pas de caractéristiques personnelles ou commerciales non fournies. Un exemple fictif n&#39;est produit que sur demande explicite ou si les restrictions de l&#39;action finale l&#39;imposent ; il reste séparé des informations confirmées.
 
-Ta réponse est UNE fiche « Entrée préparée pour l&#39;étape 4 », sans la répéter dans une seconde synthèse :
-1. Contenu utilisable — le format choisi, rempli seulement avec mes informations ; une trame vide suffit si les faits manquent.
-2. À compléter ou confirmer — seulement les manques utiles et leur prochaine action. Ne rends pas une précision facultative bloquante et n&#39;ajoute pas de nouvelles données démographiques ou commerciales à collecter sans nécessité pour cet élément.
-3. Sources et statut — origine, période/périmètre connus, faits, choix déclarés ou hypothèses distingués ; indique prêt, partiel ou bloqué et pourquoi.
-Ne complète pas les inconnues par un portrait ou des chiffres fictifs. Un exemple fictif n&#39;est produit que sur demande explicite pour cet élément ou si le premier essai l&#39;impose ; il reste séparé des informations confirmées.
-N&#39;invente jamais d&#39;historique de ventes, de résultats observés ni de preuves. Ne réalise pas encore le livrable final du cas. Si cet élément correspond lui-même au résultat à produire, signale-le et rassemble seulement les entrées nécessaires ; sa réalisation reste à l&#39;étape 4.
+Réponds par UNE fiche « Entrée préparée », sans seconde synthèse :
+1. Contenu utilisable — informations confirmées dans le format choisi, ou trame avec les champs manquants marqués [à compléter]. Sépare l&#39;original de tes annotations.
+2. À compléter — seulement les manques utiles et comment les obtenir.
+3. Sources et statut — origine, période/périmètre connus ; prêt, partiel ou bloqué et pourquoi.
+Si un manque critique empêche de choisir le bon format ou de respecter les règles, pose au maximum trois questions précises dans une seule liste et attends les réponses. Sinon, produis la fiche avec les inconnues marquées, sans questionnaire préalable. Ne rends pas une précision facultative bloquante.
+Ne réalise pas encore le livrable final. Si cet élément désigne lui-même le résultat final, signale-le et identifie seulement les informations nécessaires à sa réalisation.
+Règles source à respecter impérativement :
+Ne transmettre que des extraits nécessaires et autorisés, sans identifiants inutiles. Calculer les délais uniquement lorsque les horodatages de réception et de réponse sont disponibles ; sinon les signaler comme inconnus. Vérifier les catégories et calculs sur l&#39;échantillon.
 
-Utilise uniquement un outil autorisé et des données dont le partage est autorisé, sans données personnelles identifiables. Les restrictions du premier essai et les règles de confidentialité s&#39;appliquent dès cette préparation, même si un exemple générique de collecte semble plus large. Un prérequis cité n&#39;est pas une autorisation de le transmettre : si le cas impose une préparation locale ou des données fictives/agrégées, ne demande pas les données brutes ; recueille seulement leur disponibilité ou le résultat autorisé et validé. Aucun envoi, publication, modification de système ni action automatique. Les règles du cas ci-dessous encadrent la préparation ; elles ne demandent pas de réaliser la stratégie, l&#39;analyse ou le déploiement maintenant.
-Règles source à respecter impérativement : Ne transmettre que des extraits nécessaires et autorisés, sans identifiants inutiles. Calculer les délais uniquement lorsque les horodatages de réception et de réponse sont disponibles ; sinon les signaler comme inconnus. Vérifier les catégories et calculs sur l&#39;échantillon.
-Termine le livrable par : « À faire valider en interne avant usage. »</pre>
+Utilise uniquement des données dont le partage est autorisé dans un outil autorisé. Ne demande ni données personnelles identifiables, ni mot de passe, ni clé d&#39;accès. Une pièce citée n&#39;est pas une autorisation de la transmettre : si une préparation locale ou des données fictives/agrégées sont imposées, demande seulement le contenu autorisé ou le statut de disponibilité. En cas de conflit, suspends la partie concernée et explique pourquoi.
+N&#39;invente jamais d&#39;historique de ventes, de résultats observés ni de preuves. Distingue faits fournis, choix déclarés, hypothèses et exemple explicitement fictif. Ne prétends pas consulter des fichiers, vérifier des sources ou effectuer des calculs sans accès effectif ; indique les contrôles impossibles. Aucun envoi, publication, connexion, modification de système ni déclenchement automatique. Une validation humaine reste nécessaire avant usage.
+Termine par : « À faire valider en interne avant usage. »</pre>
           </div>
         </details>
         
-        <p class="note">Conservez les blocs « Entrée préparée pour l'étape 4 » dans un espace autorisé. Continuez dans la même conversation avec votre assistant IA, ou collez-les avec le prompt de l'étape 4. Cette page ne conserve ni ne transmet ces textes.</p>
+        <p class="note">Une fois les éléments prêts, passez au cadre de sécurité, puis collez leurs contenus autorisés avec le prompt de production. Une entrée déjà disponible n'a pas besoin d'être recréée. Cette page ne conserve ni ne transmet ces textes.</p>
         <div class="valider"><input type="checkbox" id="fin-2" data-fin="2"><label for="fin-2">Étape terminée — mes éléments sont prêts pour l'essai choisi</label></div>
       </div>
     </details>
@@ -514,6 +438,7 @@ Termine le livrable par : « À faire valider en interne avant usage. »</pre>
       <div class="contenu">
         <p>Règles source à conserver et à appliquer avant de partager des données :</p>
         <p class="source">Ne transmettre que des extraits nécessaires et autorisés, sans identifiants inutiles. Calculer les délais uniquement lorsque les horodatages de réception et de réponse sont disponibles ; sinon les signaler comme inconnus. Vérifier les catégories et calculs sur l&#39;échantillon.</p>
+        <p><b>À prévoir :</b> Suppose de ne transmettre que des extraits nécessaires sans identifiants inutiles et de vérifier catégories et calculs sur l&#39;échantillon.</p>
         <div class="coche">
           <input type="checkbox" id="e3source" data-suivi>
           <label for="e3source">J'ai vérifié l'application des règles source pour cet essai</label>
@@ -542,7 +467,39 @@ Termine le livrable par : « À faire valider en interne avant usage. »</pre>
         <p><b>Votre première action proposée — adaptez le délai à vos contraintes :</b></p>
         <p class="source">Exporter 50 emails clients du dernier mois (objet, corps et horodatages disponibles, après dépersonnalisation). Ouvrir un assistant IA autorisé par votre organisation et lui fournir ces emails, puis lui demander d&#39;identifier les 5 sujets les plus fréquents et les délais moyens par catégorie. Astuce : dans votre demande à l&#39;IA, précisez (1) votre rôle et contexte — ex. « Je suis responsable service client d&#39;une PME e-commerce de 25 salariés » (2) la tâche exacte attendue (3) le format de sortie souhaité — ex. « synthèse : top 5 motifs avec fréquence, délai moyen et recommandation d&#39;amélioration » (4) les contraintes — ex. « analyse factuelle, pas de suppositions ». Vérifier : croiser avec le ressenti de l&#39;équipe. Livrable : synthèse mensuelle des tendances emails clients.</p>
         <p class="note">Ce premier livrable n'est pas un déploiement. Une intégration ou une automatisation éventuelle demande une mise en place et des validations distinctes.</p>
-        <p class="note">Utilisez <a href="#prompt-demarrage">votre prompt de démarrage</a> avec les entrées préparées à l'étape 2, sans les refaire. Gardez leurs sources, les manques et les hypothèses visibles ; appliquez le cadre de sécurité de l'étape 3. Vous produisez ici le résultat du cas, que vous testerez à l'étape 5.</p>
+        <p class="note">Copiez ce prompt et ajoutez vos éléments préparés, avec leurs sources et leurs limites. Ne relancez pas les aides de préparation pour des entrées déjà prêtes. Vous obtenez ici le résultat à relire, puis à tester.</p>
+        <div class="ticket" id="prompt-demarrage" tabindex="-1" role="region" aria-label="Votre prompt de production">
+          <div class="bandeau"><span>Votre prompt de production</span><button type="button" data-copie>Copier</button></div>
+          <pre>Tu m&#39;aides à produire un premier livrable concret en français, à relire avant usage.
+Domaine métier du cas : Service &amp; relation client.
+Mon objectif prioritaire est : Suivre et améliorer la qualité de service.
+Contexte secteur : Multi-sectoriel.
+Cas d&#39;usage cible : Analyse des e-mails du service client.
+
+Description source :
+Vous recevez 200 emails clients par mois mais ne savez pas quels sujets reviennent le plus ? L&#39;IA analyse vos emails pour identifier les tendances, les motifs récurrents et les délais de réponse. Votre équipe priorise mieux et traite les causes racines.
+
+Première action source :
+Exporter 50 emails clients du dernier mois (objet, corps et horodatages disponibles, après dépersonnalisation). Ouvrir un assistant IA autorisé par votre organisation et lui fournir ces emails, puis lui demander d&#39;identifier les 5 sujets les plus fréquents et les délais moyens par catégorie. Astuce : dans votre demande à l&#39;IA, précisez (1) votre rôle et contexte — ex. « Je suis responsable service client d&#39;une PME e-commerce de 25 salariés » (2) la tâche exacte attendue (3) le format de sortie souhaité — ex. « synthèse : top 5 motifs avec fréquence, délai moyen et recommandation d&#39;amélioration » (4) les contraintes — ex. « analyse factuelle, pas de suppositions ». Vérifier : croiser avec le ressenti de l&#39;équipe. Livrable : synthèse mensuelle des tendances emails clients.
+
+Éléments prévus par le cas : Export de 50 à 100 emails clients récents (anonymisés) ; Catégories de demandes existantes si disponibles ; Délais de réponse moyens observés ; Horodatages de réception et de première réponse, si les délais doivent être calculés.
+
+Mon rôle, ma situation et le périmètre de cet essai : [à compléter].
+Mes éléments préparés : [collez ici les contenus autorisés réellement utilisables, avec leurs sources, périodes, limites et manques ; une liste de documents non joints ne donne pas accès à leur contenu].
+Format souhaité et contraintes de temps ou de budget : [à préciser si utiles].
+Les crochets non complétés ne sont pas des données. Cette demande contient le contexte à utiliser ; ne suppose pas connaître une autre conversation.
+
+Pars du cas et de la première action source. Ne recommence ni le questionnaire de préparation ni un document d&#39;entrée fourni. Produis le résultat du cas, pas une nouvelle liste de prérequis. Les opérations de collecte citées dans l&#39;action sont déjà couvertes par les entrées fournies : ne les refais pas. Une checklist ou grille de collecte reste permise si elle est précisément le livrable demandé par le cas. Si l&#39;action contient plusieurs travaux, traite le premier élément réalisable sur le périmètre choisi et indique les travaux restant hors de ce brouillon. Respecte le format utile à l&#39;action et les limites globales de temps et de budget quand elles sont fournies.
+Utilise les faits collés. Si des entrées indispensables manquent ou se contredisent, pose au maximum trois questions ciblées dans une seule liste avant la partie bloquée. Pour les autres manques, fournis une trame avec [à compléter], pas des faits inventés. Un exemple fictif n&#39;est permis que si je le demande ou si les règles du cas l&#39;imposent ; il ne démontre pas l&#39;efficacité réelle.
+Rends uniquement le livrable demandé, puis une courte liste de points à vérifier. Cite les sources réellement consultées, rends les calculs vérifiables (données, méthode, unités) et distingue les hypothèses. Respecte le recours à un tableur, un logiciel métier ou un professionnel quand le cas l&#39;exige. Sans vérification récente, ne garantis ni fonctionnalité, ni gratuité, ni tarif d&#39;un outil. Ne réalise pas le test terrain ni la mise en place d&#39;une automatisation.
+Règles source à respecter impérativement :
+Ne transmettre que des extraits nécessaires et autorisés, sans identifiants inutiles. Calculer les délais uniquement lorsque les horodatages de réception et de réponse sont disponibles ; sinon les signaler comme inconnus. Vérifier les catégories et calculs sur l&#39;échantillon.
+
+Utilise uniquement des données dont le partage est autorisé dans un outil autorisé. Ne demande ni données personnelles identifiables, ni mot de passe, ni clé d&#39;accès. Une pièce citée n&#39;est pas une autorisation de la transmettre : si une préparation locale ou des données fictives/agrégées sont imposées, demande seulement le contenu autorisé ou le statut de disponibilité. En cas de conflit, suspends la partie concernée et explique pourquoi.
+N&#39;invente jamais d&#39;historique de ventes, de résultats observés ni de preuves. Distingue faits fournis, choix déclarés, hypothèses et exemple explicitement fictif. Ne prétends pas consulter des fichiers, vérifier des sources ou effectuer des calculs sans accès effectif ; indique les contrôles impossibles. Aucun envoi, publication, connexion, modification de système ni déclenchement automatique. Une validation humaine reste nécessaire avant usage.
+Termine le livrable par : « À faire valider en interne avant usage. »</pre>
+        </div>
+        <p class="note">Copier reprend exactement le texte affiché, sans ajout caché. Collez-le dans votre assistant IA et complétez les champs. AVIA ne lui transmet aucun contexte automatiquement.</p>
         <h3>Avant de l'utiliser, vérifiez trois points</h3>
         <ul class="reflexion">
           <li><b>Utile :</b> le résultat répond-il à la tâche choisie, dans le format attendu ?</li>
@@ -598,82 +555,45 @@ Termine le livrable par : « À faire valider en interne avant usage. »</pre>
   <section class="etape" data-etape="6">
     <div class="marqueur"><span>6</span></div>
     <details>
-      <summary><span class="titre">Installez l'usage durablement</span><span class="duree">30 min</span><span class="chevron">▶</span></summary>
+      <summary><span class="titre">Réutilisez ce qui fonctionne</span><span class="duree">30 min</span><span class="chevron">▶</span></summary>
       <div class="contenu">
-        <p>Ne réutilisez que ce qui a été validé sur le périmètre testé. Documentez les ajustements ou l'arrêt si le résultat n'est pas utilisable.</p>
-<p>Reprenez la recette et les contrôles issus de l'essai ; cette étape organise leur réutilisation, pas une nouvelle collecte complète ni un déploiement automatique.</p>
-<ul>
-<div class="coche"><input type="checkbox" id="auto6" data-suivi><label for="auto6">Sauvegardez la recette validée dans un espace autorisé : instructions, outil, entrées permises, contrôles, limites et procédure d'arrêt ; aucun nouveau compte nécessaire</label></div>
-<div class="coche"><input type="checkbox" id="auto7" data-suivi><label for="auto7">Désignez le responsable du contrôle et, si utile, une personne capable de reprendre la tâche</label></div>
-<div class="coche"><input type="checkbox" id="auto8" data-suivi><label for="auto8">Définissez la prochaine tâche comparable, sa validation humaine et les conditions de lancement ; aucun déclenchement automatique depuis ce parcours</label></div>
-<div class="coche"><input type="checkbox" id="auto9" data-suivi><label for="auto9">Prévoyez un point de décision et gardez le lien du parcours : garder, ajuster ou arrêter</label></div>
-</ul>
-<p><strong>C'est fait quand</strong> : la recette, les responsabilités et la prochaine tâche sont définies, ou l'arrêt est consigné. Une case cochée ne démontre ni autonomie ni adoption durable.</p>
-        <details class="aide-element">
-          <summary>Si utile : transmettre une synthèse au responsable</summary>
-          <div class="contenu">
-            <p>Dans votre canal interne autorisé, partagez seulement : tâche testée et périmètre, données réelles ou fictives, résultat vérifié et limites, temps total comparé, décision (utilisable / à ajuster / à arrêter), responsable et prochaine tâche. N'annoncez aucun gain non mesuré.</p>
-            <p class="note">Transmission manuelle et facultative : ce parcours ne crée aucun compte, n'envoie aucun email et ne notifie personne.</p>
-          </div>
-        </details>
-        <!-- value-return:source-value-1 -->
-<div class="carte">
-  <h3>Revenir volontairement à ce cas</h3>
-  <p>Gardez ce lien dans vos favoris ou copiez-le dans votre espace autorisé. Il ouvre ce même parcours générique, pas une conversation sauvegardée.</p>
-  <label for="lien-retour">Lien de ce parcours, sans contexte personnel</label>
-  <input id="lien-retour" type="text" readonly style="width:100%;min-height:44px;font:inherit">
-  <button type="button" id="copier-lien" style="min-height:44px;padding:10px;font:inherit">Copier le lien du parcours</button>
-  <p id="retour-statut" role="status"></p>
-  <p class="note">Seules les cases cochées sont conservées dans ce navigateur par le suivi existant. Ni vos entrées, ni votre bilan, ni vos résultats ne sont sauvegardés ici. Aucun compte, envoi ou partage automatique.</p>
-</div>
-<!-- /value-return -->
-        <div class="valider"><input type="checkbox" id="fin-6" data-fin="6"><label for="fin-6">Étape terminée — recette et suite documentées, ou arrêt consigné</label></div>
-      </div>
-    </details>
-  </section>
-
-</div>
-
-<!-- ================= QUICK WIN (accordion en bas) ================= -->
-<details class="quickwin-accordion">
-  <summary><span class="titre">Si vous voulez tester sans attendre — votre prompt prêt</span><span class="chevron">▶</span></summary>
-  <div class="contenu-qw">
-    <p>Ce raccourci utilise le même prompt de production que l'étape 4 ; ce n'est pas un second travail à refaire. Si vos entrées sont prêtes, fournissez-les dans un assistant IA autorisé par votre organisation. Sinon, commencez par l'aide de l'étape 2 ou une démonstration explicitement fictive. Complétez les [crochets] avec des données dont le partage est autorisé, sans données personnelles identifiables. Vérifiez les règles de confidentialité et les limites de l'offre utilisée.</p>
-    <div class="ticket" id="prompt-demarrage" tabindex="-1" role="region" aria-label="Votre prompt de démarrage">
-      <div class="bandeau"><span>Votre prompt de démarrage</span><button type="button" data-copie>Copier</button></div>
-      <pre>Mon rôle : [votre fonction ou rôle dans l&#39;entreprise]. Mon contexte : [votre secteur, taille d&#39;entreprise, situation actuelle].
-
-Étape 4 — produire le premier livrable à partir des entrées préparées.
-Référence du catalogue (ne pas la réécrire) :
+        <p>Si l'essai est utile et vérifié, transformez ce qui a fonctionné en une consigne à copier la prochaine fois. Sinon, ajustez ce qui pose problème ou arrêtez ici.</p>
+<p>L'aide ci-dessous rédige cette consigne à partir de votre méthode testée ; elle ne refait pas la tâche. Collez les instructions qui ont fonctionné, le format attendu et vos vérifications. Pas besoin d'une fonction payante : le résultat est du texte à conserver où vous le souhaitez, dans un espace autorisé.</p>
+<p>Une intégration ou un automatisme éventuel nécessite une mise en place distincte, avec autorisations, contrôles et possibilité d'arrêt ; cette consigne ne l'installe pas.</p>
+        <div class="ticket" id="prompt-reutilisation">
+  <div class="bandeau"><span>Créer ma consigne réutilisable</span><button type="button" data-copie>Copier</button></div>
+  <pre>Tu m&#39;aides à écrire une consigne réutilisable, pas à exécuter la tâche maintenant.
 Domaine métier du cas : Service &amp; relation client.
 Mon objectif prioritaire est : Suivre et améliorer la qualité de service.
 Contexte secteur : Multi-sectoriel.
 Cas d&#39;usage cible : Analyse des e-mails du service client.
 
-Description source : Vous recevez 200 emails clients par mois mais ne savez pas quels sujets reviennent le plus ? L&#39;IA analyse vos emails pour identifier les tendances, les motifs récurrents et les délais de réponse. Votre équipe priorise mieux et traite les causes racines.
+Tâche de référence :
+Exporter 50 emails clients du dernier mois (objet, corps et horodatages disponibles, après dépersonnalisation). Ouvrir un assistant IA autorisé par votre organisation et lui fournir ces emails, puis lui demander d&#39;identifier les 5 sujets les plus fréquents et les délais moyens par catégorie. Astuce : dans votre demande à l&#39;IA, précisez (1) votre rôle et contexte — ex. « Je suis responsable service client d&#39;une PME e-commerce de 25 salariés » (2) la tâche exacte attendue (3) le format de sortie souhaité — ex. « synthèse : top 5 motifs avec fréquence, délai moyen et recommandation d&#39;amélioration » (4) les contraintes — ex. « analyse factuelle, pas de suppositions ». Vérifier : croiser avec le ressenti de l&#39;équipe. Livrable : synthèse mensuelle des tendances emails clients.
 
-Première action source : Exporter 50 emails clients du dernier mois (objet, corps et horodatages disponibles, après dépersonnalisation). Ouvrir un assistant IA autorisé par votre organisation et lui fournir ces emails, puis lui demander d&#39;identifier les 5 sujets les plus fréquents et les délais moyens par catégorie. Astuce : dans votre demande à l&#39;IA, précisez (1) votre rôle et contexte — ex. « Je suis responsable service client d&#39;une PME e-commerce de 25 salariés » (2) la tâche exacte attendue (3) le format de sortie souhaité — ex. « synthèse : top 5 motifs avec fréquence, délai moyen et recommandation d&#39;amélioration » (4) les contraintes — ex. « analyse factuelle, pas de suppositions ». Vérifier : croiser avec le ressenti de l&#39;équipe. Livrable : synthèse mensuelle des tendances emails clients.
+Ma méthode testée : [collez les instructions qui ont fonctionné et les ajustements validés].
+Entrées autorisées et format du résultat : [précisez les informations variables à fournir et le format à conserver].
+Vérifications et limites constatées : [collez les contrôles humains et les limites du test].
 
-Éléments prévus par le cas : Export de 50 à 100 emails clients récents (anonymisés) ; Catégories de demandes existantes si disponibles ; Délais de réponse moyens observés ; Horodatages de réception et de première réponse, si les délais doivent être calculés.
+À partir de ces informations, rends uniquement UNE consigne courte prête à copier dans une nouvelle conversation : tâche, champs variables [à compléter à chaque utilisation], format attendu, règles de prudence et contrôles humains. Inclus le contexte nécessaire dans la consigne ; ne renvoie ni à cette conversation, ni à une étape, ni à un document absent. Ne conserve pas les données du précédent essai comme valeurs par défaut. Ne crée pas de nouvelle méthode et n&#39;exécute pas la tâche. Si la méthode testée manque, fournis seulement un modèle marqué « À compléter et tester » ; ne le présente pas comme validé. Les crochets non complétés ne sont pas des données.
+La consigne doit fonctionner par simple copier-coller de texte, sans exiger un abonnement, un fichier joint, une mémoire, un connecteur ou une fonction d&#39;agent. Elle doit demander les seuls faits critiques manquants en une liste de trois questions maximum et laisser les autres inconnues [à compléter]. Elle doit conserver les règles source exactes et le contrôle humain, sans promettre gain ou conformité. Fais figurer dans la consigne l&#39;interdiction d&#39;inventer des faits ou des preuves, l&#39;utilisation exclusive de données autorisées et l&#39;absence d&#39;envoi, publication ou modification automatique.
+Règles source à respecter impérativement :
+Ne transmettre que des extraits nécessaires et autorisés, sans identifiants inutiles. Calculer les délais uniquement lorsque les horodatages de réception et de réponse sont disponibles ; sinon les signaler comme inconnus. Vérifier les catégories et calculs sur l&#39;échantillon.
 
-Mes éléments préparés : [collez ici les contenus ou trames issus de la préparation, avec leurs sources, leurs manques et leurs hypothèses ; indiquez « déjà fournis plus haut » s&#39;ils figurent dans cette conversation]. Les crochets non complétés ne sont pas des données.
+Utilise uniquement des données dont le partage est autorisé dans un outil autorisé. Ne demande ni données personnelles identifiables, ni mot de passe, ni clé d&#39;accès. Une pièce citée n&#39;est pas une autorisation de la transmettre : si une préparation locale ou des données fictives/agrégées sont imposées, demande seulement le contenu autorisé ou le statut de disponibilité. En cas de conflit, suspends la partie concernée et explique pourquoi.
+N&#39;invente jamais d&#39;historique de ventes, de résultats observés ni de preuves. Distingue faits fournis, choix déclarés, hypothèses et exemple explicitement fictif. Ne prétends pas consulter des fichiers, vérifier des sources ou effectuer des calculs sans accès effectif ; indique les contrôles impossibles. Aucun envoi, publication, connexion, modification de système ni déclenchement automatique. Une validation humaine reste nécessaire avant usage.</pre>
+</div>
+<p class="note">Si votre outil le permet, cette consigne peut servir d'instructions à un assistant personnalisé (agent, GPT ou skill). Sinon, copiez-la dans une nouvelle conversation. Ces fonctions sont facultatives et leur disponibilité dépend de l'outil et de l'offre. Une consigne réutilisable n'automatise pas l'exécution de la tâche.</p>
+        <div class="coche"><input type="checkbox" id="e6consigne" data-suivi><label for="e6consigne">Relisez la consigne : tâche, informations à remplacer, format et contrôles sont compréhensibles sans l'ancien échange</label></div>
+        <div class="coche"><input type="checkbox" id="e6nouvelle" data-suivi><label for="e6nouvelle">Pour une prochaine tâche comparable, copiez cette consigne dans une nouvelle conversation avec les nouvelles informations autorisées</label></div>
+        <div class="coche"><input type="checkbox" id="e6controle" data-suivi><label for="e6controle">Faites vérifier chaque résultat par la personne compétente ; ajustez ou arrêtez si le contexte ou les règles ont changé</label></div>
+        <p><b>C'est fait quand :</b> vous avez une consigne claire à réutiliser, ou vous avez décidé de ne pas poursuivre. Cela ne lance aucune action automatiquement.</p>
+        <div class="valider"><input type="checkbox" id="fin-6" data-fin="6"><label for="fin-6">Étape terminée — consigne prête à réutiliser, ou décision de ne pas poursuivre</label></div>
+      </div>
+    </details>
+  </section>
 
-Consignes pour mon premier essai :
-1. Pars du cas et de la première action source ci-dessus. Réutilise les éléments préparés et les informations effectivement présents dans cette conversation. Ne recommence ni le questionnaire de préparation ni un document d&#39;entrée déjà fourni. Demande uniquement les entrées indispensables encore absentes ou ambiguës qui empêchent la première action ; ne repose pas les questions déjà résolues. Les exemples de la fiche ne remplacent pas mes faits. Conserve les périodes, sources, régimes applicables et statuts réellement confirmés ; explicite tout sous-ensemble choisi pour l&#39;essai, sans le présenter comme un classement mesuré. Les limites de confidentialité et conditions des entrées priment sur une amorce générique de collecte. Signale un conflit et demande la clarification nécessaire avant la partie concernée.
-2. Distingue données réelles disponibles et autorisées, données à obtenir et exemple fictif. S&#39;il manque une donnée factuelle, demande sa source ou propose une trame vide ou un exemple explicitement fictif. N&#39;invente jamais d&#39;historique de ventes, de résultats observés ou de preuves. Un exemple fictif ne valide pas l&#39;efficacité réelle.
-3. À partir de la première action source, produis un premier livrable concret en français sur un périmètre réduit, dans le format utile à cette action. Si elle prévoit plusieurs travaux, commence par le premier élément réalisable et indique ce qui reste à faire. Si les entrées sont insuffisantes, donne la trame et nomme les manques plutôt que présenter un résultat comme acquis. Le résultat doit être celui du cas, pas un nouveau support de collecte des prérequis. Réserve le test en situation réelle à l&#39;étape 5 et l&#39;organisation de la réutilisation à l&#39;étape 6. Respecte le format demandé sans ajouter des livrables complémentaires. Vérifie que l&#39;ensemble proposé tient dans le budget et le temps disponibles, pas seulement chaque action prise séparément.
-4. Sépare les faits fournis, les hypothèses et les points à vérifier. Vérifie les faits contre les sources disponibles, cite seulement les sources réellement consultées et rends les calculs vérifiables (données, méthode, unités). Signale tout contrôle impossible et demande une validation métier avant usage. Si le cas exige un tableur, un logiciel métier ou un professionnel, respecte ce circuit ; ne présente pas comme effectué un calcul, un accès ou une validation qui n&#39;a pas eu lieu. Sans source récente consultée, présente les outils, fonctionnalités et tarifs comme des options à vérifier, pas comme des offres actuelles garanties.
-5. N&#39;effectue aucune action automatique : aucun envoi, publication, modification de système ou déclenchement de processus. Prépare uniquement un brouillon à relire.
-
-Règles source à respecter impérativement : Ne transmettre que des extraits nécessaires et autorisés, sans identifiants inutiles. Calculer les délais uniquement lorsque les horodatages de réception et de réponse sont disponibles ; sinon les signaler comme inconnus. Vérifier les catégories et calculs sur l&#39;échantillon.
-Utilise uniquement un outil autorisé et des données dont le partage est autorisé. Ne me demande jamais de données personnelles identifiables.
-
-Termine chaque livrable par : « À faire valider en interne avant usage. »</pre>
-    </div>
-    <p class="note">Le bouton Copier reprend uniquement le texte affiché ; adaptez-le vous-même après copie. Les règles de prudence sont intégrées au prompt ; cela ne garantit pas que l'assistant les respectera. Vérifiez toujours son résultat.</p>
-    <p class="note">💡 Vous retrouverez aussi ce prompt à l'étape 4 du parcours, à réutiliser avec vos éléments autorisés ou fictifs.</p>
-  </div>
-</details>
+</div>
 
 <footer>
   <p>Contenu source issu de la base Avoulia v4.6.3 — cas UC-0083.
@@ -780,22 +700,7 @@ Termine chaque livrable par : « À faire valider en interne avant usage. »</pr
 <!-- value-script:source-value-1 -->
 <script>
 (function(){
-  var champ=document.getElementById('lien-retour');
-  var bouton=document.getElementById('copier-lien');
-  var statut=document.getElementById('retour-statut');
-  champ.value=location.origin+location.pathname;
   document.querySelectorAll('[data-bilan]').forEach(function(select){select.selectedIndex=0;});
-  bouton.addEventListener('click',function(){
-    function secours(){
-      statut.textContent="Copie automatique indisponible. Le lien est sélectionné : copiez-le manuellement.";
-      champ.focus();champ.select();
-    }
-    if(navigator.clipboard&&navigator.clipboard.writeText){
-      navigator.clipboard.writeText(champ.value).then(function(){
-        statut.textContent="Lien copié. Aucune conversation ni réponse de bilan n'est incluse.";
-      },secours);
-    }else{secours();}
-  });
 })();
 </script>
 <!-- /value-script -->
