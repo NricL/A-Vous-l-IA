@@ -6,6 +6,12 @@ repo pour rester traçable côté Eneric **et** côté Simplon.
 
 **Dernière mise à jour :** 2026-09-15
 
+**11:07 — libellé livré :** « Plus de détails » remplace uniquement « Premier essai »
+sur les cartes proposées. Source `57f59c6`, frontend `v463-details-20260915-r1`
+sain à100%, rollback compact r1 ;46tests frontend et recette réelle Azure/Pages
+réussis. Backend/contenus/parcours inchangés, kit toujours en pause. Détails et reçu
+dans `HANDOFF.md` ; les jalons ci-dessous restent historiques.
+
 ## Correctif compact — 15 septembre, demande10:28 livrée
 
 La présentation blanche et le bandeau de contexte de la consolidation précédente

@@ -1,5 +1,18 @@
 # Avoulia V2 — Implementation Handover Guide for Simplon
 
+## Libellé des détails — 15 septembre, demande11:07 livrée
+
+Seul le résumé des cartes proposées passe de « Premier essai » à **« Plus de détails »**.
+Contenu, ouverture/repli, bouton « Choisir cette piste », fiche sélectionnée et parcours
+inchangés ; les mentions historiques ci-dessous décrivent leur version de livraison.
+Source `57f59c6`,46tests frontend, typage/build et recette réelle candidate puis
+Azure/Pages après rechargement ordinaire réussis. Pages `34951318376`, CI `34951318397`.
+Frontend `v463-details-20260915-r1` sain à100%, build `dd3c`,
+digest `60f86f60ce8b6aad353c8947e985e6ae22016b7c7c7bd20654a0dd0a0339c668`.
+Rollback compact r1 actif (`d8eb2bb8…d8be38b3`) ; backend accessibilité r1 inchangé.
+Reçu : `_local-trace/2026-09-15-details-label/deployment-receipt.json`.
+Kit toujours en pause, aucun gel ni contenu métier actualisé, classeur/prototypes exclus.
+
 ## Correctif d'affichage compact — 15 septembre 2026, livré
 
 Demande de10:28 après pause du kit à10:23. Ce lot **remplace le choix visuel des

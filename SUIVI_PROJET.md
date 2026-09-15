@@ -1,5 +1,14 @@
 # Avoulia V2 — Suivi Projet & Décisions
 
+### 15septembre — libellé demandé à11:07, livré
+
+« Plus de détails » remplace uniquement le résumé « Premier essai » des cartes.
+Source `57f59c6`, frontend `v463-details-20260915-r1` sain à100%, build `dd3c`,
+rollback compact r1 actif ; backend inchangé.46tests frontend, typage/build et
+recette réelle clavier/rechargement Azure/Pages réussis. Pages `34951318376`,
+CI `34951318397`. Reçu : `_local-trace/2026-09-15-details-label/deployment-receipt.json`.
+Autres mentions de premier essai, contenu, parcours et kit en pause inchangés.
+
 ### 15septembre — correctif compact demandé à10:28, livré
 
 Source `e2b3fe2` : seules les deux sources frontend changent. Cartes bleu nuit,
