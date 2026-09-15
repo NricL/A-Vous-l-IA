@@ -23,8 +23,8 @@
                                 :role="step.state === 'done' ? 'button' : 'group'"
                                 :tabindex="step.state === 'done' && !loading ? 0 : null"
                                 :aria-disabled="step.state === 'done' ? loading : null"
-                                :title="step.state === 'done' ? `Modifier : ${step.label}` : null"
-                                :aria-label="step.state === 'done' ? `Modifier : ${step.label}` : step.label"
+                                :title="step.state === 'done' ? `Modifier : ${step.label}${step.value ? ` : ${step.value}` : ''}` : null"
+                                :aria-label="`${step.state === 'done' ? 'Modifier : ' : ''}${step.label}${step.value ? ` : ${step.value}` : ''}`"
                                 :aria-current="step.state === 'current' ? 'step' : null"
                                 @click="step.state === 'done' ? goBackToStep(si) : null"
                                 @keydown.enter="step.state === 'done' ? goBackToStep(si) : null"
@@ -35,17 +35,13 @@
                                     <span v-else-if="step.state === 'skipped'">–</span>
                                     <span v-else>{{ si + 1 }}</span>
                                 </span>
-                                <span class="stepper-label">{{ step.label }}</span>
+                                <span class="stepper-copy">
+                                    <span class="stepper-label">{{ step.label }}</span>
+                                    <span v-if="step.value" class="stepper-value">{{ step.value }}</span>
+                                </span>
                                 <span v-if="step.state === 'done'" class="stepper-edit" aria-hidden="true">↩</span>
                             </div>
-                            <span v-if="si < steps.length - 1" class="stepper-sep"></span>
                         </template>
-                    </div>
-                    <div v-if="selectedDomainCode" class="context-summary" aria-label="Vos choix confirmés">
-                        <strong>Périmètre :</strong> {{ contextLabel(selectedDomainCode, 0) }}
-                        <span v-if="selectedSector"> · {{ selectedSector }}</span>
-                        <span v-if="selectedIntention"> · {{ contextLabel(selectedIntention, 2) }}</span>
-                        <small>Les étapes cochées ci-dessus permettent de corriger vos choix et de refaire la suite.</small>
                     </div>
                     <div class="chat-messages" id="chatMessages" ref="messagesBox" role="log" aria-label="Conversation" tabindex="0" :aria-busy="loading">
                         <template v-if="!messages.length">
@@ -59,28 +55,29 @@
                                 :tabindex="msg.role === 'user' ? null : -1"
                             >
                                 <template v-if="messagePhase(msg) === 4 && msg.suggestedCases?.length">
-                                    <p>Voici les pistes proposées pour votre besoin. Choisissez celle à approfondir.</p>
+                                    <p>Choisissez une piste à approfondir.</p>
                                     <article v-for="(c, ci) in msg.suggestedCases" :key="c.id" class="case-card">
                                         <h3>{{ c.cas_utilisation || `Piste ${ci + 1}` }}</h3>
                                         <template v-if="c.value_presentation?.editorial">
-                                            <p><strong>Gain recherché — hypothèse :</strong> {{ c.value_presentation.editorial.claims.gain.text || c.value_presentation.editorial.claims.gain.unknown_reason }}</p>
-                                            <p><strong>Premier livrable :</strong> {{ c.value_presentation.editorial.claims.deliverable.text || c.value_presentation.editorial.claims.deliverable.unknown_reason }}</p>
-                                            <p><strong>Quand en juger :</strong> {{ c.value_presentation.horizon }}</p>
+                                            <p class="case-gain"><span class="case-gain-label">Gain potentiel</span>{{ c.value_presentation.editorial.claims.gain.text || c.value_presentation.editorial.claims.gain.unknown_reason }}</p>
                                         </template>
                                         <p v-else class="source-text">{{ c.value_presentation?.description || c.description_cas_utilisation || c.content }}</p>
-                                        <p><strong>Effort indiqué :</strong> {{ c.effort || 'Non précisé' }}</p>
-                                        <details v-if="c.value_presentation" class="value-notes">
-                                            <summary>Premier essai et conditions d'intérêt</summary>
+                                        <details class="value-notes case-trial">
+                                            <summary>Premier essai</summary>
+                                            <p><strong>Effort indiqué :</strong> {{ c.effort || 'Non précisé' }}</p>
+                                            <p v-if="c.value_presentation?.editorial"><strong>Premier livrable :</strong> {{ c.value_presentation.editorial.claims.deliverable.text || c.value_presentation.editorial.claims.deliverable.unknown_reason }}</p>
+                                            <template v-if="c.value_presentation">
                                             <template v-if="c.value_presentation.editorial">
                                                 <p><strong>Description — source :</strong></p>
                                                 <p class="source-text">{{ c.value_presentation.description }}</p>
                                             </template>
                                             <p><strong>Première action — source :</strong></p>
                                             <p class="source-text">{{ c.value_presentation.first_action || 'Non précisée dans les informations servies.' }}</p>
-                                            <p v-if="!c.value_presentation.editorial"><strong>Horizon de valeur :</strong> {{ c.value_presentation.horizon }}</p>
+                                            <p><strong>Quand en juger :</strong> {{ c.value_presentation.horizon }}</p>
                                             <p>{{ c.value_presentation.useful_when }}</p>
                                             <p>{{ c.value_presentation.tradeoff }}</p>
                                             <small>{{ c.value_presentation.limit }}</small>
+                                            </template>
                                         </details>
                                         <button v-if="i === lastAssistantIndex" type="button" class="chip choice-chip"
                                             :disabled="loading" @click="submit(String(ci + 1))"
@@ -639,14 +636,19 @@ const showStepper = computed(() => currentPhase.value >= 0)
 const steps = computed(() => {
     const labels = ['Domaine', 'Secteur', 'Objectif', 'Problème', "Cas d'usage", 'Parcours']
     const cur = currentPhase.value
+    const values = [
+        selectedDomainCode.value ? contextLabel(selectedDomainCode.value, 0) : '',
+        selectedSector.value || '',
+        selectedIntention.value ? contextLabel(selectedIntention.value, 2) : '',
+    ]
     return labels.map((label, i) => {
         let state
         if (i === cur) state = 'current'
         else if (i < cur) state = 'done'
         else state = 'upcoming'
         // Secteur sauté : on a dépassé l'étape secteur sans qu'elle ait été posée.
-        if (i === 1 && cur > 1 && !sectorEverShown.value) state = 'skipped'
-        return { label, state }
+        if (i === 1 && cur > 1 && !sectorEverShown.value && !selectedSector.value) state = 'skipped'
+        return { label, state, value: state === 'skipped' ? '' : values[i] || '' }
     })
 })
 
@@ -846,20 +848,22 @@ async function submit(forcedText = null, retryRequest = null) {
 </script>
 
 <style>
-    .context-summary { padding: 10px 16px; background: var(--blue-light); font-size: 13px; overflow-wrap: anywhere; }
-    .context-summary small, .msg small { display: block; margin-top: 6px; }
-    .case-card { border: 1px solid var(--gray-200); border-radius: 10px; padding: 14px; margin-top: 12px; background: var(--white); color: var(--gray-800); }
+    .msg small { display: block; margin-top: 6px; }
+    .case-card { border: 1px solid #63758c; border-radius: 10px; padding: 14px; margin-top: 4px; background: #243b55; color: #f0f4fa; }
     .case-card h3 { font-size: 16px; line-height: 1.4; margin-bottom: 8px; }
     .case-card p, .value-notes p { margin: 8px 0; }
+    .case-gain-label { display: block; color: #c5d9f2; font-size: 11px; font-weight: 600; margin-bottom: 2px; }
+    .case-card .case-trial { margin: 4px 0 0; }
+    .case-trial summary { color: #c5d9f2; }
     .source-text { white-space: pre-wrap; overflow-wrap: anywhere; }
     .value-notes { margin: 10px 0; }
     .value-notes summary { cursor: pointer; padding: 10px 0; min-height: 44px; font-weight: 600; }
-    .case-card .choice-chip { margin-top: 10px; color: var(--blue-dark); background: var(--blue-light); border-color: var(--blue); }
-    .case-card .choice-chip:hover { color: var(--blue-dark); background: var(--blue-light); }
+    .case-card .choice-chip { margin-top: 4px; color: #f0f4fa; background: #304e70; border-color: #91b9ed; }
+    .case-card .choice-chip:hover { color: #fff; background: #3b5b81; }
     .waiting-status { padding: 12px; color: #b8c7da; font-size: 13px; flex-shrink: 0; }
     .waiting-status:empty { padding: 0; }
     .chat-error { flex-shrink: 0; margin: 8px 16px; }
-    .chat-window .case-card :focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+    .chat-window .case-card :focus-visible { outline: 3px solid #b4d2ff; outline-offset: 3px; }
     .chat-window .chat-messages:focus-visible, .chat-window .msg-bot:focus-visible { outline: 2px solid #b4d2ff; outline-offset: -3px; }
     .chat-window .choice-chip { min-height: 44px; }
     .chat-window .msg-cases { max-width: 100%; }
@@ -1333,20 +1337,26 @@ async function submit(forcedText = null, retryRequest = null) {
     .stepper {
         min-width: 0;
         flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        gap: 4px;
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        align-items: start;
+        gap: 8px;
         padding: 8px 12px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        overflow-x: auto;
+        overflow-wrap: anywhere;
     }
 
     .stepper-item {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         gap: 5px;
-        flex: 0 0 auto;
+        min-width: 0;
+        min-height: 44px;
+        padding: 2px 0;
     }
+
+    .stepper-copy { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .stepper-value { color: #dae7f8; font-size: 11px; line-height: 1.35; }
 
     .stepper-dot {
         display: inline-flex;
@@ -1354,6 +1364,7 @@ async function submit(forcedText = null, retryRequest = null) {
         justify-content: center;
         width: 18px;
         height: 18px;
+        flex-shrink: 0;
         border-radius: 50%;
         font-size: 10px;
         font-weight: 700;
@@ -1366,14 +1377,7 @@ async function submit(forcedText = null, retryRequest = null) {
         font-size: 11px;
         font-weight: 500;
         color: rgba(255, 255, 255, 0.5);
-        white-space: nowrap;
-    }
-
-    .stepper-sep {
-        width: 14px;
-        height: 1px;
-        background: rgba(255, 255, 255, 0.18);
-        flex: 0 0 auto;
+        white-space: normal;
     }
 
     .stepper-item.is-current .stepper-dot {
@@ -1405,7 +1409,7 @@ async function submit(forcedText = null, retryRequest = null) {
     .stepper-item.is-clickable {
         cursor: pointer;
         border-radius: 6px;
-        padding: 2px 5px;
+        padding: 2px 0;
         transition: background 0.15s;
     }
 
@@ -1421,7 +1425,7 @@ async function submit(forcedText = null, retryRequest = null) {
 
     .stepper-edit {
         font-size: 10px;
-        opacity: 0;
+        opacity: 0.95;
         color: rgba(180, 210, 255, 0.95);
         margin-left: 1px;
         transition: opacity 0.15s;
@@ -2054,10 +2058,6 @@ async function submit(forcedText = null, retryRequest = null) {
             font-size: 16px;
         }
 
-        /* Stepper mobile : on masque uniquement les libellés des étapes À VENIR (les étapes
-           faites gardent leur libellé pour rester éditables au doigt). Scroll horizontal si besoin. */
-        .stepper-item.is-upcoming .stepper-label {
-            display: none;
-        }
+        .stepper { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
 </style>

@@ -32,6 +32,56 @@ test('homepage footer contrast is isolated from global legal-view footer rules',
   }
 })
 
+test('case selection keeps only title and potential gain outside first-trial disclosure', () => {
+  const card = homeSource.split('class="case-card">')[1].split('</article>')[0]
+  const visible = card.split('<details')[0]
+  const disclosure = card.split('<details')[1].split('</details>')[0]
+  assert.match(visible, /<h3>/)
+  assert.match(visible, /Gain potentiel/)
+  assert.doesNotMatch(visible, /Premier livrable|Quand en juger|Effort indiqué/)
+  for (const label of ['Premier essai', 'Premier livrable', 'Quand en juger', 'Effort indiqué']) {
+    assert.ok(disclosure.includes(label), label)
+  }
+  assert.doesNotMatch(card.split('<details')[1].split('>')[0], /\bopen\b/)
+  assert.match(card.split('</details>')[1], /Choisir cette piste/)
+  assert.doesNotMatch(homeSource, /class="context-summary"/)
+  assert.match(homeSource, /class="stepper-value"/)
+})
+
+test('confirmed context belongs to matching step and resets when rewinding', async t => {
+  const f = fixture(t)
+  f.home.messages.value = [
+    { role: 'assistant', content: 'Dans quel domaine souhaitez-vous agir ?\n1. Marketing & visibilité\n2. Finances & rentabilité' },
+    { role: 'user', content: '1' },
+    { role: 'assistant', content: 'Dans quel secteur travaillez-vous ?\n1. Industrie\n2. Autre / Non spécifique' },
+    { role: 'user', content: '2' },
+    { role: 'assistant', content: 'Quel est votre objectif principal ?\n1. Créer des contenus\n2. Gérer et piloter les campagnes' },
+    { role: 'user', content: '2' },
+    { role: 'assistant', content: 'Pouvez-vous décrire le problème concret ?' },
+  ]
+  f.home.selectedDomainCode.value = 'marketing_visibilite'
+  f.home.selectedSector.value = 'Autre / Non spécifique'
+  f.home.selectedIntention.value = '2'
+  assert.deepEqual(f.home.steps.value.slice(0, 3).map(s => s.value),
+    ['Marketing & visibilité', 'Autre / Non spécifique', 'Gérer et piloter les campagnes'])
+  assert.ok(f.home.steps.value.slice(3).every(s => s.value === ''))
+  f.home.goBackToStep(1)
+  assert.deepEqual(f.home.steps.value.slice(0, 3).map(s => s.value),
+    ['Marketing & visibilité', '', ''])
+  f.home.goBackToStep(0)
+  assert.ok(f.home.steps.value.every(s => s.value === ''))
+})
+
+test('sectorless domains do not display a fabricated context value', t => {
+  const f = fixture(t)
+  f.home.messages.value = [{ role: 'assistant', content: 'Pouvez-vous décrire le problème concret ?' }]
+  f.home.selectedDomainCode.value = 'direction_strategie'
+  f.home.selectedSector.value = null
+  f.home.selectedIntention.value = '1'
+  assert.equal(f.home.steps.value[1].state, 'skipped')
+  assert.equal(f.home.steps.value[1].value, '')
+})
+
 function fixture(t, document) {
   let callbacks
   let finish
